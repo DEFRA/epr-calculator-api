@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -174,14 +174,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_classification_id");
 
-                    b.Property<int?>("CalculatorRunOrganisationDataMasterId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_organization_data_master_id");
-
-                    b.Property<int?>("CalculatorRunPomDataMasterId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_pom_data_master_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -206,6 +198,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(250)")
                         .HasColumnName("name");
 
+                    b.Property<DateTime?>("OrgPomDataLoadedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("org_pom_data_loaded_at");
+
                     b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
@@ -221,10 +217,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalculatorRunOrganisationDataMasterId");
-
-                    b.HasIndex("CalculatorRunPomDataMasterId");
-
                     b.HasIndex("DefaultParameterSettingMasterId");
 
                     b.HasIndex("LapcapDataMasterId");
@@ -235,7 +227,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasDatabaseName("IX_index_calculator_run");
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
 
                     b.ToTable("calculator_run", (string)null);
                 });
@@ -435,17 +427,18 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("calculator_run_csvfile_metadata", (string)null);
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CalculatorRunOrganisationDataMasterId")
+                    b.Property<int>("CalculatorRunId")
                         .HasColumnType("int")
-                        .HasColumnName("calculator_run_organization_data_master_id");
+                        .HasColumnName("calculator_run_id");
 
                     b.Property<int?>("DaysObligated")
                         .HasColumnType("int")
@@ -455,13 +448,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("error_code");
 
-                    b.Property<bool>("HasH1")
+                    b.Property<bool>("IsError")
                         .HasColumnType("bit")
-                        .HasColumnName("has_h1");
-
-                    b.Property<bool>("HasH2")
-                        .HasColumnType("bit")
-                        .HasColumnName("has_h2");
+                        .HasColumnName("is_error");
 
                     b.Property<string>("JoinerDate")
                         .HasMaxLength(50)
@@ -472,16 +461,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("leaver_date");
-
-                    b.Property<DateTime>("LoadTimeStamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("load_ts");
-
-                    b.Property<string>("ObligationStatus")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("obligation_status");
 
                     b.Property<int>("OrganisationId")
                         .HasColumnType("int")
@@ -497,10 +476,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
 
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
-
                     b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
@@ -513,160 +488,9 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalculatorRunOrganisationDataMasterId");
+                    b.HasIndex("CalculatorRunId");
 
-                    b.ToTable("calculator_run_organization_data_detail", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("effective_from");
-
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("effective_to");
-
-                    b.Property<int>("RelativeYear")
-                        .HasColumnType("int")
-                        .HasColumnName("relative_year");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RelativeYear");
-
-                    b.ToTable("calculator_run_organization_data_master", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunPomDataMasterId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_pom_data_master_id");
-
-                    b.Property<DateTime>("LoadTimeStamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("load_ts");
-
-                    b.Property<int?>("OrganisationId")
-                        .HasColumnType("int")
-                        .HasColumnName("organisation_id");
-
-                    b.Property<string>("PackagingActivity")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_activity");
-
-                    b.Property<string>("PackagingClass")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_class");
-
-                    b.Property<string>("PackagingMaterial")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_material");
-
-                    b.Property<string>("PackagingMaterialSubtype")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("packaging_material_subtype");
-
-                    b.Property<double?>("PackagingMaterialWeight")
-                        .HasColumnType("float")
-                        .HasColumnName("packaging_material_weight");
-
-                    b.Property<string>("PackagingType")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_type");
-
-                    b.Property<string>("RamRagRating")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ram_rag_rating");
-
-                    b.Property<string>("SubmissionPeriod")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
-
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunPomDataMasterId");
-
-                    b.ToTable("calculator_run_pom_data_detail", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("effective_from");
-
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("effective_to");
-
-                    b.Property<int>("RelativeYear")
-                        .HasColumnType("int")
-                        .HasColumnName("relative_year");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RelativeYear");
-
-                    b.ToTable("calculator_run_pom_data_master", (string)null);
+                    b.ToTable("calculator_run_organisation", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", b =>
@@ -1850,137 +1674,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("calc_result_modulation", (string)null);
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.OrganisationData", b =>
-                {
-                    b.Property<int?>("DaysObligated")
-                        .HasColumnType("int")
-                        .HasColumnName("num_days_obligated");
-
-                    b.Property<string>("ErrorCode")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("error_code");
-
-                    b.Property<bool>("HasH1")
-                        .HasColumnType("bit")
-                        .HasColumnName("has_h1");
-
-                    b.Property<bool>("HasH2")
-                        .HasColumnType("bit")
-                        .HasColumnName("has_h2");
-
-                    b.Property<string>("JoinerDate")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("joiner_date");
-
-                    b.Property<string>("LeaverDate")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("leaver_date");
-
-                    b.Property<DateTime>("LoadTimestamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("load_ts");
-
-                    b.Property<string>("ObligationStatus")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("obligation_status");
-
-                    b.Property<int>("OrganisationId")
-                        .HasColumnType("int")
-                        .HasColumnName("organisation_id");
-
-                    b.Property<string>("OrganisationName")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("organisation_name");
-
-                    b.Property<string>("StatusCode")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("status_code");
-
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.Property<string>("TradingName")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("trading_name");
-
-                    b.ToTable("organisation_data", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.PomData", b =>
-                {
-                    b.Property<DateTime>("LoadTimeStamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("load_ts");
-
-                    b.Property<int?>("OrganisationId")
-                        .HasColumnType("int")
-                        .HasColumnName("organisation_id");
-
-                    b.Property<string>("PackagingActivity")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_activity");
-
-                    b.Property<string>("PackagingClass")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_class");
-
-                    b.Property<string>("PackagingMaterial")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("packaging_material");
-
-                    b.Property<string>("PackagingMaterialSubtype")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("packaging_material_subtype");
-
-                    b.Property<double?>("PackagingMaterialWeight")
-                        .HasColumnType("float")
-                        .HasColumnName("packaging_material_weight");
-
-                    b.Property<string>("PackagingType")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("packaging_type");
-
-                    b.Property<string>("RamRagRating")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ram_rag_rating");
-
-                    b.Property<string>("SubmissionPeriod")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
-
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.ToTable("pom_data", (string)null);
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>
                 {
                     b.Property<int>("Id")
@@ -2051,6 +1744,20 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_id");
 
+                    b.Property<int?>("DaysObligated")
+                        .HasColumnType("int")
+                        .HasColumnName("num_days_obligated");
+
+                    b.Property<string>("JoinerDate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("joiner_date");
+
+                    b.Property<string>("LeaverDate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("leaver_date");
+
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
                         .HasColumnName("producer_id");
@@ -2059,6 +1766,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("producer_name");
+
+                    b.Property<string>("StatusCode")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("status_code");
 
                     b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
@@ -3343,66 +3055,54 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultCancelledProducer", "CancelledProducer", b1 =>
                         {
-                            b1.Property<int>("CalcResultCancelledProducerEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultCancelledProducerEntryId");
 
-                            b1.Property<int>("ProducerId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerId");
 
-                            b1.Property<string>("ProducerOrSubsidiaryName")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("ProducerOrSubsidiaryName");
 
-                            b1.Property<string>("SubsidiaryId")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("SubsidiaryId");
 
-                            b1.Property<string>("TradingName")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TradingName");
 
                             b1.HasKey("CalcResultCancelledProducerEntryId");
 
                             b1.ToTable("calc_result_cancelled_producer");
 
-                            b1.ToJson("cancelled_producer");
+                            b1
+                                .ToJson("cancelled_producer")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultCancelledProducerEntryId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.LastTonnage", "LastTonnage", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCancelledProducerEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCancelledProducerEntryId");
 
                                     b2.Property<decimal?>("Aluminium")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("FibreComposite")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("Glass")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("OtherMaterials")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("PaperOrCard")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("Plastic")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("Steel")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("Wood")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultCancelledProducerEntryId");
 
@@ -3414,21 +3114,16 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.LatestInvoice", "LatestInvoice", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCancelledProducerEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCancelledProducerEntryId");
 
-                                    b2.Property<string>("BillingInstructionId")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("BillingInstructionId");
 
                                     b2.Property<decimal?>("CurrentYearInvoicedTotalToDate")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.Property<string>("RunName")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("RunName");
 
-                                    b2.Property<string>("RunNumber")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("RunNumber");
 
                                     b2.HasKey("CalcResultCancelledProducerEntryId");
 
@@ -3451,38 +3146,34 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultCommsCost", "CommsCost", b1 =>
                         {
-                            b1.Property<int>("CalcResultCommsCostEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultCommsCostEntryId");
 
                             b1.HasKey("CalcResultCommsCostEntryId");
 
                             b1.ToTable("calc_result_comms_cost");
 
-                            b1.ToJson("comms_cost");
+                            b1
+                                .ToJson("comms_cost")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultCommsCostEntryId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "CommsCostByCountry", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCommsCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultCommsCostEntryId");
 
@@ -3494,24 +3185,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "CommsCostUkWide", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCommsCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultCommsCostEntryId");
 
@@ -3523,24 +3209,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "OnePlusFourApportionment", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCommsCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultCommsCostEntryId");
 
@@ -3552,18 +3233,15 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialCommsCostData", "MaterialCosts", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultCommsCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("CalcResultCommsCostEntryId", "Id");
+                                    b2.HasKey("CalcResultCommsCostEntryId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_comms_cost");
 
@@ -3572,69 +3250,56 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultCommsCostCommsCostByMaterial", "CommsCost", b3 =>
                                         {
-                                            b3.Property<int>("MaterialCommsCostDataCalcResultCommsCostEntryId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialCommsCostDataCalcResultCommsCostEntryId");
 
-                                            b3.Property<int>("MaterialCommsCostDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialCommsCostData__synthesizedOrdinal");
 
                                             b3.Property<decimal>("HouseholdDrinksContainersTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("HouseholdPackagingWasteTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("LateReportingTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PublicBinTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("TotalCost")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostDataId");
+                                            b3.HasKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_comms_cost");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostDataId");
+                                                .HasForeignKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostData__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b4 =>
                                                 {
-                                                    b4.Property<int>("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId");
 
-                                                    b4.Property<int>("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostData__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("England")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("NorthernIreland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId", "CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataId");
+                                                    b4.HasKey("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId", "CalcResultCommsCostCommsCostByMaterialMaterialCommsCostData__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_comms_cost");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId", "CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataId");
+                                                        .HasForeignKey("CalcResultCommsCostCommsCostByMaterialMaterialCommsCostDataCalcResultCommsCostEntryId", "CalcResultCommsCostCommsCostByMaterialMaterialCommsCostData__synthesizedOrdinal");
                                                 });
 
                                             b3.Navigation("Cost")
@@ -3665,32 +3330,30 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLaDisposalCostData", "LaDisposalCost", b1 =>
                         {
-                            b1.Property<int>("CalcResultLaDisposalCostDataEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultLaDisposalCostDataEntryId");
 
                             b1.HasKey("CalcResultLaDisposalCostDataEntryId");
 
                             b1.ToTable("calc_result_la_disposal_cost");
 
-                            b1.ToJson("la_disposal_cost");
+                            b1
+                                .ToJson("la_disposal_cost")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLaDisposalCostDataEntryId");
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLaDisposalCostData", "MaterialCosts", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultLaDisposalCostDataEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultLaDisposalCostDataEntryId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("CalcResultLaDisposalCostDataEntryId", "Id");
+                                    b2.HasKey("CalcResultLaDisposalCostDataEntryId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_la_disposal_cost");
 
@@ -3699,69 +3362,56 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLaDisposalCostDataDetail", "Detail", b3 =>
                                         {
-                                            b3.Property<int>("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId");
 
-                                            b3.Property<int>("MaterialLaDisposalCostDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLaDisposalCostData__synthesizedOrdinal");
 
                                             b3.Property<decimal?>("ActionedSelfManagedConsumerWasteTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("HouseholdDrinkContainersTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("HouseholdPackagingWasteTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("LateReportingTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PublicBinTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostDataId");
+                                            b3.HasKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_la_disposal_cost");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostDataId");
+                                                .HasForeignKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostData__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b4 =>
                                                 {
-                                                    b4.Property<int>("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId");
 
-                                                    b4.Property<int>("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostData__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("England")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("NorthernIreland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataId");
+                                                    b4.HasKey("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostData__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_la_disposal_cost");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataId");
+                                                        .HasForeignKey("CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "CalcResultLaDisposalCostDataDetailMaterialLaDisposalCostData__synthesizedOrdinal");
                                                 });
 
                                             b3.Navigation("Cost")
@@ -3783,32 +3433,30 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLapcapData", "LapcapData", b1 =>
                         {
-                            b1.Property<int>("CalcResultLapcapDataEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultLapcapDataEntryId");
 
                             b1.HasKey("CalcResultLapcapDataEntryId");
 
                             b1.ToTable("calc_result_lapcap_data");
 
-                            b1.ToJson("lapcap");
+                            b1
+                                .ToJson("lapcap")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLapcapDataEntryId");
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLapcapData", "MaterialCosts", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultLapcapDataEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultLapcapDataEntryId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("CalcResultLapcapDataEntryId", "Id");
+                                    b2.HasKey("CalcResultLapcapDataEntryId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_lapcap_data");
 
@@ -3817,34 +3465,28 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b3 =>
                                         {
-                                            b3.Property<int>("MaterialLapcapDataCalcResultLapcapDataEntryId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLapcapDataCalcResultLapcapDataEntryId");
 
-                                            b3.Property<int>("MaterialLapcapDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLapcapData__synthesizedOrdinal");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialLapcapDataCalcResultLapcapDataEntryId", "MaterialLapcapDataId");
+                                            b3.HasKey("MaterialLapcapDataCalcResultLapcapDataEntryId", "MaterialLapcapData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_lapcap_data");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialLapcapDataCalcResultLapcapDataEntryId", "MaterialLapcapDataId");
+                                                .HasForeignKey("MaterialLapcapDataCalcResultLapcapDataEntryId", "MaterialLapcapData__synthesizedOrdinal");
                                         });
 
                                     b2.Navigation("Cost")
@@ -3862,32 +3504,30 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLateReportingTonnage", "LateReportingTonnage", b1 =>
                         {
-                            b1.Property<int>("CalcResultLateReportingTonnageEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultLateReportingTonnageEntryId");
 
                             b1.HasKey("CalcResultLateReportingTonnageEntryId");
 
                             b1.ToTable("calc_result_late_reporting_tonnage");
 
-                            b1.ToJson("late_reporting_tonnage");
+                            b1
+                                .ToJson("late_reporting_tonnage")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLateReportingTonnageEntryId");
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLateReportingTonnageData", "MaterialTonnages", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultLateReportingTonnageEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultLateReportingTonnageEntryId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("CalcResultLateReportingTonnageEntryId", "Id");
+                                    b2.HasKey("CalcResultLateReportingTonnageEntryId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_late_reporting_tonnage");
 
@@ -3896,34 +3536,28 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLateReportingTonnageDetail", "Detail", b3 =>
                                         {
-                                            b3.Property<int>("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId");
 
-                                            b3.Property<int>("MaterialLateReportingTonnageDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialLateReportingTonnageData__synthesizedOrdinal");
 
                                             b3.Property<decimal>("Amber")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Green")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Red")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Total")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId", "MaterialLateReportingTonnageDataId");
+                                            b3.HasKey("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId", "MaterialLateReportingTonnageData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_late_reporting_tonnage");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId", "MaterialLateReportingTonnageDataId");
+                                                .HasForeignKey("MaterialLateReportingTonnageDataCalcResultLateReportingTonnageEntryId", "MaterialLateReportingTonnageData__synthesizedOrdinal");
                                         });
 
                                     b2.Navigation("Detail")
@@ -3941,38 +3575,34 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultOnePlusFourApportionment", "OnePlusFourApportionment", b1 =>
                         {
-                            b1.Property<int>("CalcResultOnePlusFourApportionmentEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
 
                             b1.HasKey("CalcResultOnePlusFourApportionmentEntryId");
 
                             b1.ToTable("calc_result_one_plus_four_apportionment");
 
-                            b1.ToJson("one_plus_four_apppointment");
+                            b1
+                                .ToJson("one_plus_four_apppointment")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "LADataPrepCharge", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
 
@@ -3984,24 +3614,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "LaDisposalCost", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
 
@@ -4026,45 +3651,39 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultParameterOtherCost", "ParameterOtherCost", b1 =>
                         {
-                            b1.Property<int>("CalcResultParameterOtherCostEntryId")
-                                .HasColumnType("int");
+                            b1.Property<int>("CalcResultParameterOtherCostEntryId");
 
                             b1.Property<decimal>("BadDebtValue")
-                                .HasPrecision(18, 6)
-                                .HasColumnType("decimal(18,6)");
+                                .HasPrecision(18, 6);
 
-                            b1.Property<DateTime?>("CutOffDate")
-                                .HasColumnType("datetime2");
+                            b1.Property<DateTime?>("CutOffDate");
 
                             b1.HasKey("CalcResultParameterOtherCostEntryId");
 
                             b1.ToTable("calc_result_parameter_other_cost");
 
-                            b1.ToJson("parameter_other_cost");
+                            b1
+                                .ToJson("parameter_other_cost")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultParameterOtherCostEntryId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "CountryApportionment", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4076,24 +3695,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "LaDataPrepCharge", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4105,16 +3719,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.Materiality", "MaterialityDecrease", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("Amount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Percentage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4126,16 +3737,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.Materiality", "MaterialityIncrease", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("Amount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Percentage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4147,24 +3755,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "SaOperatingCost", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4176,24 +3779,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "SchemeSetupCost", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("England")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("NorthernIreland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4205,16 +3803,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.Materiality", "TonnageChangeDecrease", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("Amount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Percentage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4226,16 +3821,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.Materiality", "TonnageChangeIncrease", b2 =>
                                 {
-                                    b2.Property<int>("CalcResultParameterOtherCostEntryId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("CalcResultParameterOtherCostEntryId");
 
                                     b2.Property<decimal>("Amount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Percentage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("CalcResultParameterOtherCostEntryId");
 
@@ -4282,14 +3874,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", "CalculatorRunOrganisationDataMaster")
-                        .WithMany("Runs")
-                        .HasForeignKey("CalculatorRunOrganisationDataMasterId");
-
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", "CalculatorRunPomDataMaster")
-                        .WithMany("Runs")
-                        .HasForeignKey("CalculatorRunPomDataMasterId");
-
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
                         .WithMany("RunDetails")
                         .HasForeignKey("DefaultParameterSettingMasterId");
@@ -4303,10 +3887,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CalculatorRunOrganisationDataMaster");
-
-                    b.Navigation("CalculatorRunPomDataMaster");
 
                     b.Navigation("DefaultParameterSettingMaster");
 
@@ -4335,44 +3915,15 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("CalculatorRun");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisation", b =>
                 {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", "CalculatorRunOrganisationDataMaster")
-                        .WithMany("Details")
-                        .HasForeignKey("CalculatorRunOrganisationDataMasterId")
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
+                        .WithMany("CalculatorRunOrganisations")
+                        .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CalculatorRunOrganisationDataMaster");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
-                        .WithMany()
-                        .HasForeignKey("RelativeYear")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataDetail", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", "CalculatorRunPomDataMaster")
-                        .WithMany("Details")
-                        .HasForeignKey("CalculatorRunPomDataMasterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CalculatorRunPomDataMaster");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
-                        .WithMany()
-                        .HasForeignKey("RelativeYear")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("CalculatorRun");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CountryApportionment", b =>
@@ -4473,95 +4024,80 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialModulation", "MaterialModulations", b1 =>
                         {
-                            b1.Property<int>("ModulationResultId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ModulationResultId");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
-                            b1.HasKey("ModulationResultId", "Id");
+                            b1.HasKey("ModulationResultId", "__synthesizedOrdinal");
 
                             b1.ToTable("calc_result_modulation");
 
-                            b1.ToJson("material_modulations");
+                            b1
+                                .ToJson("material_modulations")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("ModulationResultId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.MaterialDetail", "MaterialDetail", b2 =>
                                 {
-                                    b2.Property<int>("MaterialModulationModulationResultId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialModulationModulationResultId");
 
-                                    b2.Property<int>("MaterialModulationId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialModulation__synthesizedOrdinal");
 
                                     b2.Property<string>("Code")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.Property<int>("Id")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("Id");
 
                                     b2.Property<string>("Name")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("MaterialModulationModulationResultId", "MaterialModulationId");
+                                    b2.HasKey("MaterialModulationModulationResultId", "MaterialModulation__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_modulation");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("MaterialModulationModulationResultId", "MaterialModulationId");
+                                        .HasForeignKey("MaterialModulationModulationResultId", "MaterialModulation__synthesizedOrdinal");
                                 });
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ModulationDetail", "ModulationDetail", b2 =>
                                 {
-                                    b2.Property<int>("MaterialModulationModulationResultId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialModulationModulationResultId");
 
-                                    b2.Property<int>("MaterialModulationId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialModulation__synthesizedOrdinal");
 
                                     b2.Property<decimal>("AmberMaterialDisposalCost")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("AmberMaterialTonnages")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("GreenMaterialDisposalCost")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("GreenMaterialTonnages")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("RedMaterialDisposalCost")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("RedMaterialTonnages")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("TotalGreenMaterialAtAmberDisposalCost")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("TotalRedMaterialAtAmberDisposalCost")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.HasKey("MaterialModulationModulationResultId", "MaterialModulationId");
+                                    b2.HasKey("MaterialModulationModulationResultId", "MaterialModulation__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_modulation");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("MaterialModulationModulationResultId", "MaterialModulationId");
+                                        .HasForeignKey("MaterialModulationModulationResultId", "MaterialModulation__synthesizedOrdinal");
                                 });
 
                             b1.Navigation("MaterialDetail")
@@ -4606,97 +4142,75 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeDetail", "FeeDetail", b1 =>
                         {
-                            b1.Property<int>("ProducerFeeDetailId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerFeeDetailId");
 
-                            b1.Property<string>("JoinerDate")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("JoinerDate");
 
-                            b1.Property<string>("LeaverDate")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("LeaverDate");
 
-                            b1.Property<string>("Level")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("Level");
 
-                            b1.Property<int>("ProducerId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerId");
 
                             b1.Property<string>("ProducerName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
                             b1.Property<decimal>("ReportedTonnagePercentage")
-                                .HasPrecision(18, 6)
-                                .HasColumnType("decimal(18,6)");
+                                .HasPrecision(18, 6);
 
-                            b1.Property<string>("StatusCode")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("StatusCode");
 
                             b1.Property<string>("SubsidiaryId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.Property<string>("TonnageChangeAdvice")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TonnageChangeAdvice");
 
-                            b1.Property<string>("TonnageChangeCount")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TonnageChangeCount");
 
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
-                                .HasPrecision(18, 6)
-                                .HasColumnType("decimal(18,6)");
+                                .HasPrecision(18, 6);
 
-                            b1.Property<string>("TradingName")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TradingName");
 
                             b1.HasKey("ProducerFeeDetailId");
 
                             b1.ToTable("calc_result_producer_fee_detail");
 
-                            b1.ToJson("detail");
+                            b1
+                                .ToJson("detail")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProducerFeeDetailId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.BillingInstruction", "BillingInstruction", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal?>("CurrentYearInvoiceTotalToDate")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("LiabilityDifference")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.Property<string>("MaterialityLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("MaterialityLiabilityDirection");
 
-                                    b2.Property<string>("MaterialityPercentageLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("MaterialityPercentageLiabilityDirection");
 
                                     b2.Property<decimal?>("PercentageLiabilityDifference")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<string>("SuggestedBillingInstruction")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
                                     b2.Property<decimal?>("SuggestedInvoiceAmount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.Property<string>("TonnageAmountLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageAmountLiabilityDirection");
 
-                                    b2.Property<string>("TonnageAmountPercentageLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageAmountPercentageLiabilityDirection");
 
-                                    b2.Property<string>("TonnageChangeSinceLastInvoice")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageChangeSinceLastInvoice");
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4708,16 +4222,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2a", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4728,24 +4239,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -4761,16 +4267,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2b", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4781,24 +4284,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -4814,16 +4312,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2c", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4834,24 +4329,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -4867,16 +4357,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "LADisposalCostsSection1", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4887,24 +4374,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -4920,16 +4402,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "LaDataPrepSection4", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -4940,24 +4419,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -4973,114 +4447,94 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialFee", "MaterialFees", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("FeeDetailProducerFeeDetailId", "Id");
+                                    b2.HasKey("FeeDetailProducerFeeDetailId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_producer_fee_detail");
 
-                                    b2.HasAnnotation("Relational:JsonPropertyName", "MaterialFees");
+                                    b2.HasJsonPropertyName("MaterialFees");
 
                                     b2.WithOwner()
                                         .HasForeignKey("FeeDetailProducerFeeDetailId");
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.CommsFee", "CommFee", b3 =>
                                         {
-                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeeDetailId");
 
-                                            b3.Property<int>("MaterialFeeId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFee__synthesizedOrdinal");
 
                                             b3.Property<decimal>("HdcTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("HhTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PbTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PricePerTonne")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("TotalTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFeeId");
+                                            b3.HasKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_producer_fee_detail");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFeeId");
+                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "Costs", b4 =>
                                                 {
-                                                    b4.Property<int>("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("CommsFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("BadDebt")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("FeeWithoutBadDebt")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "CommsFeeMaterialFeeId");
+                                                    b4.HasKey("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "CommsFeeMaterialFeeId");
+                                                        .HasForeignKey("CommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b5 =>
                                                         {
-                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                                .HasColumnType("int");
+                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeId")
-                                                                .HasColumnType("int");
+                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
 
                                                             b5.Property<decimal>("England")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("NorthernIreland")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
-                                                            b5.HasKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "FeeWithBadDebtCommsFeeMaterialFeeId");
+                                                            b5.HasKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
 
                                                             b5.ToTable("calc_result_producer_fee_detail");
 
                                                             b5.WithOwner()
-                                                                .HasForeignKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "FeeWithBadDebtCommsFeeMaterialFeeId");
+                                                                .HasForeignKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeeDetailId", "FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
                                                         });
 
                                                     b4.Navigation("ByCountry")
@@ -5093,357 +4547,288 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.DisposalFee", "DisposalFee", b3 =>
                                         {
-                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeeDetailId");
 
-                                            b3.Property<int>("MaterialFeeId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFee__synthesizedOrdinal");
 
                                             b3.Property<decimal>("BadDebt")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("PreviousInvoicedTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("ResidualSmcwTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("SmcwTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("TonnageChange")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFeeId");
+                                            b3.HasKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_producer_fee_detail");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFeeId");
+                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeeDetailId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "Fee", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "FeeWithBadDebtByCountry", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("England")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("NorthernIreland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "HdcTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "HhTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "PbTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "PricePerTonne", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "TotalTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.Navigation("ActionedSmcwTonnage")
@@ -5483,16 +4868,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "SaOperatingCostsSection3", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -5503,24 +4885,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -5536,16 +4913,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "SaSetupCostsSection5", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -5556,24 +4930,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -5589,16 +4958,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "TotalBillBreakdown", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeeDetailId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeeDetailId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeeDetailId");
 
@@ -5609,24 +4975,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeeDetailId");
 
@@ -5677,97 +5038,75 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeDetail", "Total", b1 =>
                         {
-                            b1.Property<int>("ProducerFeesId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerFeesId");
 
-                            b1.Property<string>("JoinerDate")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("JoinerDate");
 
-                            b1.Property<string>("LeaverDate")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("LeaverDate");
 
-                            b1.Property<string>("Level")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("Level");
 
-                            b1.Property<int>("ProducerId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerId");
 
                             b1.Property<string>("ProducerName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
                             b1.Property<decimal>("ReportedTonnagePercentage")
-                                .HasPrecision(18, 6)
-                                .HasColumnType("decimal(18,6)");
+                                .HasPrecision(18, 6);
 
-                            b1.Property<string>("StatusCode")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("StatusCode");
 
                             b1.Property<string>("SubsidiaryId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.Property<string>("TonnageChangeAdvice")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TonnageChangeAdvice");
 
-                            b1.Property<string>("TonnageChangeCount")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TonnageChangeCount");
 
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
-                                .HasPrecision(18, 6)
-                                .HasColumnType("decimal(18,6)");
+                                .HasPrecision(18, 6);
 
-                            b1.Property<string>("TradingName")
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<string>("TradingName");
 
                             b1.HasKey("ProducerFeesId");
 
                             b1.ToTable("calc_result_producer_fees");
 
-                            b1.ToJson("total");
+                            b1
+                                .ToJson("total")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProducerFeesId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.BillingInstruction", "BillingInstruction", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal?>("CurrentYearInvoiceTotalToDate")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal?>("LiabilityDifference")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.Property<string>("MaterialityLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("MaterialityLiabilityDirection");
 
-                                    b2.Property<string>("MaterialityPercentageLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("MaterialityPercentageLiabilityDirection");
 
                                     b2.Property<decimal?>("PercentageLiabilityDifference")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<string>("SuggestedBillingInstruction")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
                                     b2.Property<decimal?>("SuggestedInvoiceAmount")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.Property<string>("TonnageAmountLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageAmountLiabilityDirection");
 
-                                    b2.Property<string>("TonnageAmountPercentageLiabilityDirection")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageAmountPercentageLiabilityDirection");
 
-                                    b2.Property<string>("TonnageChangeSinceLastInvoice")
-                                        .HasColumnType("nvarchar(max)");
+                                    b2.Property<string>("TonnageChangeSinceLastInvoice");
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -5779,16 +5118,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2a", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -5799,24 +5135,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -5832,16 +5163,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2b", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -5852,24 +5180,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -5885,16 +5208,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "CommsCostsSection2c", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -5905,24 +5225,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -5938,16 +5253,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "LADisposalCostsSection1", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -5958,24 +5270,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -5991,16 +5298,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "LaDataPrepSection4", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -6011,24 +5315,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -6044,114 +5343,94 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialFee", "MaterialFees", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
 
                                     b2.Property<string>("MaterialCode")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .IsRequired();
 
-                                    b2.HasKey("FeeDetailProducerFeesId", "Id");
+                                    b2.HasKey("FeeDetailProducerFeesId", "__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_producer_fees");
 
-                                    b2.HasAnnotation("Relational:JsonPropertyName", "MaterialFees");
+                                    b2.HasJsonPropertyName("MaterialFees");
 
                                     b2.WithOwner()
                                         .HasForeignKey("FeeDetailProducerFeesId");
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.CommsFee", "CommFee", b3 =>
                                         {
-                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeesId");
 
-                                            b3.Property<int>("MaterialFeeId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFee__synthesizedOrdinal");
 
                                             b3.Property<decimal>("HdcTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("HhTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PbTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PricePerTonne")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("TotalTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFeeId");
+                                            b3.HasKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_producer_fees");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFeeId");
+                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "Costs", b4 =>
                                                 {
-                                                    b4.Property<int>("CommsFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CommsFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("CommsFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("BadDebt")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("FeeWithoutBadDebt")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("CommsFeeMaterialFeeFeeDetailProducerFeesId", "CommsFeeMaterialFeeId");
+                                                    b4.HasKey("CommsFeeMaterialFeeFeeDetailProducerFeesId", "CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("CommsFeeMaterialFeeFeeDetailProducerFeesId", "CommsFeeMaterialFeeId");
+                                                        .HasForeignKey("CommsFeeMaterialFeeFeeDetailProducerFeesId", "CommsFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b5 =>
                                                         {
-                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId")
-                                                                .HasColumnType("int");
+                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFeeId")
-                                                                .HasColumnType("int");
+                                                            b5.Property<int>("FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
 
                                                             b5.Property<decimal>("England")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("NorthernIreland")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
-                                                                .HasPrecision(18, 6)
-                                                                .HasColumnType("decimal(18,6)");
+                                                                .HasPrecision(18, 6);
 
-                                                            b5.HasKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId", "FeeWithBadDebtCommsFeeMaterialFeeId");
+                                                            b5.HasKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId", "FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
 
                                                             b5.ToTable("calc_result_producer_fees");
 
                                                             b5.WithOwner()
-                                                                .HasForeignKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId", "FeeWithBadDebtCommsFeeMaterialFeeId");
+                                                                .HasForeignKey("FeeWithBadDebtCommsFeeMaterialFeeFeeDetailProducerFeesId", "FeeWithBadDebtCommsFeeMaterialFee__synthesizedOrdinal");
                                                         });
 
                                                     b4.Navigation("ByCountry")
@@ -6164,357 +5443,288 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.DisposalFee", "DisposalFee", b3 =>
                                         {
-                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFeeFeeDetailProducerFeesId");
 
-                                            b3.Property<int>("MaterialFeeId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("MaterialFee__synthesizedOrdinal");
 
                                             b3.Property<decimal>("BadDebt")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("PreviousInvoicedTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("ResidualSmcwTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("SmcwTonnage")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("TonnageChange")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFeeId");
+                                            b3.HasKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_producer_fees");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFeeId");
+                                                .HasForeignKey("MaterialFeeFeeDetailProducerFeesId", "MaterialFee__synthesizedOrdinal");
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "Fee", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "FeeWithBadDebtByCountry", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("England")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("NorthernIreland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "HdcTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "HhTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "PbTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "PricePerTonne", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal?>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal?>("Total")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnage", "TotalTonnage", b4 =>
                                                 {
-                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFeeFeeDetailProducerFeesId");
 
-                                                    b4.Property<int>("DisposalFeeMaterialFeeId")
-                                                        .HasColumnType("int");
+                                                    b4.Property<int>("DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.Property<decimal>("Amber")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("AmberMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Red")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
-                                                        .HasPrecision(18, 6)
-                                                        .HasColumnType("decimal(18,6)");
+                                                        .HasPrecision(18, 6);
 
-                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                    b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
 
                                                     b4.WithOwner()
-                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFeeId");
+                                                        .HasForeignKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
                                                 });
 
                                             b3.Navigation("ActionedSmcwTonnage")
@@ -6554,16 +5764,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "SaOperatingCostsSection3", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -6574,24 +5781,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -6607,16 +5809,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "SaSetupCostsSection5", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -6627,24 +5826,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -6660,16 +5854,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.FeeWithBadDebt", "TotalBillBreakdown", b2 =>
                                 {
-                                    b2.Property<int>("FeeDetailProducerFeesId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("FeeDetailProducerFeesId");
 
                                     b2.Property<decimal>("BadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("FeeWithoutBadDebt")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.HasKey("FeeDetailProducerFeesId");
 
@@ -6680,24 +5871,19 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "ByCountry", b3 =>
                                         {
-                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("FeeWithBadDebtFeeDetailProducerFeesId");
 
                                             b3.Property<decimal>("England")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("NorthernIreland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.HasKey("FeeWithBadDebtFeeDetailProducerFeesId");
 
@@ -6822,111 +6008,94 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialSelfManagedConsumerWasteData", "SmcwMaterialData", b1 =>
                         {
-                            b1.Property<int>("ProducerSelfManagedConsumerWasteId")
-                                .HasColumnType("int");
+                            b1.Property<int>("ProducerSelfManagedConsumerWasteId");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
                             b1.Property<string>("MaterialCode")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.HasKey("ProducerSelfManagedConsumerWasteId", "Id");
+                            b1.HasKey("ProducerSelfManagedConsumerWasteId", "__synthesizedOrdinal");
 
                             b1.ToTable("calc_result_smcw_producer");
 
-                            b1.ToJson("material_totals");
+                            b1
+                                .ToJson("material_totals")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProducerSelfManagedConsumerWasteId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWasteData", "Smcw", b2 =>
                                 {
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
 
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.Property<decimal?>("ResidualSmcwTonnage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("SmcwTonnage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteDataId");
+                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_smcw_producer");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteDataId");
+                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b3 =>
                                         {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
 
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_smcw_producer");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
                                         });
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b3 =>
                                         {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
 
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_smcw_producer");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
                                         });
 
                                     b2.Navigation("ActionedSmcwTonnage")
@@ -6947,111 +6116,94 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialSelfManagedConsumerWasteData", "MaterialTotals", b1 =>
                         {
-                            b1.Property<int>("SelfManagedConsumerWasteId")
-                                .HasColumnType("int");
+                            b1.Property<int>("SelfManagedConsumerWasteId");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
                             b1.Property<string>("MaterialCode")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.HasKey("SelfManagedConsumerWasteId", "Id");
+                            b1.HasKey("SelfManagedConsumerWasteId", "__synthesizedOrdinal");
 
                             b1.ToTable("calc_result_smcw");
 
-                            b1.ToJson("material_totals");
+                            b1
+                                .ToJson("material_totals")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("SelfManagedConsumerWasteId");
 
                             b1.OwnsOne("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWasteData", "Smcw", b2 =>
                                 {
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
 
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataId")
-                                        .HasColumnType("int");
+                                    b2.Property<int>("MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.Property<decimal?>("ResidualSmcwTonnage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("SmcwTonnage")
-                                        .HasPrecision(18, 6)
-                                        .HasColumnType("decimal(18,6)");
+                                        .HasPrecision(18, 6);
 
-                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteDataId");
+                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.ToTable("calc_result_smcw");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteDataId");
+                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b3 =>
                                         {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
 
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_smcw");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
                                         });
 
                                     b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b3 =>
                                         {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
 
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId")
-                                                .HasColumnType("int");
+                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
                                             b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6)
-                                                .HasColumnType("decimal(18,6)");
+                                                .HasPrecision(18, 6);
 
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
 
                                             b3.ToTable("calc_result_smcw");
 
                                             b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataId");
+                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
                                         });
 
                                     b2.Navigation("ActionedSmcwTonnage")
@@ -7072,6 +6224,8 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.Navigation("CalculatorRunBillingFileMetadata");
 
+                    b.Navigation("CalculatorRunOrganisations");
+
                     b.Navigation("CountryApportionments");
 
                     b.Navigation("CsvFileMetadata");
@@ -7085,20 +6239,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProducerInvoicedMaterialNetTonnage");
 
                     b.Navigation("ProducerResultFileSuggestedBillingInstruction");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
-                {
-                    b.Navigation("Details");
-
-                    b.Navigation("Runs");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", b =>
-                {
-                    b.Navigation("Details");
-
-                    b.Navigation("Runs");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CostType", b =>

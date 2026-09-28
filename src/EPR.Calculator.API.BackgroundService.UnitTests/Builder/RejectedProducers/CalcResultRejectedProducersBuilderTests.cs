@@ -20,57 +20,37 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
         const int organisationId = 100;
         dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = runContextOld.RelativeYear });
 
-        var masterOld = new CalculatorRunOrganisationDataMaster
-        {
-            Id = 1,
-            RelativeYear = runContextOld.RelativeYear,
-            EffectiveFrom = DateTime.UtcNow.AddDays(-10),
-            CreatedAt = DateTime.UtcNow.AddDays(-10),
-            CreatedBy = "testsuperuser.paycal"
-        };
-        var masterLatest = new CalculatorRunOrganisationDataMaster
-        {
-            Id = 2,
-            RelativeYear = runContextOld.RelativeYear,
-            EffectiveFrom = DateTime.UtcNow.AddDays(-5),
-            CreatedAt = DateTime.UtcNow.AddDays(-5),
-            CreatedBy = "testsuperuser.paycal"
-        };
-        dbContext.CalculatorRunOrganisationDataMaster.AddRange(masterOld, masterLatest);
-
         var runOld = new CalculatorRun
         {
             Id = runContextOld.RunId,
             Name = runContextOld.RunName,
-            RelativeYear = runContextOld.RelativeYear,
-            CalculatorRunOrganisationDataMasterId = masterOld.Id
+            RelativeYear = runContextOld.RelativeYear
         };
         var runLatest = new CalculatorRun
         {
             Id = runContextLatest.RunId,
             Name = runContextLatest.RunName,
-            RelativeYear = runContextLatest.RelativeYear,
-            CalculatorRunOrganisationDataMasterId = masterLatest.Id
+            RelativeYear = runContextLatest.RelativeYear
         };
         dbContext.CalculatorRuns.AddRange(runOld, runLatest);
 
-        var orgOld = new CalculatorRunOrganisationDataDetail
+        var orgOld = new CalculatorRunOrganisation
         {
             Id = 1,
-            CalculatorRunOrganisationDataMasterId = masterOld.Id,
+            CalculatorRunId = runOld.Id,
             OrganisationId = organisationId,
             OrganisationName = "Old Org Name",
             TradingName = "Old Trading Name"
         };
-        var orgLatest = new CalculatorRunOrganisationDataDetail
+        var orgLatest = new CalculatorRunOrganisation
         {
             Id = 2,
-            CalculatorRunOrganisationDataMasterId = masterLatest.Id,
+            CalculatorRunId = runLatest.Id,
             OrganisationId = organisationId,
             OrganisationName = "Latest Org Name",
             TradingName = "Latest Trading Name"
         };
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(orgOld, orgLatest);
+        dbContext.CalculatorRunOrganisations.AddRange(orgOld, orgLatest);
 
         // Producer detail for the new run
         dbContext.ProducerDetail.Add(new ProducerDetail

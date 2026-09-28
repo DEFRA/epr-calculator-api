@@ -1,0 +1,56 @@
+using EPR.Calculator.API.Data.DataModels;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace EPR.Calculator.API.Data.TypeConfigurations;
+
+public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisation>
+{
+    public void Configure(EntityTypeBuilder<CalculatorRunOrganisation> builder)
+    {
+        builder.ToTable("calculator_run_organisation");
+
+        builder.Property(p => p.Id)
+            .HasColumnName("id")
+            .IsRequired();
+
+        builder.Property(p => p.CalculatorRunId)
+            .HasColumnName("calculator_run_id")
+            .IsRequired();
+
+        builder.Property(p => p.OrganisationId)
+            .HasColumnName("organisation_id");
+
+        builder.Property(p => p.SubsidiaryId)
+            .HasColumnName("subsidiary_id")
+            .HasMaxLength(400);
+
+        builder.Property(p => p.OrganisationName)
+            .HasColumnName("organisation_name")
+            .HasMaxLength(400);
+
+        builder.Property(p => p.TradingName)
+            .HasColumnName("trading_name")
+            .HasMaxLength(400);
+
+        builder.Property(p => p.DaysObligated)
+            .HasColumnName("num_days_obligated");
+
+        builder.Property(p => p.JoinerDate)
+            .HasColumnName("joiner_date")
+            .HasMaxLength(50);
+
+        builder.Property(p => p.LeaverDate)
+            .HasColumnName("leaver_date")
+            .HasMaxLength(50);
+
+        builder.Property(p => p.StatusCode)
+            .HasColumnName("status_code");
+
+        builder.Property(p => p.ErrorCode)
+            .HasColumnName("error_code");
+
+        builder.Property(p => p.IsError)
+            .HasColumnName("is_error");
+    }
+}

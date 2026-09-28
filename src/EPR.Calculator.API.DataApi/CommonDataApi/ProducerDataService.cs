@@ -1,0 +1,299 @@
+using System.Diagnostics;
+using EPR.CommonDataService.DataApi.AcceptedFileSelection;
+using EPR.CommonDataService.DataApi.Alignment;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.PomEligibility;
+
+namespace EPR.CommonDataService.DataApi.CommonDataApi;
+
+/// <summary>
+///     Produces the full set of data a calculator run needs from organisation/POM data, in a single
+///     call: streams the raw Synapse data, applies every business rule (file selection, obligation
+///     determination, POM eligibility, period flags, error/warning detection), and aligns the result
+///     into producers ready for calculation. Performs no database access outside of the Synapse
+///     streams themselves - persisting the result is the caller's responsibility.
+/// </summary>
+public interface IProducerDataService
+{
+    Task<IReadOnlyList<ProducerRecord>> GetProducerData(
+        int relativeYear,
+        DateTimeOffset? cutOffDate,
+        IReadOnlyList<string> materialCodes,
+        CancellationToken cancellationToken = default);
+}
+
+public sealed class ProducerDataService(
+    IStreamOrganisationsRequestHandler organisationsHandler,
+    IStreamPomsRequestHandler pomsHandler,
+    IAcceptedFileSelector acceptedFileSelector,
+    IProducerObligationDeterminer obligationDeterminer,
+    IPomEligibilityFilter pomEligibilityFilter,
+    IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
+    IProducerErrorDetector errorDetector,
+    IProducerPomAligner aligner
+) : IProducerDataService
+{
+    private const string ErrorStatus = "E";
+    private static readonly HashSet<string> ValidRagRatings = ["R", "A", "G", "R-M", "A-M", "G-M"];
+
+    public async Task<IReadOnlyList<ProducerRecord>> GetProducerData(
+        int relativeYear,
+        DateTimeOffset? cutOffDate,
+        IReadOnlyList<string> materialCodes,
+        CancellationToken cancellationToken = default)
+    {
+        using var activity = DataApiTelemetry.StartActivity(typeof(ProducerDataService), nameof(GetProducerData));
+
+        // If either stream fails, both should cancel.
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var linkedCt = linkedCts.Token;
+
+        try
+        {
+            var result = await GetProducerDataCore(relativeYear, cutOffDate, materialCodes, linkedCt);
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (!linkedCt.IsCancellationRequested)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.AddException(ex);
+            await linkedCts.CancelAsync();
+            throw;
+        }
+    }
+
+    private async Task<IReadOnlyList<ProducerRecord>> GetProducerDataCore(
+        int relativeYear,
+        DateTimeOffset? cutOffDate,
+        IReadOnlyList<string> materialCodes,
+        CancellationToken cancellationToken)
+    {
+        var orgsTask = StreamOrganisations(relativeYear, cutOffDate, cancellationToken);
+        var pomsTask = StreamPoms(relativeYear, cutOffDate, cancellationToken);
+
+        await Task.WhenAll(orgsTask, pomsTask);
+
+        var rawOrganisations = orgsTask.Result;
+        var rawPoms = pomsTask.Result;
+
+        // POM eligibility (both H1 and H2 submitted, a registration exists) and each organisation's
+        // own HasH1/HasH2 flags both depend on the POM stream, so they can only run once both
+        // streams have finished.
+        //
+        // Cancelled registrations are excluded here - the obligation stream has to keep them (they
+        // drive "Not Obligated"), but sp_GetPaycalPomData's registration gate was Granted/Accepted
+        // only. The org stream only ever carries Granted/Accepted/Cancelled, so "not Cancelled" is
+        // equivalent and also tolerates fixtures that leave RegulatorStatus unset.
+        var registeredOrganisationIds = rawOrganisations
+            .Where(o => o.OrganisationId is not null && o.RegulatorStatus is not "Cancelled")
+            .Select(o => o.OrganisationId!.Value)
+            .ToHashSet();
+        var eligiblePoms = pomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
+        var organisationsWithPeriodFlags = organisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
+
+        var organisations = organisationsWithPeriodFlags.Select(MapOrganisation).ToImmutableList();
+        // sp_GetPaycalPomData applied the reportable-packaging filter upstream of every consumer,
+        // error detection included - not just alignment.
+        var poms = eligiblePoms
+            .Where(p => ReportablePackaging.Includes(p.PackagingType, p.PackagingMaterial))
+            .Select(MapPom)
+            .ToImmutableList();
+
+        var detection = errorDetector.Detect(organisations, poms);
+
+        var matchedPoms = poms
+            .Where(p => !detection.UnmatchedKeys.Contains((p.OrganisationId.GetValueOrDefault(), p.SubsidiaryId)))
+            .ToImmutableList();
+
+        var dedupedOrganisations = aligner.DedupeOrganisations(organisations);
+        var aligned = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes).ToImmutableList();
+
+        return MergeProducerRecords(dedupedOrganisations, aligned, detection.Errors);
+    }
+
+    /// <summary>
+    ///     Combines the aligner's per-obligated-organisation output with detection's error/warning
+    ///     results into the final per-organisation record set. Three sources feed the result:
+    ///     obligated organisations (from <paramref name="aligned" />, keyed by (OrganisationId,
+    ///     SubsidiaryId) since detection doesn't distinguish submitters), "E"-status organisations
+    ///     (which the aligner never looks at, since it only iterates obligated ones), and "orphan"
+    ///     errors - almost always <see cref="ProducerErrorCodes.MissingRegistrationData" />, which is
+    ///     POM-driven and can reference an org/subsidiary combo with no exact registration match.
+    /// </summary>
+    private static IReadOnlyList<ProducerRecord> MergeProducerRecords(
+        IReadOnlyList<AlignmentOrganisation> dedupedOrganisations,
+        IReadOnlyList<ProducerRecord> aligned,
+        IReadOnlyList<OrganisationCalculationError> errors)
+    {
+        var alignedByKey = aligned.ToLookup(r => (r.OrganisationId, r.SubsidiaryId));
+        var errorsByKey = errors.ToLookup(e => (e.OrganisationId, e.SubsidiaryId));
+
+        var records = new List<ProducerRecord>(aligned.Count);
+        var coveredKeys = new HashSet<(int OrganisationId, string? SubsidiaryId)>();
+
+        foreach (var key in alignedByKey.Select(g => g.Key))
+        {
+            coveredKeys.Add(key);
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+
+            foreach (var record in alignedByKey[key])
+                records.Add(record with { Errors = hardErrors, Warnings = warnings });
+        }
+
+        // "E"-status organisations: never obligated, so the aligner never produces a record for them.
+        foreach (var organisation in dedupedOrganisations.Where(o => o.ObligationStatus == ErrorStatus))
+        {
+            var key = (organisation.OrganisationId, organisation.SubsidiaryId);
+            coveredKeys.Add(key);
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+            records.Add(ToProducerRecord(organisation, hardErrors, warnings));
+        }
+
+        // Orphan errors: a key with no aligned or "E"-status row at all. Borrow identity fields from
+        // any other row sharing the OrganisationId (e.g. a POM submitted under a subsidiary/submitter
+        // combo that doesn't match any registration); fall back to an empty identity in the rare case
+        // no registration exists for the organisation at all - mirroring today's behaviour, where such
+        // an organisation never gets a CalculatorRunOrganisation snapshot either.
+        foreach (var key in errorsByKey.Select(g => g.Key))
+        {
+            if (!coveredKeys.Add(key))
+                continue;
+
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+            var anyOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.OrganisationId == key.OrganisationId);
+
+            records.Add(anyOrganisationRow is not null
+                ? ToProducerRecord(anyOrganisationRow with { SubsidiaryId = key.SubsidiaryId, SubmitterId = null }, hardErrors, warnings)
+                : ToOrphanProducerRecord(key, hardErrors, warnings));
+        }
+
+        return records;
+    }
+
+    private static (IReadOnlyList<ProducerCalculationError> HardErrors, IReadOnlyList<ProducerCalculationError> Warnings) SplitErrors(
+        IEnumerable<OrganisationCalculationError> errors)
+    {
+        var list = errors.Select(e => e.Error).ToImmutableList();
+        return (list.Where(e => !e.IsWarning).ToImmutableList(), list.Where(e => e.IsWarning).ToImmutableList());
+    }
+
+    private static ProducerRecord ToProducerRecord(
+        AlignmentOrganisation organisation,
+        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<ProducerCalculationError> warnings) => new()
+    {
+        OrganisationId = organisation.OrganisationId,
+        SubsidiaryId = organisation.SubsidiaryId,
+        ProducerName = organisation.OrganisationName,
+        TradingName = organisation.TradingName,
+        DaysObligated = organisation.DaysObligated,
+        JoinerDate = organisation.JoinerDate,
+        LeaverDate = organisation.LeaverDate,
+        StatusCode = organisation.StatusCode,
+        ErrorCode = organisation.ErrorCode,
+        Errors = errors,
+        Warnings = warnings,
+        ReportedMaterials = []
+    };
+
+    private static ProducerRecord ToOrphanProducerRecord(
+        (int OrganisationId, string? SubsidiaryId) key,
+        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<ProducerCalculationError> warnings) => new()
+    {
+        OrganisationId = key.OrganisationId,
+        SubsidiaryId = key.SubsidiaryId,
+        ProducerName = string.Empty,
+        Errors = errors,
+        Warnings = warnings,
+        ReportedMaterials = []
+    };
+
+    private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
+    {
+        var rawOrganisations = new List<PayCalOrganisation>();
+
+        await foreach (var organisation in organisationsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+            rawOrganisations.Add(organisation);
+
+        // Every candidate accepted file is streamed unfiltered - pick the winning file per
+        // org/submitter/period (honouring the cut-off date) before obligation determination, which
+        // needs every row for the run up front since it aggregates across rows (per producer/submission
+        // period) rather than deciding a row in isolation.
+        var latestOrganisations = acceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate);
+        return obligationDeterminer.Determine(latestOrganisations).ToList();
+    }
+
+    private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
+    {
+        var poms = new List<PayCalPom>();
+
+        await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+            poms.Add(pom);
+
+        return acceptedFileSelector.SelectLatestPomFiles(poms, cutOffDate).ToList();
+    }
+
+    private static AlignmentOrganisation MapOrganisation(PayCalOrganisation r) => new()
+    {
+        OrganisationId = r.OrganisationId ?? throw new FormatException(
+            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationId)}: {r.OrganisationId}"),
+        SubsidiaryId = r.SubsidiaryId,
+        OrganisationName = r.OrganisationName ?? throw new FormatException(
+            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationName)}: {r.OrganisationName}"),
+        TradingName = r.TradingName,
+        StatusCode = r.StatusCode,
+        ErrorCode = r.ErrorCode,
+        JoinerDate = r.JoinerDate,
+        LeaverDate = r.LeaverDate,
+        ObligationStatus = r.ObligationStatus ?? throw new FormatException(
+            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.ObligationStatus)}: {r.ObligationStatus}"),
+        DaysObligated = r.NumDaysObligated,
+        SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
+            ? guid
+            : throw new FormatException($"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.SubmitterId)}: {r.SubmitterId}"),
+        HasH1 = r.HasH1,
+        HasH2 = r.HasH2
+    };
+
+    private static AlignmentPom MapPom(PayCalPom r) => new()
+    {
+        SubmissionPeriod = r.SubmissionPeriod,
+        OrganisationId = r.OrganisationId,
+        SubsidiaryId = r.SubsidiaryId,
+        PackagingType = r.PackagingType,
+        PackagingMaterial = r.PackagingMaterial,
+        PackagingMaterialWeight = r.PackagingMaterialWeight,
+        RamRagRating = SafeParseRamRagRating(r),
+        SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
+            ? guid
+            : throw new FormatException($"Invalid {nameof(PayCalPom)}.{nameof(PayCalPom.SubmitterId)}: {r.SubmitterId}")
+    };
+
+    private static string? SafeParseRamRagRating(PayCalPom pom)
+    {
+        if (string.IsNullOrWhiteSpace(pom.RamRagRating))
+            return null;
+
+        var trimmed = pom.RamRagRating.Trim();
+        if (ValidRagRatings.Contains(trimmed))
+            return trimmed;
+
+        Activity.Current?.AddEvent(new ActivityEvent("InvalidRagRating", tags: new ActivityTagsCollection
+        {
+            ["OrganisationId"] = pom.OrganisationId,
+            ["SubsidiaryId"] = pom.SubsidiaryId,
+            ["SubmitterId"] = pom.SubmitterId,
+            ["RamRagRating"] = pom.RamRagRating,
+            ["PackagingMaterial"] = pom.PackagingMaterial
+        }));
+
+        return "R"; // Treat as Red when the value can't be recognised.
+    }
+}

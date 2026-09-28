@@ -857,6 +857,12 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.11, )"
         }
+      },
+      "epr.calculator.api.dataapi": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.11, )"
+        }
       }
     }
   }
