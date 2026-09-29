@@ -113,10 +113,7 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
                 HasInitialCompleted        = filteredRuns.Any(run => run.Classification == RunClassification.Initial && run.IsBillingFileShared),
                 HasRecalculationIncomplete = filteredRuns.Any(run => run.Classification == RunClassification.Recalculation && !run.IsBillingFileShared),
                 HasRecalculationCompleted  = filteredRuns.Any(run => run.Classification == RunClassification.Recalculation && run.IsBillingFileShared),
-                LatestFileSharedAt         = filteredRuns
-                    .Where(run => run.IsBillingFileShared)
-                    .SelectMany(run => run.CalculatorRunBillingFileMetadata)
-                    .Max(m => m.BillingFileAuthorisedDate)
+                LatestFileSharedAt         = filteredRuns.Where(run => run.IsBillingFileShared).Max(run => run.BillingFileSharedAt)
             })
             .SingleOrDefaultAsync(cancellationToken) ?? new RelativeYearInfo();
     }

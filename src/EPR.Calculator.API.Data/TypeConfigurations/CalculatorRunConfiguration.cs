@@ -37,6 +37,17 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .HasColumnName("billing_run_started_at")
             .HasConversion<UtcDateTimeConverter>();
 
+        builder.Property(p => p.IsBillingFileShared)
+            .HasColumnName("is_billing_file_shared");
+
+        builder.Property(p => p.BillingFileSharedBy)
+            .HasColumnName("billing_file_shared_by")
+            .HasMaxLength(400);
+
+        builder.Property(p => p.BillingFileSharedAt)
+            .HasColumnName("billing_file_shared_at")
+            .HasConversion<UtcDateTimeConverter>();
+
         builder.Property(p => p.Name)
             .HasColumnName("name")
             .HasMaxLength(250)

@@ -33,7 +33,7 @@ public class AvailableClassificationsService(
         }
 
         var hasIncompleteOfficialRun = officialRuns.Exists(r => !(r.BillingFile?.IsShared ?? false));
-        var hasNewerCompletedRun = officialRuns.Exists(r => r.BillingFile?.SentAt >= run.CreatedAt);
+        var hasNewerCompletedRun = officialRuns.Exists(r => r.BillingFile?.SharedAt >= run.CreatedAt);
 
         if (!hasIncompleteOfficialRun && !hasNewerCompletedRun)
         {

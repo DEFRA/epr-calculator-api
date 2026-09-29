@@ -33,13 +33,6 @@ public class CalculatorRunBillingFileMetadataConfiguration : IEntityTypeConfigur
             .HasMaxLength(400)
             .IsRequired();
 
-        builder.Property(p => p.BillingFileAuthorisedDate)
-            .HasColumnName("billing_file_authorised_date");
-
-        builder.Property(p => p.BillingFileAuthorisedBy)
-            .HasColumnName("billing_file_authorised_by")
-            .HasMaxLength(400);
-
         builder.Property(p => p.CalculatorRunId)
             .HasColumnName("calculator_run_id")
             .IsRequired();

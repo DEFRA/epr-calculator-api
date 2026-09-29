@@ -33,9 +33,9 @@ public static class CalcRunMapper
                     JsonFileName = m.BillingJsonFileName,
                     CreatedAt = m.BillingFileCreatedDate,
                     CreatedBy = m.BillingFileCreatedBy,
-                    IsShared = m.BillingFileAuthorisedDate != null,
-                    SentAt = m.BillingFileAuthorisedDate,
-                    SentBy = m.BillingFileAuthorisedBy
+                    IsShared = run.IsBillingFileShared,
+                    SharedAt = run.BillingFileSharedAt,
+                    SharedBy = run.BillingFileSharedBy
                 })
                 .FirstOrDefault()
         };

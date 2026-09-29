@@ -83,26 +83,19 @@ public class CalculatorNewController(
 
         try
         {
-            var calculatorRun = await dbContext.CalculatorRuns
-                .Include(run => run.CalculatorRunBillingFileMetadata)
+            var run = await dbContext.CalculatorRuns
                 .SingleAsync(x => x.Id == runId, cancellationToken);
 
-            var metadata = calculatorRun.CalculatorRunBillingFileMetadata
-                .Single(m => m.Id == runDto.BillingFile.Id);
-
-            var sentBy = User.GetName();
-            var sentAt = DateTime.UtcNow;
-
-            calculatorRun.IsBillingFileShared = true;
-            metadata.BillingFileAuthorisedBy = sentBy;
-            metadata.BillingFileAuthorisedDate = sentAt;
+            run.IsBillingFileShared = true;
+            run.BillingFileSharedBy = User.GetName();
+            run.BillingFileSharedAt = DateTime.UtcNow;
 
             var affectedRows = await invoiceDetailsService
-                .InsertInvoiceDetailsAtProducerLevel(runId, sentAt, sentBy, cancellationToken);
+                .InsertInvoiceDetailsAtProducerLevel(runId, run.BillingFileSharedAt.Value, run.BillingFileSharedBy, cancellationToken);
 
             logger.LogDebug("Inserting {RowsAffected} invoice details at producer level for run {RunId}", affectedRows, runId);
 
-            dbContext.CalculatorRuns.Update(calculatorRun);
+            dbContext.CalculatorRuns.Update(run);
             await dbContext.SaveChangesAsync(cancellationToken);
 
             var result = await billingFileService.MoveBillingJsonFile(runId, cancellationToken);

@@ -56,7 +56,8 @@ public class RunClassificationValidatorTests
     {
         // Arrange: once a run's billing file has been shared, it cannot be reclassified - not even to Deleted.
         // The DeleteCalculatorRun endpoint relies solely on this check to stop completed runs being deleted.
-        var run = CreateRun(1, RunClassification.Initial, Year, isBillingFileShared: true);
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var run = CreateRun(1, RunClassification.Initial, Year, sharedAt);
 
         // Act
         var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken.None);
@@ -64,6 +65,55 @@ public class RunClassificationValidatorTests
         // Assert
         result.IsInvalid.ShouldBeTrue();
         result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot reclassify a run once the run is completed.");
+    }
+
+    [TestMethod]
+    [DataRow(RunClassification.Test)]
+    [DataRow(RunClassification.Initial)]
+    [DataRow(RunClassification.Recalculation)]
+    [DataRow(RunClassification.Deleted)]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunIsDeleted(RunClassification classification)
+    {
+        // Arrange: deleted runs are final, so cannot be reclassified (i.e. restored).
+        var run = CreateRun(1, RunClassification.Deleted, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, classification, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot reclassify a run once the run is deleted.");
+    }
+
+    [TestMethod]
+    [DataRow(CalculationRunStatus.Unknown)]
+    [DataRow(CalculationRunStatus.None)]
+    [DataRow(CalculationRunStatus.Started)]
+    [DataRow(CalculationRunStatus.Errored)]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunCalculationHasNotCompleted(CalculationRunStatus calculationRunStatus)
+    {
+        // Arrange: only runs with a completed calculation (i.e. with results) can be classified.
+        var run = CreateRun(1, RunClassification.None, Year, calculationRunStatus: calculationRunStatus);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Test, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot classify a run until its calculation has completed.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsValid_WhenClassifyingAsDeleted_EvenWhenRunCalculationHasErrored()
+    {
+        // Arrange: errored runs can still be discarded.
+        var run = CreateRun(1, RunClassification.None, Year, calculationRunStatus: CalculationRunStatus.Errored);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -148,8 +198,9 @@ public class RunClassificationValidatorTests
     public async Task ValidateAsync_ReturnsInvalid_WhenInitialAlreadyCompletedForYear()
     {
         // Arrange
-        var completedInitial = CreateRun(2, RunClassification.Initial, Year, isBillingFileShared: true);
-        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata(DateTime.UtcNow.AddDays(-1)));
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
         dbContext.CalculatorRuns.Add(completedInitial);
         dbContext.SaveChanges();
         var run = CreateRun(1, RunClassification.None, Year);
@@ -181,12 +232,12 @@ public class RunClassificationValidatorTests
     {
         // Arrange: an Official run for the year already had its billing file authorised *after* this run was
         // created, so this (now out-of-sequence) run can no longer be classified as Official.
-        var authorisedAt = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
-        var completedInitial = CreateRun(2, RunClassification.Initial, Year, isBillingFileShared: true);
-        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata(authorisedAt));
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
         dbContext.CalculatorRuns.Add(completedInitial);
         dbContext.SaveChanges();
-        var run = CreateRun(1, RunClassification.None, Year, createdAt: authorisedAt.AddDays(-1));
+        var run = CreateRun(1, RunClassification.None, Year, createdAt: sharedAt.AddDays(-1));
 
         // Act
         var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
@@ -214,12 +265,12 @@ public class RunClassificationValidatorTests
     public async Task ValidateAsync_ReturnsValid_WhenDesignatingRecalculation_AfterInitialWasCompletedEarlier()
     {
         // Arrange
-        var authorisedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var completedInitial = CreateRun(2, RunClassification.Initial, Year, isBillingFileShared: true);
-        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata(authorisedAt));
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
         dbContext.CalculatorRuns.Add(completedInitial);
         dbContext.SaveChanges();
-        var run = CreateRun(1, RunClassification.None, Year, createdAt: authorisedAt.AddDays(1));
+        var run = CreateRun(1, RunClassification.None, Year, createdAt: sharedAt.AddDays(1));
 
         // Act
         var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
@@ -235,8 +286,9 @@ public class RunClassificationValidatorTests
         // Arrange: a completed Initial run exists, but for a different year - it must not affect this year's checks.
         var otherYear = new RelativeYear(Year.Value - 1);
         dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = otherYear });
-        var completedInitialOtherYear = CreateRun(2, RunClassification.Initial, otherYear, isBillingFileShared: true);
-        completedInitialOtherYear.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata(DateTime.UtcNow));
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitialOtherYear = CreateRun(2, RunClassification.Initial, otherYear, sharedAt);
+        completedInitialOtherYear.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
         dbContext.CalculatorRuns.Add(completedInitialOtherYear);
         dbContext.SaveChanges();
         var run = CreateRun(1, RunClassification.None, Year);
@@ -252,25 +304,26 @@ public class RunClassificationValidatorTests
         int id,
         RunClassification classification,
         RelativeYear relativeYear,
-        bool isBillingFileShared = false,
-        DateTime? createdAt = null) => new()
+        DateTime? billingFileSharedAt = null,
+        DateTime? createdAt = null,
+        CalculationRunStatus calculationRunStatus = CalculationRunStatus.Completed) => new()
     {
         Id = id,
         Name = $"Run {id}",
         Classification = classification,
+        CalculationRunStatus = calculationRunStatus,
         RelativeYear = relativeYear,
-        IsBillingFileShared = isBillingFileShared,
+        IsBillingFileShared = billingFileSharedAt != null,
+        BillingFileSharedAt = billingFileSharedAt,
         CreatedBy = "Test",
         CreatedAt = createdAt ?? DateTime.UtcNow,
     };
 
-    private static CalculatorRunBillingFileMetadata CreateSharedBillingFileMetadata(DateTime authorisedDate) => new()
+    private static CalculatorRunBillingFileMetadata CreateSharedBillingFileMetadata() => new()
     {
         BillingCsvFileName = "billing.csv",
         BillingJsonFileName = "billing.json",
-        BillingFileCreatedDate = authorisedDate,
-        BillingFileCreatedBy = "Test",
-        BillingFileAuthorisedDate = authorisedDate,
-        BillingFileAuthorisedBy = "Test",
+        BillingFileCreatedDate = DateTime.UtcNow,
+        BillingFileCreatedBy = "Test"
     };
 }

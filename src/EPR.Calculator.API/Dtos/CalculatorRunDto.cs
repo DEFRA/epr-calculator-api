@@ -26,7 +26,7 @@ public record CalculatorRunDto
         public required string JsonFileName { get; init; }
         public required DateTime CreatedAt { get; init; }
         public required string CreatedBy { get; init; }
-        public required DateTime? SentAt { get; init; }
-        public required string? SentBy { get; init; }
+        public required DateTime? SharedAt { get; init; }
+        public required string? SharedBy { get; init; }
     }
 }
