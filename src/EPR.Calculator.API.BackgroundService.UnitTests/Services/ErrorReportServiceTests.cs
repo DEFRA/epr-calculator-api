@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
     ///     Unit tests for <see cref="ErrorReportService" />.
     ///     <para>
     ///         DataApi computes every error/warning unconditionally, flagging whether it found a
-    ///         current-year POM match (<see cref="ProducerCalculationError.HasPomMatch" />) - it can't see
+    ///         current-year POM match (<see cref="ProducerCalculationError.HasPom" />) - it can't see
     ///         billing history, so it doesn't know whether a no-POM-match row is still worth showing. This
     ///         service makes that call (keep it if the organisation was invoiced in a previous run this
     ///         financial year), then persists the result.
@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task PersistErrors_KeepsErrorWithPomMatch_RegardlessOfInvoiceStatus()
         {
-            var errors = new[] { CreateError(2, null, "Missing POM Data", "01", isWarning: false, hasPomMatch: true) };
+            var errors = new[] { CreateError(2, null, "Missing POM Data", "01", isWarning: false, hasPom: true) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 
@@ -57,7 +57,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 .Setup(s => s.GetInvoicedProducers(It.IsAny<RelativeYear>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ImmutableList.Create(CreateInvoicedProducer(1)));
 
-            var errors = new[] { CreateError(1, null, "some synapse error", "16", isWarning: false, hasPomMatch: false) };
+            var errors = new[] { CreateError(1, null, "some synapse error", "16", isWarning: false, hasPom: false) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 
@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task PersistErrors_DropsErrorWithNoPomMatch_WhenOrganisationWasNotInvoiced()
         {
-            var errors = new[] { CreateError(1, null, "some synapse error", "16", isWarning: false, hasPomMatch: false) };
+            var errors = new[] { CreateError(1, null, "some synapse error", "16", isWarning: false, hasPom: false) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 
@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task PersistErrors_KeepsWarnings()
         {
-            var errors = new[] { CreateError(1, "101", "some warning", "01", isWarning: true, hasPomMatch: true) };
+            var errors = new[] { CreateError(1, "101", "some warning", "01", isWarning: true, hasPom: true) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 
@@ -98,7 +98,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task PersistErrors_SetsCalculatorRunIdAndCreatedBy()
         {
-            var errors = new[] { CreateError(1, "101", "Missing POM Data", "01", isWarning: false, hasPomMatch: true) };
+            var errors = new[] { CreateError(1, "101", "Missing POM Data", "01", isWarning: false, hasPom: true) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 
@@ -107,14 +107,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.AreEqual("test user", report.CreatedBy);
         }
 
-        private static ProducerRecord CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPomMatch)
+        private static ProducerRecord CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPom)
         {
             var error = new ProducerCalculationError
             {
                 ErrorCode = errorCode,
                 LeaverCode = leaverCode,
                 IsWarning = isWarning,
-                HasPomMatch = hasPomMatch
+                HasPom = hasPom
             };
 
             return new ProducerRecord

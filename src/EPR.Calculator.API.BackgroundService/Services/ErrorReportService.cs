@@ -13,7 +13,7 @@ public interface IErrorReportService
     /// </summary>
     /// <remarks>
     ///     DataApi can't see billing history, so any error/warning it raises with no current-year POM
-    ///     match (<see cref="ProducerCalculationError.HasPomMatch" /> false) is only kept here if the
+    ///     match (<see cref="ProducerCalculationError.HasPom" /> false) is only kept here if the
     ///     organisation was invoiced in a previous run this financial year - otherwise it's a stale
     ///     status error for a producer with no reason to still appear.
     /// </remarks>
@@ -54,7 +54,7 @@ public class ErrorReportService(
         var createdAt = DateTime.UtcNow;
 
         var reports = errors
-            .Where(e => e.Error.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
+            .Where(e => e.Error.HasPom || invoicedOrganisationIds.Contains(e.OrganisationId))
             .Select(e => new ErrorReport
             {
                 CalculatorRunId = calculatorRunId,
