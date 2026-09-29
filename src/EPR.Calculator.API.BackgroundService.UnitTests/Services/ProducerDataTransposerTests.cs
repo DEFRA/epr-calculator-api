@@ -72,8 +72,8 @@ public class ProducerDataTransposerTests
     [TestMethod]
     public async Task Transpose_WritesIsError_FromRecordsHardErrors_NotWarnings()
     {
-        var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPomMatch = true };
-        var warning = new ProducerCalculationError { ErrorCode = "some warning", LeaverCode = "", IsWarning = true, HasPomMatch = true };
+        var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPom = true };
+        var warning = new ProducerCalculationError { ErrorCode = "some warning", LeaverCode = "", IsWarning = true, HasPom = true };
 
         var records = new[]
         {
@@ -91,8 +91,8 @@ public class ProducerDataTransposerTests
     [TestMethod]
     public async Task Transpose_FlattensErrorsAndWarnings_IntoKeyedErrorList()
     {
-        var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPomMatch = true };
-        var warning = new ProducerCalculationError { ErrorCode = "some warning", LeaverCode = "", IsWarning = true, HasPomMatch = true };
+        var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPom = true };
+        var warning = new ProducerCalculationError { ErrorCode = "some warning", LeaverCode = "", IsWarning = true, HasPom = true };
 
         var records = new[]
         {
