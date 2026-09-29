@@ -63,13 +63,18 @@ public abstract class BaseIntegrationTest
         // The SQL Server container is reused (WithReuse(true)) across local test sessions to
         // avoid paying its startup cost every run, so its data outlives any single `dotnet test`
         // invocation. If a previous session was interrupted (e.g. a cancelled debug run) while a
-        // run was mid-flight, that run is left behind still classified as RUNNING/IN_THE_QUEUE.
+        // run was mid-flight, that run is left behind still queued (None) or Started.
         // CalculatorController.Create() refuses to start a new run while any run anywhere has
-        // one of those classifications, so a single abandoned row can permanently block every
-        // future session. Reclassify any such leftovers as errored before tests start.
+        // one of those statuses, so a single abandoned row can permanently block every
+        // future session. Mark any such leftovers as errored before tests start.
         await db.CalculatorRuns
-            .Where(run => run.Classification == RunClassification.Running)
-            .ExecuteUpdateAsync(s => s.SetProperty(run => run.Classification, RunClassification.Errored));
+            .Where(run => run.CalculationRunStatus == CalculationRunStatus.None
+                          || run.CalculationRunStatus == CalculationRunStatus.Started)
+            .ExecuteUpdateAsync(s => s.SetProperty(run => run.CalculationRunStatus, CalculationRunStatus.Errored));
+
+        await db.CalculatorRuns
+            .Where(run => run.BillingRunStatus == BillingRunStatus.Started)
+            .ExecuteUpdateAsync(s => s.SetProperty(run => run.BillingRunStatus, BillingRunStatus.Errored));
     }
 
     public static async Task CleanupAsync()
@@ -200,12 +205,12 @@ public abstract class BaseIntegrationTest
                 var status = await db.CalculatorRuns
                     .AsNoTracking()
                     .Where(x => x.Id == runId)
-                    .Select(x => x.Classification)
+                    .Select(x => x.CalculationRunStatus)
                     .SingleAsync();
 
-                return status == RunClassification.Errored
-                    ? throw new Exception($"Calculator run {runId} entered Errored state.")
-                    : status == RunClassification.Unclassified;
+                return status == CalculationRunStatus.Errored
+                    ? throw new Exception($"Billing run for calculator run {runId} entered Errored state.")
+                    : status == CalculationRunStatus.Completed;
             },
             $"Calculator run {runId} did not complete.",
             TimeSpan.FromMinutes(5));

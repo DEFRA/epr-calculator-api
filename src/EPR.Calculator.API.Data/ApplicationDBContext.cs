@@ -22,7 +22,6 @@ public class ApplicationDBContext : DbContext
     public DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
     public DbSet<DefaultParameterSettingDetail> DefaultParameterSettingDetail { get; set; }
     public DbSet<DefaultParameterTemplateMaster> DefaultParameterTemplateMasterList { get; set; }
-    public DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
     public DbSet<CalculatorRun> CalculatorRuns { get; set; }
     public DbSet<LapcapDataTemplateMaster> LapcapDataTemplateMaster { get; set; }
     public DbSet<LapcapDataMaster> LapcapDataMaster { get; set; }
@@ -102,9 +101,9 @@ public class ApplicationDBContext : DbContext
         configurationBuilder.Properties<BillingRunStatus>()
             .HaveConversion<StringEnumConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
 
-        // Configures global conversion for RunClassification enum.
+        // Configures global conversion for RunClassification enum to database string type.
         configurationBuilder.Properties<RunClassification>()
-            .HaveConversion<IntEnumConverter<RunClassification>, EnumComparer<RunClassification>>();
+            .HaveConversion<StringEnumConverter<RunClassification>, EnumComparer<RunClassification>>();
 
         configurationBuilder.Properties<decimal>().HavePrecision(18, 6);
     }

@@ -22,13 +22,36 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
             .WithMessage("No producers have been accepted for this billing run");
 
         RuleFor(ctx => ctx.Run)
-            .SetValidator(new RunValidator());
+            .SetValidator(ctx => new RunValidator(ctx.StartedAt));
     }
 
     private sealed class RunValidator : AbstractValidator<CalculatorRun>
     {
-        public RunValidator()
+        public RunValidator(DateTimeOffset startedAt)
         {
+            RuleFor(run => run.Classification)
+                .Must(classification => classification is RunClassification.Initial or RunClassification.Recalculation)
+                .WithMessage("Run must have an official classification.");
+
+            RuleFor(run => run.CalculationRunStatus)
+                .Must(status => status == CalculationRunStatus.Completed)
+                .WithMessage($"Run calculation status must be {CalculationRunStatus.Completed}");
+
+            RuleFor(run => run.BillingRunStatus)
+                .NotEqual(BillingRunStatus.Unknown)
+                .WithMessage($"Run billing status must not be {BillingRunStatus.Unknown}");
+
+            // A billing file may be regenerated (e.g. once outdated by changes to billing instructions) or retried,
+            // just not whilst a billing run is already underway. Billing runs Started over an hour ago are considered
+            // stuck, so may also be restarted.
+            RuleFor(run => run.BillingRunStatus)
+                .Must((run, _) => !run.IsBillingRunUnderway(startedAt))
+                .WithMessage("Run already has a billing run underway");
+
+            RuleFor(run => run.IsBillingFileShared)
+                .Must(isBillingFileShared => !isBillingFileShared)
+                .WithMessage("Run billing file has already been shared.");
+
             RuleFor(run => run.Name)
                 .NotEmpty()
                 .WithMessage("Run has no name");
@@ -52,14 +75,6 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
                 .NotEmpty()
                 .GreaterThan(0)
                 .WithMessage($"Run is missing {nameof(CalculatorRunPomDataMaster)}");
-
-            RuleFor(run => run.Classification)
-                .Must(classification => classification is { IsOfficial: true, IsCompleted: false })
-                .WithMessage("Run must have an Official classification that is not already completed.");
-
-            RuleFor(run => run.BillingRunStatus)
-                .Equal(BillingRunStatus.Started)
-                .WithMessage($"Status must be '{nameof(BillingRunStatus.Started)}'");
         }
     }
 }

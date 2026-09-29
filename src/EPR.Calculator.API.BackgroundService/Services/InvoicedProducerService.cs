@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Queries;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,12 +58,10 @@ public class InvoicedProducerService(
             from
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns.AsNoTracking()
+                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
-                RunClassificationHelper.CompletedClassifications.Contains(run.Classification)
-                && run.RelativeYear == relativeYear
-                && suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
+                suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && suggested.SuggestedBillingInstruction == BillingConstants.Suggestion.Cancel
             select
                 suggested.ProducerId;
@@ -76,12 +75,10 @@ public class InvoicedProducerService(
             from
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns.AsNoTracking()
+                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
-                RunClassificationHelper.CompletedClassifications.Contains(run.Classification)
-                && run.RelativeYear == relativeYear
-                && suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
+                suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
             select
                 suggested.ProducerId;
 
@@ -106,11 +103,9 @@ public class InvoicedProducerService(
 
         var query =
             from
-                projection in GetInvoicedProducerProjection()
+                projection in GetInvoicedProducerProjection(relativeYear)
             where
-                RunClassificationHelper.CompletedClassifications.Contains(projection.CalculatorRun.Classification)
-                && projection.CalculatorRun.RelativeYear == relativeYear
-                && projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
+                projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && (producerIdFilter == null || producerIdFilter.Contains(projection.ProducerId))
             select
                 new InvoicedProducer
@@ -133,11 +128,9 @@ public class InvoicedProducerService(
     {
         var query =
             from
-                projection in GetInvoicedProducerProjection()
+                projection in GetInvoicedProducerProjection(relativeYear)
             where
-                RunClassificationHelper.CompletedClassifications.Contains(projection.CalculatorRun.Classification)
-                && projection.CalculatorRun.RelativeYear == relativeYear
-                && projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
+                projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && projection.SuggestedInstruction.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel
 
                 // Exclude rows that have been superseded by a later valid run for this producer, i.e. either:
@@ -145,14 +138,12 @@ public class InvoicedProducerService(
                 //  - a later accepted non-cancel billing for the same producer + material (i.e. this row isn't the latest).
                 && !(
                     from
-                        laterRun in dbContext.CalculatorRuns.AsNoTracking()
+                        laterRun in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
                     join
                         laterSuggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                         on laterRun.Id equals laterSuggested.CalculatorRunId
                     where
                         laterRun.Id > projection.CalculatorRun.Id
-                        && laterRun.RelativeYear == relativeYear
-                        && RunClassificationHelper.CompletedClassifications.Contains(laterRun.Classification)
                         && laterSuggested.ProducerId == projection.ProducerId
                         && laterSuggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                         && (
@@ -182,10 +173,10 @@ public class InvoicedProducerService(
         return query.ToImmutableListAsync(cancellationToken);
     }
 
-    private IQueryable<InvoicedProducerProjection> GetInvoicedProducerProjection()
+    private IQueryable<InvoicedProducerProjection> GetInvoicedProducerProjection(RelativeYear relativeYear)
     {
         return from
-                run in dbContext.CalculatorRuns.AsNoTracking()
+                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
             join
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                 on run.Id equals suggested.CalculatorRunId

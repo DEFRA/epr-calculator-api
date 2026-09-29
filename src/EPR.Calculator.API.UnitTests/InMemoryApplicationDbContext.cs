@@ -92,7 +92,8 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        Classification = RunClassification.Errored,
+                        Classification = RunClassification.Initial,
+                        CalculationRunStatus = CalculationRunStatus.Errored,
                         Name = "Test Calculated Result",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),

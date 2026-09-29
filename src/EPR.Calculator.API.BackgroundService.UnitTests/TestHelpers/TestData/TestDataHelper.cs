@@ -1622,7 +1622,7 @@ public static partial class TestDataHelper
             new CalculatorRun
             {
                 Id = 1,
-                Classification = RunClassification.Unclassified,
+                Classification = RunClassification.None,
                 Name = "Test Run 1",
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
@@ -1635,7 +1635,7 @@ public static partial class TestDataHelper
             new CalculatorRun
             {
                 Id = 2,
-                Classification = RunClassification.Running,
+                Classification = RunClassification.None,
                 Name = "Test Run 2",
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
@@ -1800,8 +1800,8 @@ public static partial class TestDataHelper
 
         List<CalculatorRun> runs =
         [
-            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, Classification = RunClassification.InitialCompleted, Name = "CalculatorRunTest1", CalculatorRunOrganisationDataMaster = dataMasters[0] },
-            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, Classification = RunClassification.Running,               Name = "CalculatorRunTest2", CalculatorRunOrganisationDataMaster = dataMasters[0] }
+            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, Classification = RunClassification.Initial, Name = "CalculatorRunTest1", CalculatorRunOrganisationDataMaster = dataMasters[0], IsBillingFileShared = true },
+            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, Classification = RunClassification.None,    Name = "CalculatorRunTest2", CalculatorRunOrganisationDataMaster = dataMasters[0] }
         ];
         dbContext.CalculatorRuns.AddRange(runs);
 

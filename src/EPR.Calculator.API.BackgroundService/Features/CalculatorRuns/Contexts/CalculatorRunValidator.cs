@@ -8,13 +8,21 @@ public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
 {
     public CalculatorRunValidator()
     {
+        RuleFor(run => run.Classification)
+            .Must(classification => classification == RunClassification.None)
+            .WithMessage($"Run classification must be {RunClassification.None}");
+
         RuleFor(run => run.CalculationRunStatus)
             .Must(status => status == CalculationRunStatus.None)
             .WithMessage($"Run calculation status must be {CalculationRunStatus.None}");
 
-        RuleFor(run => run.Classification)
-            .Must(classification => classification == RunClassification.None)
-            .WithMessage($"Run classification must be {RunClassification.None}");
+        RuleFor(run => run.BillingRunStatus)
+            .Must(status => status == BillingRunStatus.None)
+            .WithMessage($"Run billing status must be {BillingRunStatus.None}");
+
+        RuleFor(run => run.IsBillingFileShared)
+            .Must(isBillingFileShared => !isBillingFileShared)
+            .WithMessage("Run billing file has already been shared.");
 
         RuleFor(run => run.Name)
             .NotEmpty()

@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataSeeder;
@@ -8,12 +7,9 @@ namespace EPR.Calculator.API.Data.DataSeeder;
 [ExcludeFromCodeCoverage]
 public static class Seeder
 {
-    private const string SystemUser = "System User";
-
     public static void Initialize(ModelBuilder modelBuilder)
     {
         InitializeDefaultParameterTemplateMaster(modelBuilder);
-        InitializeCalculatorRunClassification(modelBuilder);
         InitializeLapcapData(modelBuilder);
     }
 
@@ -489,65 +485,6 @@ public static class Seeder
                 ParameterUniqueReferenceId = "COFF-DT",
                 ParameterCategory = "Optional Date",
                 ParameterType = "Cut-off date"
-            });
-    }
-
-    public static void InitializeCalculatorRunClassification(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<CalculatorRunClassification>().HasData(
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Running,
-                Status = "RUNNING",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Unclassified,
-                Status = "UNCLASSIFIED",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Test,
-                Status = "TEST RUN",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Errored,
-                Status = "ERROR",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Deleted,
-                Status = "DELETED",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Initial,
-                Status = "INITIAL RUN",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.InitialCompleted,
-                Status = "INITIAL RUN COMPLETED",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.Recalculation,
-                Status = "RECALCULATION RUN",
-                CreatedBy = SystemUser
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassification.RecalculationCompleted,
-                Status = "RECALCULATION RUN COMPLETED",
-                CreatedBy = SystemUser
             });
     }
 

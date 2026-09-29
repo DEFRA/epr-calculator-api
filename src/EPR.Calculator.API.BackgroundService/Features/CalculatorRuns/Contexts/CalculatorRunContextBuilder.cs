@@ -81,8 +81,9 @@ public class CalculatorRunContextBuilder(
     {
         try
         {
+            // Only mark runs that are not already completed
             await dbContext.CalculatorRuns
-                .Where(r => r.Id == runId)
+                .Where(r => r.Id == runId && r.CalculationRunStatus != CalculationRunStatus.Completed)
                 .ExecuteUpdateAsync(s => s.SetProperty(r => r.CalculationRunStatus, CalculationRunStatus.Errored), ct);
         }
         catch (Exception ex)

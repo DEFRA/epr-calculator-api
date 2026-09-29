@@ -136,15 +136,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        [DataRow(RunClassification.Initial, RunClassification.InitialCompleted)]
-        [DataRow(RunClassification.Recalculation, RunClassification.RecalculationCompleted)]
-        public async Task PrepareBillingFileSendToFSS_Updates_Classification_To_Completed(
-            RunClassification initialValue,
-            RunClassification expectedNewValue)
+        [DataRow(RunClassification.Initial)]
+        [DataRow(RunClassification.Recalculation)]
+        public async Task PrepareBillingFileSendToFSS_Updates_IsBillingFileShared(RunClassification classification)
         {
             // Arrange
             var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.Classification = initialValue;
+            calculatorRun.Classification = classification;
 
             mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
@@ -153,15 +151,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (IStatusCodeActionResult)await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).Classification;
+            var newIsShared = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).IsBillingFileShared;
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
-            newClassification.ShouldBe(expectedNewValue);
+            newIsShared.ShouldBe(true);
         }
 
         [TestMethod]
-        [DataRow(RunClassification.Running)]
+        [DataRow(RunClassification.Unknown)]
         [DataRow(RunClassification.Test)]
         [DataRow(RunClassification.Deleted)]
         public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_Classification_Invalid(RunClassification initialValue)

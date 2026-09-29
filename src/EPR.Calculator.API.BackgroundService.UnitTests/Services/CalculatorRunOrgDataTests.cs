@@ -33,13 +33,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             _connection.Close();
         }
 
-        private async Task<(CalculatorRunClassification, OrganisationData)> SeedData()
+        private async Task<OrganisationData> SeedData()
         {
             var calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value  = new RelativeYear(2024) };
             context.CalculatorRunRelativeYears.Add(calculatorRunRelativeYear);
-
-            var classification = new CalculatorRunClassification { Status = "Test Classification" };
-            context.CalculatorRunClassifications.Add(classification);
 
             var orgData = new OrganisationData
             {
@@ -59,7 +56,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 VALUES ({orgData.OrganisationId}, {orgData.OrganisationName}, {orgData.LoadTimestamp}, {orgData.ObligationStatus}, {orgData.SubmitterId}, {orgData.HasH1}, {orgData.HasH2} )");
 
             await context.SaveChangesAsync();
-            return (classification, orgData);
+            return orgData;
         }
 
         [TestMethod]
@@ -69,10 +66,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var runContext2 = runContext1 with { RunId = runContext1.RunId + 1 };
             var cancellationToken = CancellationToken.None;
             var service = new CalculatorRunOrgData(context);
-            var (classification, orgData) = await SeedData();
+            var orgData = await SeedData();
 
             //Run 1
-            var run = new CalculatorRun { Id = runContext1.RunId, RelativeYear = runContext1.RelativeYear, Name = "CalculatorRunTest1", Classification = (RunClassification) classification.Id };
+            var run = new CalculatorRun { Id = runContext1.RunId, RelativeYear = runContext1.RelativeYear, Name = "CalculatorRunTest1", Classification = RunClassification.None };
             context.CalculatorRuns.Add(run);
             await context.SaveChangesAsync();
 
@@ -96,7 +93,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.AreEqual(orgMasterRun1.Id, calculatorRun1!.CalculatorRunOrganisationDataMasterId);
 
             //Run 2
-            var run2 = new CalculatorRun { Id = runContext2.RunId, RelativeYear = runContext2.RelativeYear, Name = "CalculatorRunTest2", Classification = (RunClassification) classification.Id };
+            var run2 = new CalculatorRun { Id = runContext2.RunId, RelativeYear = runContext2.RelativeYear, Name = "CalculatorRunTest2", Classification = RunClassification.None };
             context.CalculatorRuns.Add(run2);
             await context.SaveChangesAsync();
 

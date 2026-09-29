@@ -91,7 +91,7 @@ public class ProducerBillingFileControllerTests
     private void SetupBillingFileService(HttpStatusCode statusCode, string? message = null)
     {
         billingFileServiceMock
-            .Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new BillingFileService.Response { StatusCode = statusCode, Message = message });
     }
 
