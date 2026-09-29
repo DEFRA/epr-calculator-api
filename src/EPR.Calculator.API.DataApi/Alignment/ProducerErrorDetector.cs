@@ -18,7 +18,7 @@ internal sealed record OrganisationCalculationError
 internal sealed record ProducerErrorDetectionResult
 {
     /// <summary>
-    ///     Every error/warning row. For a row with <see cref="ProducerCalculationError.HasPomMatch" />
+    ///     Every error/warning row. For a row with <see cref="ProducerCalculationError.HasPom" />
     ///     false, the caller decides whether it's still worth surfacing (e.g. because the organisation
     ///     was invoiced in a previous run) - DataApi has no visibility into billing history.
     /// </summary>
@@ -36,7 +36,7 @@ internal interface IProducerErrorDetector
     /// <summary>
     ///     Runs every error/warning rule against the (pre-dedupe) organisation and POM populations.
     ///     Doesn't decide whether a no-POM-match error/warning should be shown - that depends on billing
-    ///     history DataApi doesn't have, so it's surfaced via <see cref="ProducerCalculationError.HasPomMatch" />
+    ///     history DataApi doesn't have, so it's surfaced via <see cref="ProducerCalculationError.HasPom" />
     ///     for the caller to decide. For the same reason, holding-company roll-ups aren't computed here
     ///     either - they depend on which of a producer's errors the caller keeps.
     /// </summary>
@@ -67,7 +67,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
             .Concat(missingPomErrors)
             .ToImmutableList();
 
-        // A hard error always excludes its org/subsidiary from alignment, regardless of HasPomMatch -
+        // A hard error always excludes its org/subsidiary from alignment, regardless of HasPom -
         // an "E"-status organisation's POM data should never enter the calculation. Warnings are kept
         // in calculation (they still get POM data), so they're excluded from the unmatched set.
         var unmatchedKeys = calcErrors
@@ -102,7 +102,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
 
                 // Always POM-driven by definition - there's no invoiced-history question here.
                 return missing
-                    ? group.Select(p => CreateError(p.OrganisationId, p.SubsidiaryId, "Missing Registration Data", null, isWarning: false, hasPomMatch: true))
+                    ? group.Select(p => CreateError(p.OrganisationId, p.SubsidiaryId, "Missing Registration Data", null, isWarning: false, hasPom: true))
                     : [];
             })
             .ToList();
@@ -127,7 +127,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
             .Where(o => pomKeys.Contains(o.Org.SubsidiaryId ?? o.Org.OrganisationId.ToString()))
             .Where(o => o is not { HasH1: true, HasH2: true })
             // Always POM-driven by definition (matched via pomKeys above).
-            .Select(o => CreateError(o.Org.OrganisationId, o.Org.SubsidiaryId, "Missing POM Data", o.Org.StatusCode, isWarning: false, hasPomMatch: true))
+            .Select(o => CreateError(o.Org.OrganisationId, o.Org.SubsidiaryId, "Missing POM Data", o.Org.StatusCode, isWarning: false, hasPom: true))
             .ToList();
     }
 
@@ -140,7 +140,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
         return organisations
             .Where(x => x.ObligationStatus == ErrorStatus)
             .Select(x => CreateError(x.Org.OrganisationId, x.Org.SubsidiaryId, x.ErrorCode, x.Org.StatusCode, isWarning: false,
-                hasPomMatch: pomKeys.Contains((x.Org.OrganisationId, x.Org.SubsidiaryId, x.Org.SubmitterId))))
+                hasPom: pomKeys.Contains((x.Org.OrganisationId, x.Org.SubsidiaryId, x.Org.SubmitterId))))
             .ToList();
     }
 
@@ -153,7 +153,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
         return organisations
             .Where(x => x.ObligationStatus == ObligatedStatus && !string.IsNullOrEmpty(x.ErrorCode))
             .Select(x => CreateError(x.Org.OrganisationId, x.Org.SubsidiaryId, x.ErrorCode, x.Org.StatusCode, isWarning: true,
-                hasPomMatch: pomKeys.Contains((x.Org.OrganisationId, x.Org.SubsidiaryId, x.Org.SubmitterId))))
+                hasPom: pomKeys.Contains((x.Org.OrganisationId, x.Org.SubsidiaryId, x.Org.SubmitterId))))
             .ToList();
     }
 
@@ -161,7 +161,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
         IReadOnlyCollection<PayCalPom> poms) =>
         poms.Select(p => (p.OrganisationId, p.SubsidiaryId, p.SubmitterId)).ToHashSet();
 
-    private static OrganisationCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPomMatch) =>
+    private static OrganisationCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPom) =>
         new()
         {
             OrganisationId = orgId,
@@ -171,7 +171,7 @@ internal sealed class ProducerErrorDetector : IProducerErrorDetector
                 ErrorCode = errorCode ?? string.Empty,
                 LeaverCode = leaverCode ?? string.Empty,
                 IsWarning = isWarning,
-                HasPomMatch = hasPomMatch
+                HasPom = hasPom
             }
         };
 }

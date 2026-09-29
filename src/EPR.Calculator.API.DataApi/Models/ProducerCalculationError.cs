@@ -20,5 +20,5 @@ public sealed record ProducerCalculationError
     ///     organisation was invoiced in a previous run this financial year), since DataApi has no
     ///     visibility into billing history.
     /// </summary>
-    public required bool HasPomMatch { get; init; }
+    public required bool HasPom { get; init; }
 }
