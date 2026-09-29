@@ -9,6 +9,7 @@ public class CalculatorRun
     public CalculationRunStatus CalculationRunStatus { get; set; }
     public BillingRunStatus BillingRunStatus { get; set; }
     public DateTime? BillingRunStartedAt { get; set; }
+    public bool IsBillingFileShared { get; set; }
     public required string Name { get; set; }
     public RelativeYear RelativeYear { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
@@ -36,4 +37,28 @@ public class CalculatorRun
     public virtual ICollection<ErrorReport> ErrorReports { get; } = [];
 
     #endregion
+}
+
+public static class CalculatorRunExtensions
+{
+    /// <summary>
+    ///     How long a billing run can be <see cref="BillingRunStatus.Started" /> before it's considered stuck, e.g. due to an
+    ///     unclean shutdown of the processor.
+    /// </summary>
+    public static readonly TimeSpan BillingRunTimeout = TimeSpan.FromHours(1);
+
+    extension(CalculatorRun run)
+    {
+        /// <summary>
+        ///     Is a billing run underway? i.e. <see cref="BillingRunStatus.Started" /> within the last
+        ///     <see cref="BillingRunTimeout" />.
+        /// </summary>
+        /// <remarks>
+        ///     Billing runs that were started longer ago are considered stuck, so may be restarted. Those without a start time
+        ///     are never considered stuck.
+        /// </remarks>
+        public bool IsBillingRunUnderway(DateTimeOffset now) =>
+            run.BillingRunStatus == BillingRunStatus.Started
+            && (run.BillingRunStartedAt is not { } startedAt || now.UtcDateTime - startedAt <= BillingRunTimeout);
+    }
 }

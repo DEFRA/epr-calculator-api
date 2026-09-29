@@ -29,7 +29,7 @@ public class CalculatorRunProcessor(
         {
             // ⚠️ Database mutations can happen throughout many of these calls
             // This behaviour is different to BillingRunProcessor (which only does so in the finalizer).
-            await SaveRunningRunStatus(runContext, cancellationToken);
+            await SetStartedStatus(runContext, cancellationToken);
 
             // This streams required data from the common data API and transposes it into the paycal database.
             await dataInitializer.Initialize(runContext, cancellationToken);
@@ -65,14 +65,10 @@ public class CalculatorRunProcessor(
         }
     }
 
-    private async Task SaveRunningRunStatus(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    private async Task SetStartedStatus(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
-        var calcRun = await dbContext
-            .CalculatorRuns
-            .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
-
-        calcRun.Classification = RunClassification.Running;
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.CalculatorRuns
+            .Where(r => r.Id == runContext.RunId)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.CalculationRunStatus, CalculationRunStatus.Started), cancellationToken);
     }
 }

@@ -52,12 +52,22 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
         }
 
         // Check that the run is unclassified
-        if (currentRun.Classification != RunClassification.Unclassified)
+        if (currentRun.Classification != RunClassification.None)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
                 Message = "Run is already classified."
+            });
+        }
+
+        // Check that the run can be classified
+        if (currentRun.CalculationRunStatus != CalculationRunStatus.Completed)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run calculation has not completed."
             });
         }
 

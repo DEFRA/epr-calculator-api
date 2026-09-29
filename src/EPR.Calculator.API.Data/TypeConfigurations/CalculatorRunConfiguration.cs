@@ -16,7 +16,9 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .IsRequired();
 
         builder.Property(p => p.Classification)
-            .HasColumnName("calculator_run_classification_id")
+            .HasColumnName("classification")
+            .HasMaxLength(50)
+            .IsUnicode(false)
             .IsRequired();
 
         builder.Property(p => p.CalculationRunStatus)
@@ -77,10 +79,6 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 
         builder.Property(p => p.DefaultParameterSettingMasterId)
             .HasColumnName("default_parameter_setting_master_id");
-
-        builder.HasOne<CalculatorRunClassification>()
-            .WithMany()
-            .HasForeignKey(e => e.Classification);
 
         builder.HasMany(e => e.CountryApportionments)
             .WithOne(e => e.CalculatorRun)

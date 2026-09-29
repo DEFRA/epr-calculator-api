@@ -36,8 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockBackgroundTaskQueue.Object,
                 Mock.Of<IRunClassificationValidator>(),
                 mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>());
+                Mock.Of<IAvailableClassificationsService>());
 
             this.DbContext.Material.RemoveRange(this.DbContext.Material.ToList());
             this.DbContext.SaveChanges();

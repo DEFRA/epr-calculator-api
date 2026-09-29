@@ -11,6 +11,8 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing.Contex
 [TestClass]
 public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidator>
 {
+    private static readonly DateTimeOffset Now = new(2026, 9, 29, 12, 0, 0, TimeSpan.Zero);
+
     [DataRow(RunClassification.Initial)]
     [DataRow(RunClassification.Recalculation)]
     [TestMethod]
@@ -83,14 +85,48 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
         result.ShouldHaveValidationErrorFor(ctx => ctx.Run.CalculatorRunPomDataMasterId);
     }
 
-    [DataRow(BillingRunStatus.Completed)]
-    [DataRow(BillingRunStatus.Errored)]
     [DataRow(BillingRunStatus.None)]
-    [DataRow(BillingRunStatus.Unknown)]
+    [DataRow(BillingRunStatus.Completed)] // Regenerating the billing file
+    [DataRow(BillingRunStatus.Errored)]   // Retrying the billing run
     [TestMethod]
-    public void Should_error_when_billing_status_is_incorrect(BillingRunStatus status)
+    public void Should_not_error_when_billing_status_allows_a_billing_run(BillingRunStatus status)
     {
         var preValidationContext = CreatePreValidationContext(billingRunStatus: status);
+        var result = testSubject.TestValidate(preValidationContext);
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [DataRow(61)]
+    [DataRow(24 * 60)]
+    [TestMethod]
+    public void Should_not_error_when_billing_run_is_stuck(int startedMinutesAgo)
+    {
+        var preValidationContext = CreatePreValidationContext(
+            billingRunStatus: BillingRunStatus.Started,
+            billingRunStartedAt: Now.UtcDateTime.AddMinutes(-startedMinutesAgo));
+
+        var result = testSubject.TestValidate(preValidationContext);
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [DataRow(null)] // Without a start time, it can never be considered stuck
+    [DataRow(0)]
+    [DataRow(60)]
+    [TestMethod]
+    public void Should_error_when_billing_run_is_underway(int? startedMinutesAgo)
+    {
+        var preValidationContext = CreatePreValidationContext(
+            billingRunStatus: BillingRunStatus.Started,
+            billingRunStartedAt: startedMinutesAgo is { } minutes ? Now.UtcDateTime.AddMinutes(-minutes) : null);
+
+        var result = testSubject.TestValidate(preValidationContext);
+        result.ShouldHaveValidationErrorFor(ctx => ctx.Run.BillingRunStatus);
+    }
+
+    [TestMethod]
+    public void Should_error_when_billing_status_is_unknown()
+    {
+        var preValidationContext = CreatePreValidationContext(billingRunStatus: BillingRunStatus.Unknown);
         var result = testSubject.TestValidate(preValidationContext);
         result.ShouldHaveValidationErrorFor(ctx => ctx.Run.BillingRunStatus);
     }
@@ -108,26 +144,30 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
         string? user = "Test User",
         string? runName = "TestRun",
         RunClassification classification = RunClassification.Initial,
+        CalculationRunStatus calculationRunStatus = CalculationRunStatus.Completed,
+        BillingRunStatus billingRunStatus = BillingRunStatus.None,
+        DateTime? billingRunStartedAt = null,
         int? paramMasterId = 1,
         int? lapcapMasterId = 1,
         int? orgMasterId = 1,
         int? pomMasterId = 1,
-        BillingRunStatus billingRunStatus = BillingRunStatus.Started,
         ICollection<ProducerResultFileSuggestedBillingInstruction>? instructions = null)
     {
         var ctx = new BillingRunContextBuilder.PreValidationContext
         {
             User = user,
-            StartedAt = DateTime.UtcNow,
+            StartedAt = Now,
             Run = new CalculatorRun
             {
                 Name = runName!,
                 Classification = classification,
+                CalculationRunStatus = calculationRunStatus,
+                BillingRunStatus = billingRunStatus,
+                BillingRunStartedAt = billingRunStartedAt,
                 DefaultParameterSettingMasterId = paramMasterId,
                 LapcapDataMasterId = lapcapMasterId,
                 CalculatorRunOrganisationDataMasterId = orgMasterId,
                 CalculatorRunPomDataMasterId = pomMasterId,
-                BillingRunStatus = billingRunStatus
             }
         };
 

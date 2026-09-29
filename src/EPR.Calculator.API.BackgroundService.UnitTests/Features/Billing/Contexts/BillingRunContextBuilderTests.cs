@@ -21,11 +21,12 @@ public class BillingRunContextBuilderTests : TestsFor<BillingRunContextBuilder>
             Id = 1,
             Name = "Valid test run",
             Classification = RunClassification.Initial,
+            CalculationRunStatus = CalculationRunStatus.Completed,
+            BillingRunStatus = BillingRunStatus.None,
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
             CalculatorRunOrganisationDataMasterId = 1,
             CalculatorRunPomDataMasterId = 1,
-            BillingRunStatus = BillingRunStatus.Started,
             ProducerResultFileSuggestedBillingInstruction =
             {
                 new ProducerResultFileSuggestedBillingInstruction

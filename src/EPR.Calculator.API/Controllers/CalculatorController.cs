@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Queries;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
@@ -25,8 +26,7 @@ public class CalculatorController(
     IBackgroundTaskQueue backgroundTaskQueue,
     IRunClassificationValidator runClassificationValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
-    IAvailableClassificationsService availableClassificationsService,
-    ICalculationRunService calculationRunService
+    IAvailableClassificationsService availableClassificationsService
 ) : ControllerBase
 {
     [HttpPost]
@@ -39,7 +39,10 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
     {
-        var isCalcAlreadyRunning = await dbContext.CalculatorRuns.AnyAsync(run => run.Classification == RunClassification.Running);
+        // Runs are queued as None, until the background service starts processing them
+        var isCalcAlreadyRunning = await dbContext.CalculatorRuns
+            .AnyAsync(run => run.CalculationRunStatus == CalculationRunStatus.None
+                             || run.CalculationRunStatus == CalculationRunStatus.Started);
         if (isCalcAlreadyRunning)
         {
             return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
@@ -82,14 +85,15 @@ public class CalculatorController(
         // Setup calculator run details
         var calculatorRun = new CalculatorRun
         {
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
+            Classification = RunClassification.None,
             Name = request.CalculatorRunName,
             RelativeYear = relativeYear.Value,
             CreatedBy = User.GetName(),
             CreatedAt = DateTime.UtcNow,
-            Classification = RunClassification.Running,
             DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
-            LapcapDataMasterId = activeLapcapDataMaster.Id,
-            BillingRunStatus = BillingRunStatus.None
+            LapcapDataMasterId = activeLapcapDataMaster.Id
         };
 
         using (var transaction = await dbContext.Database.BeginTransactionAsync())
@@ -201,19 +205,23 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ClassificationByRelativeYear([FromQuery] CalcRelativeYearRequestDto request)
+    public async Task<IActionResult> ClassificationByRelativeYear([FromQuery] CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.Validate(request);
+        var validationResult = await validator.Validate(request, cancellationToken);
+
         if (validationResult.IsInvalid)
             return BadRequest(validationResult.Errors);
 
         var relativeYear = new RelativeYear(request.RelativeYearValue);
-        var classifications = await availableClassificationsService.GetAvailableClassifications(request);
+        var classifications = await availableClassificationsService.GetAvailableClassifications(request, cancellationToken);
 
         if (classifications.Count == 0)
             return NotFound(CommonResources.NoClassificationsFound);
 
-        var runs = await calculationRunService.GetDesignatedRunsByFinancialYear(relativeYear);
+        var runs = await dbContext.CalculatorRuns
+            .WhereOfficialForYear(relativeYear)
+            .Select(CalcRunMapper.ToDto)
+            .ToListAsync(cancellationToken);
 
         var response = new RelativeYearClassificationResponseDto
         {
