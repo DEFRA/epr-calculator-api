@@ -212,6 +212,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Classification = classification,
                 CalculationRunStatus = CalculationRunStatus.Completed,
                 BillingRunStatus = BillingRunStatus.Completed,
+                IsBillingFileShared = true,
+                BillingFileSharedAt = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                BillingFileSharedBy = "Test user",
                 Name = "Test",
                 RelativeYear = new RelativeYear(2024),
                 CreatedBy = userName,
@@ -230,9 +233,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                     BillingJsonFileName = "ignored",
                     BillingCsvFileName = "ignored",
                     BillingFileCreatedBy = userName,
-                    BillingFileCreatedDate = currentTime.AddMicroseconds(1),
-                    BillingFileAuthorisedBy = userName,
-                    BillingFileAuthorisedDate = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                    BillingFileCreatedDate = currentTime.AddMicroseconds(1)
                 });
             }
 

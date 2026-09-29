@@ -289,6 +289,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalculationRunStatus = CalculationRunStatus.Completed,
                 BillingRunStatus = BillingRunStatus.Completed,
                 IsBillingFileShared = true,
+                BillingFileSharedAt = DateTime.UtcNow,
+                BillingFileSharedBy = "Test user",
                 RelativeYear = new RelativeYear(2024),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
@@ -302,8 +304,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingJsonFileName = "test.json",
                 BillingFileCreatedBy = "Test user",
                 BillingFileCreatedDate = DateTime.UtcNow,
-                BillingFileAuthorisedDate = DateTime.UtcNow,
-                BillingFileAuthorisedBy = "Test user",
                 CalculatorRunId = run.Id,
             });
             DbContext.SaveChanges();

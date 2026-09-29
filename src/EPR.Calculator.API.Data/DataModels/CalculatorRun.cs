@@ -10,6 +10,8 @@ public class CalculatorRun
     public BillingRunStatus BillingRunStatus { get; set; }
     public DateTime? BillingRunStartedAt { get; set; }
     public bool IsBillingFileShared { get; set; }
+    public string? BillingFileSharedBy { get; set; }
+    public DateTime? BillingFileSharedAt { get; set; }
     public required string Name { get; set; }
     public RelativeYear RelativeYear { get; set; }
     public string CreatedBy { get; set; } = string.Empty;

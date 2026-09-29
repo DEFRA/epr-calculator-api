@@ -73,6 +73,26 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenBillingFileAlreadyShared()
+        {
+            // Arrange
+            var run = CreateRun(1);
+            run.IsBillingFileShared = true;
+            await SeedAsync(
+                run,
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
+
+            // Act
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1), CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
+            Assert.IsNull((await GetBillingInstructionAsync(producerId: 1, runId: 1)).BillingInstructionAcceptReject);
+        }
+
+        [TestMethod]
         public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenOrganisationIdIsInvalid()
         {
             // Arrange
