@@ -159,6 +159,15 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("BillingFileSharedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("billing_file_shared_at");
+
+                    b.Property<string>("BillingFileSharedBy")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("billing_file_shared_by");
+
                     b.Property<DateTime?>("BillingRunStartedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("billing_run_started_at");
@@ -170,6 +179,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("billing_run_status");
 
+                    b.Property<string>("CalculationRunStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("calculation_run_status");
+
                     b.Property<int?>("CalculatorRunOrganisationDataMasterId")
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_organization_data_master_id");
@@ -178,9 +194,12 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_pom_data_master_id");
 
-                    b.Property<int>("Classification")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_classification_id");
+                    b.Property<string>("Classification")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("classification");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
@@ -195,6 +214,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<int?>("DefaultParameterSettingMasterId")
                         .HasColumnType("int")
                         .HasColumnName("default_parameter_setting_master_id");
+
+                    b.Property<bool>("IsBillingFileShared")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_billing_file_shared");
 
                     b.Property<int?>("LapcapDataMasterId")
                         .HasColumnType("int")
@@ -255,15 +278,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("billing_csv_filename");
 
-                    b.Property<string>("BillingFileAuthorisedBy")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("billing_file_authorised_by");
-
-                    b.Property<DateTime?>("BillingFileAuthorisedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_authorised_date");
-
                     b.Property<string>("BillingFileCreatedBy")
                         .IsRequired()
                         .HasMaxLength(400)
@@ -289,88 +303,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("CalculatorRunId");
 
                     b.ToTable("calculator_run_billing_file_metadata", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("calculator_run_classification", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 2,
-                            CreatedBy = "System User",
-                            Status = "RUNNING"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedBy = "System User",
-                            Status = "UNCLASSIFIED"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedBy = "System User",
-                            Status = "TEST RUN"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedBy = "System User",
-                            Status = "ERROR"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedBy = "System User",
-                            Status = "DELETED"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedBy = "System User",
-                            Status = "INITIAL RUN"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedBy = "System User",
-                            Status = "INITIAL RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CreatedBy = "System User",
-                            Status = "RECALCULATION RUN"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CreatedBy = "System User",
-                            Status = "RECALCULATION RUN COMPLETED"
-                        });
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
@@ -4133,12 +4065,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", "CalculatorRunPomDataMaster")
                         .WithMany("Runs")
                         .HasForeignKey("CalculatorRunPomDataMasterId");
-
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
-                        .WithMany()
-                        .HasForeignKey("Classification")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
                         .WithMany("RunDetails")
