@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenRunClassificationIsInvalid()
         {
             // Arrange
-            await SeedAsync(CreateRun(1, RunClassification.UNCLASSIFIED));
+            await SeedAsync(CreateRun(1, RunClassification.Unclassified));
 
             // Act
             var result = await this.service.UpdateProducerBillingInstructionsAsync(
@@ -276,7 +276,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var previousRun = CreateRun(2, name: "Previous Run Snapshot");
 
             await SeedAsync(
-                CreateRun(1, RunClassification.INTERIM_RECALCULATION_RUN, "Current Run"),
+                CreateRun(1, RunClassification.Recalculation, "Current Run"),
                 CreateBillingInstruction(producerId: missingProducerId, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Pending"),
                 previousRun,
                 new CalculatorRunOrganisation
@@ -418,13 +418,13 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         private static CalculatorRun CreateRun(
             int id,
-            RunClassification classification = RunClassification.INITIAL_RUN,
+            RunClassification classification = RunClassification.Initial,
             string? name = null) => new()
             {
                 Id = id,
                 Name = name ?? $"Run {id}",
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)classification,
+                Classification = classification,
             };
 
         private static ProducerResultFileSuggestedBillingInstruction CreateBillingInstruction(

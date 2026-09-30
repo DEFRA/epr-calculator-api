@@ -2,7 +2,6 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +30,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 new()
                 {
-                    CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                    Classification = RunClassification.Initial,
                     RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = calcRunId,
@@ -40,7 +39,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 },
                 new()
                 {
-                    CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+                    Classification = RunClassification.Unclassified,
                     RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = unclassifiedRunId,

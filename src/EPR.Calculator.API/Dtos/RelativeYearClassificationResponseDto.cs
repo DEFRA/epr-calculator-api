@@ -4,10 +4,10 @@ namespace EPR.Calculator.API.Dtos
 {
     public class RelativeYearClassificationResponseDto
     {
-        public required RelativeYear RelativeYear { get; set; }
+        public required RelativeYear RelativeYear { get; init; }
 
-        public List<CalculatorRunClassificationDto> Classifications { get; set; } = [];
+        public required IReadOnlyCollection<RunClassification> Classifications { get; init; }
 
-        public List<CalculatorRunDto> ClassifiedRuns { get; set; } = [];
+        public required IReadOnlyCollection<CalculatorRunDto> ClassifiedRuns { get; init; }
     }
 }

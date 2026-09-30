@@ -8179,6 +8179,160 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    -- 'IN THE QUEUE' (1) is not expected to exist; anything left in it is treated as errored.
+    UPDATE [calculator_run]
+    SET [calculator_run_classification_id] = 5
+    WHERE [calculator_run_classification_id] = 1;
+
+    -- 'FINAL RUN' (10) and 'FINAL RE-CALCULATION RUN' (11) become 'RECALCULATION RUN' (9).
+    UPDATE [calculator_run]
+    SET [calculator_run_classification_id] = 9
+    WHERE [calculator_run_classification_id] IN (10, 11);
+
+    -- Their completed equivalents become 'RECALCULATION RUN COMPLETED' (12).
+    UPDATE [calculator_run]
+    SET [calculator_run_classification_id] = 12
+    WHERE [calculator_run_classification_id] IN (13, 14);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_classification]
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_classification]
+    WHERE [id] = 10;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_classification]
+    WHERE [id] = 11;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_classification]
+    WHERE [id] = 13;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_classification]
+    WHERE [id] = 14;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
+    WHERE [id] = 8;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User'', [status] = N''RECALCULATION RUN''
+    WHERE [id] = 9;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [status] = N''RECALCULATION RUN COMPLETED''
+    WHERE [id] = 12;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260917104423_RemoveFinalRunClassifications', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN

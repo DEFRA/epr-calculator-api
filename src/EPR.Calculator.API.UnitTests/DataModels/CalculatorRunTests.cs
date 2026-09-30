@@ -17,16 +17,16 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         private IFixture Fixture { get; } = TestFixtures.New();
 
         [TestMethod]
-        public void CanSetAndGetCalculatorRunClassificationId()
+        public void CanSetAndGetClassification()
         {
             // Arrange
-            var testValue = this.Fixture.Create<int>();
+            var testValue = this.Fixture.Create<RunClassification>();
 
             // Act
-            this.TestClass.CalculatorRunClassificationId = testValue;
+            this.TestClass.Classification = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.CalculatorRunClassificationId);
+            Assert.AreEqual(testValue, this.TestClass.Classification);
         }
 
         [TestMethod]
