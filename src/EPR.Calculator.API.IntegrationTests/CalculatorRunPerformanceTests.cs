@@ -150,16 +150,18 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             foreach (var run in await db.CalculatorRuns
                                         .Where(x =>
                                             x.RelativeYear == relativeYear &&
-                                            x.CalculatorRunClassificationId == RunClassificationStatusIds.INITIALRUNID)
+                                            x.Classification == RunClassification.Initial)
                                         .ToListAsync())
             {
-                run.CalculatorRunClassificationId = RunClassificationStatusIds.DELETEDID;
+                run.Classification = RunClassification.Deleted;
             }
             await db.SaveChangesAsync();
 
-            var setBillingClassificationResult = await CallController<CalculatorNewController, IActionResult>(services, c => c.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto {
+            var setBillingClassificationResult = await CallController<CalculatorNewController, IActionResult>(
+                services,
+                c => c.PutCalculatorRunStatus(new SetRunClassificationRequest {
                     RunId = runId,
-                    ClassificationId = RunClassificationStatusIds.INITIALRUNID
+                    Classification = RunClassification.Initial
                 }));
 
             if (setBillingClassificationResult is StatusCodeResult statusCodeResult)

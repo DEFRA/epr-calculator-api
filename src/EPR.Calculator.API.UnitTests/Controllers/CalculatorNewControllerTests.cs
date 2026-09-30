@@ -5,7 +5,6 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -40,11 +39,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             controller = new CalculatorNewController(
                 context,
-                Mock.Of<ICalculatorRunStatusDataValidator>(),
+                Mock.Of<IRunClassificationValidator>(),
                 mockBillingFileService.Object,
                 Mock.Of<IInvoiceDetailsService>(),
-                Mock.Of<ILogger<CalculatorNewController>>(),
-                Mock.Of<ICalculationRunService>())
+                Mock.Of<ILogger<CalculatorNewController>>())
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };
@@ -52,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.CalculatorRuns.Add(new CalculatorRun
             {
                 Id = CalculatorRunId,
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.Initial,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Test calculator run",
             });
@@ -138,17 +136,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.Initial, RunClassification.InitialCompleted)]
+        [DataRow(RunClassification.Recalculation, RunClassification.RecalculationCompleted)]
         public async Task PrepareBillingFileSendToFSS_Updates_Classification_To_Completed(
             RunClassification initialValue,
             RunClassification expectedNewValue)
         {
             // Arrange
             var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.Classification = initialValue;
 
             mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
@@ -157,8 +153,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (IStatusCodeActionResult)await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
+            var newClassification = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).Classification;
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
@@ -166,21 +161,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        [DataRow(RunClassification.RUNNING)]
-        [DataRow(RunClassification.TEST_RUN)]
-        [DataRow(RunClassification.DELETED)]
-        [DataRow(RunClassification.INTHEQUEUE)]
+        [DataRow(RunClassification.Running)]
+        [DataRow(RunClassification.Test)]
+        [DataRow(RunClassification.Deleted)]
         public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_Classification_Invalid(RunClassification initialValue)
         {
             // Arrange
             var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.Classification = initialValue;
             AddBillingFileMetadata(CalculatorRunId);
 
             // Act
             var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
+            var newClassification = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).Classification;
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.UnprocessableContent);

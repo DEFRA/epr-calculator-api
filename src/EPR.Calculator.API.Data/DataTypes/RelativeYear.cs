@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+using EPR.Calculator.API.Data.DataTypes.Converters.RelativeYear;
 
-// ReSharper disable once CheckNamespace - Avoids namespace/classname duplication weirdness
 namespace EPR.Calculator.API.Data.DataTypes;
 
 [TypeConverter(typeof(RelativeYearTypeConverter))]
