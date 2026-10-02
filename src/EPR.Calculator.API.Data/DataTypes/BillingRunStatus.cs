@@ -30,27 +30,30 @@ public enum BillingRunStatus
     None,
 
     /// <summary>
-    ///     Indicates that the billing run is currently underway.
+    ///     Indicates that the billing run has started and should be currently underway.
     /// </summary>
     /// <remarks>
-    ///     If the billing run was interrupted unexpectedly, the run may become stuck in this state.
-    ///     Change this status back to <see cref="None" />, then restart the billing run.
+    ///     If the billing run was interrupted unexpectedly, the run may become stuck in this state. It's considered stuck
+    ///     once it has been in this state for longer than
+    ///     <see cref="DataModels.CalculatorRunExtensions.BillingRunTimeout" />, after which the billing run may be restarted.
     ///     This should be safe - database changes aren't committed until the very end of the billing run.
-    ///     However: there may now be orphaned billing files for this run in blob storage (harmless, but should be cleaned up).
     /// </remarks>
-    Running,
+    Started,
 
     /// <summary>
     ///     Indicates that the billing run has completed successfully.
     /// </summary>
+    /// <remarks>
+    ///     The billing run may be restarted to regenerate the billing file (e.g. once it has been outdated by changes to
+    ///     billing instructions), up until the billing file has been shared.
+    /// </remarks>
     Completed,
 
     /// <summary>
     ///     Indicates that the billing run has failed.
     /// </summary>
     /// <remarks>
-    ///     If the billing run is in this state, it may be retried later.
-    ///     Change this status back to <see cref="None" />, then restart the billing run.
+    ///     If the billing run is in this state, it may be retried later by restarting the billing run.
     ///     This should be safe - database changes aren't committed until the very end of the billing run.
     ///     However: there may now be orphaned billing files for this run in blob storage (harmless, but should be cleaned up).
     /// </remarks>

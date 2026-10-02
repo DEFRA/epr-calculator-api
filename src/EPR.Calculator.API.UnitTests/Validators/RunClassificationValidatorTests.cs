@@ -9,383 +9,321 @@ namespace EPR.Calculator.API.UnitTests.Validators;
 [TestClass]
 public class RunClassificationValidatorTests
 {
-    private static readonly RelativeYear Year2024 = new(2024);
-    private static readonly RelativeYear Year2025 = new(2025);
-
-    /// <summary>
-    ///     The moment an earlier run's billing file was authorised (i.e. sent to FSS). Runs created
-    ///     before this are considered outdated.
-    /// </summary>
-    private static readonly DateTime FssSentAt = new(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
+    private static readonly RelativeYear Year = new(2024);
 
     private ApplicationDBContext dbContext = null!;
     private RunClassificationValidator validator = null!;
-    private int lastRunId;
-
-    public TestContext TestContext { get; set; } = null!;
-
-    private CancellationToken CancellationToken => TestContext.CancellationTokenSource.Token;
 
     [TestInitialize]
     public void Setup()
     {
         var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
         dbContext = new ApplicationDBContext(options);
-
-        dbContext.CalculatorRunRelativeYears.AddRange(
-            new CalculatorRunRelativeYear { Value = Year2024 },
-            new CalculatorRunRelativeYear { Value = Year2025 });
-
+        dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = Year });
         dbContext.SaveChanges();
 
         validator = new RunClassificationValidator(dbContext);
     }
 
     [TestCleanup]
-    public void TearDown() => dbContext.Dispose();
-
-    [TestMethod]
-    [DataRow(RunClassification.InitialCompleted)]
-    [DataRow(RunClassification.RecalculationCompleted)]
-    public async Task ValidateAsync_WhenRunHasAlreadyBeenCompleted_RejectsReclassification(RunClassification current)
+    public void TearDown()
     {
-        // Arrange
-        var run = AddRun(current, fssSentAt: FssSentAt);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot reclassify a run once the run is completed.");
-    }
-
-    [TestMethod]
-    [DataRow(RunClassification.Running, RunClassification.Initial)]
-    [DataRow(RunClassification.Initial, RunClassification.Recalculation)]
-    [DataRow(RunClassification.Unclassified, RunClassification.InitialCompleted)]
-    [DataRow(RunClassification.Unclassified, RunClassification.RecalculationCompleted)]
-    [DataRow(RunClassification.Initial, RunClassification.RecalculationCompleted)]
-    public async Task ValidateAsync_WhenTargetRequiresADifferentCurrentClassification_RejectsTransition(
-        RunClassification current,
-        RunClassification requested)
-    {
-        // Arrange
-        var run = AddRun(current);
-
-        // Act
-        var result = await validator.ValidateAsync(run, requested, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe(string.Format(CommonResources.InvalidClassification, requested));
+        dbContext.Database.EnsureDeleted();
+        dbContext.Dispose();
     }
 
     [TestMethod]
     [DataRow(RunClassification.None)]
-    [DataRow(RunClassification.Running)]
-    [DataRow(RunClassification.Unclassified)]
-    public async Task ValidateAsync_WhenTargetIsNotAClassificationAUserCanSet_RejectsTransition(RunClassification requested)
+    [DataRow(RunClassification.Unknown)]
+    public async Task ValidateAsync_ReturnsInvalid_WhenClassificationIsNotAssignable(RunClassification classification)
     {
         // Arrange
-        var run = AddRun(RunClassification.Unclassified);
+        var run = CreateRun(1, RunClassification.None, Year);
 
         // Act
-        var result = await validator.ValidateAsync(run, requested, CancellationToken);
+        var result = await validator.ValidateAsync(run, classification, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldHaveSingleItem().ShouldBe("Invalid Classification");
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"The classification '{classification}' is not assignable.");
     }
 
     [TestMethod]
-    [DataRow(RunClassification.Unclassified)]
-    [DataRow(RunClassification.Running)]
-    [DataRow(RunClassification.Errored)]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunIsAlreadyCompleted()
+    {
+        // Arrange: once a run's billing file has been shared, it cannot be reclassified - not even to Deleted.
+        // The DeleteCalculatorRun endpoint relies solely on this check to stop completed runs being deleted.
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var run = CreateRun(1, RunClassification.Initial, Year, sharedAt);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot reclassify a run once the run is completed.");
+    }
+
+    [TestMethod]
     [DataRow(RunClassification.Test)]
     [DataRow(RunClassification.Initial)]
     [DataRow(RunClassification.Recalculation)]
-    public async Task ValidateAsync_WhenDeletingARunThatIsNotAlreadyDeleted_ReturnsValid(RunClassification current)
-    {
-        // Arrange
-        var run = AddRun(current);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenDeletingAnAlreadyDeletedRun_RejectsTransition()
-    {
-        // Arrange
-        var run = AddRun(RunClassification.Deleted);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe(string.Format(CommonResources.InvalidClassification, RunClassification.Deleted));
-    }
-
-    [TestMethod]
-    [DataRow(RunClassification.Unclassified)]
-    [DataRow(RunClassification.Initial)]
-    public async Task ValidateAsync_WhenMarkingACompletableRunAsATestRun_ReturnsValid(RunClassification current)
-    {
-        // Arrange
-        var run = AddRun(current);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Test, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    [DataRow(RunClassification.Test)]
-    [DataRow(RunClassification.Running)]
-    [DataRow(RunClassification.Errored)]
     [DataRow(RunClassification.Deleted)]
-    public async Task ValidateAsync_WhenMarkingAnUnusableRunAsATestRun_RejectsTransition(RunClassification current)
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunIsDeleted(RunClassification classification)
     {
-        // Arrange
-        var run = AddRun(current);
+        // Arrange: deleted runs are final, so cannot be reclassified (i.e. restored).
+        var run = CreateRun(1, RunClassification.Deleted, Year);
 
         // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Test, CancellationToken);
+        var result = await validator.ValidateAsync(run, classification, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe(string.Format(CommonResources.InvalidClassification, RunClassification.Test));
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot reclassify a run once the run is deleted.");
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTargetIsNotDesignated_IgnoresTheStateOfTheRelativeYear()
+    [DataRow(CalculationRunStatus.Unknown)]
+    [DataRow(CalculationRunStatus.None)]
+    [DataRow(CalculationRunStatus.Started)]
+    [DataRow(CalculationRunStatus.Errored)]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunCalculationHasNotCompleted(CalculationRunStatus calculationRunStatus)
     {
-        // Arrange
-        AddRun(RunClassification.Initial);
-        var run = AddRun(RunClassification.Unclassified);
+        // Arrange: only runs with a completed calculation (i.e. with results) can be classified.
+        var run = CreateRun(1, RunClassification.None, Year, calculationRunStatus: calculationRunStatus);
 
         // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken);
+        var result = await validator.ValidateAsync(run, RunClassification.Test, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldBeEmpty();
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe("Cannot classify a run until its calculation has completed.");
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenNoDesignatedRunsExistForTheYear_AllowsAnInitialRun()
+    public async Task ValidateAsync_ReturnsValid_WhenClassifyingAsDeleted_EvenWhenRunCalculationHasErrored()
     {
-        // Arrange
-        var run = AddRun(RunClassification.Unclassified);
+        // Arrange: errored runs can still be discarded.
+        var run = CreateRun(1, RunClassification.None, Year, calculationRunStatus: CalculationRunStatus.Errored);
 
         // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken);
+        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldBeEmpty();
+        result.IsInvalid.ShouldBeFalse();
     }
 
     [TestMethod]
-    [DataRow(RunClassification.Initial)]
-    [DataRow(RunClassification.Recalculation)]
-    public async Task ValidateAsync_WhenAnotherDesignatedRunIsStillOutstanding_RejectsDesignation(RunClassification requested)
+    public async Task ValidateAsync_ReturnsValid_WhenClassifyingAsDeleted_EvenWhenYearHasOutstandingRuns()
     {
-        // Arrange
-        AddRun(RunClassification.Initial);
-        var run = AddRun(RunClassification.Unclassified);
+        // Arrange: Deleted is decided before any year-level conflict checks, so outstanding runs elsewhere shouldn't matter.
+        dbContext.CalculatorRuns.Add(CreateRun(2, RunClassification.Initial, Year));
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.Test, Year);
 
         // Act
-        var result = await validator.ValidateAsync(run, requested, CancellationToken);
+        var result = await validator.ValidateAsync(run, RunClassification.Deleted, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe("There are outstanding runs for '2024' that have not been completed.");
+        result.IsInvalid.ShouldBeFalse();
     }
 
     [TestMethod]
-    [DataRow(RunClassification.Unclassified, RunClassification.Initial)]
-    [DataRow(RunClassification.Initial, RunClassification.InitialCompleted)]
-    public async Task ValidateAsync_WhenTheYearAlreadyHasACompletedInitialRun_RejectsAnotherInitialRun(
-        RunClassification current,
-        RunClassification requested)
+    public async Task ValidateAsync_ReturnsValid_WhenClassifyingAsTest_EvenWhenYearHasOutstandingRuns()
     {
-        // Arrange
-        AddRun(RunClassification.InitialCompleted, fssSentAt: FssSentAt);
-        var run = AddRun(current, createdAt: FssSentAt.AddDays(1));
+        // Arrange: Test runs are not "Official", so they're exempt from the year-level conflict rules below.
+        dbContext.CalculatorRuns.Add(CreateRun(2, RunClassification.Initial, Year));
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year);
 
         // Act
-        var result = await validator.ValidateAsync(run, requested, CancellationToken);
+        var result = await validator.ValidateAsync(run, RunClassification.Test, CancellationToken.None);
 
         // Assert
-        result.Errors.ShouldHaveSingleItem().ShouldBe("A completed Initial run already exists for '2024'.");
+        result.IsInvalid.ShouldBeFalse();
     }
 
     [TestMethod]
-    [DataRow(RunClassification.Unclassified, RunClassification.Recalculation)]
-    [DataRow(RunClassification.Recalculation, RunClassification.RecalculationCompleted)]
-    public async Task ValidateAsync_WhenTheYearHasNoCompletedInitialRun_RejectsRecalculation(
-        RunClassification current,
-        RunClassification requested)
+    public async Task ValidateAsync_ExcludesTheRunBeingValidated_FromItsOwnConflictCheck()
     {
-        // Arrange
-        var run = AddRun(current);
-
-        // Act
-        var result = await validator.ValidateAsync(run, requested, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe("Recalculation is not possible as there are no completed Initial runs for '2024'.");
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenTheYearHasACompletedInitialRun_AllowsARecalculation()
-    {
-        // Arrange
-        AddRun(RunClassification.InitialCompleted, fssSentAt: FssSentAt);
-        var run = AddRun(RunClassification.Unclassified, createdAt: FssSentAt.AddDays(1));
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenCompletingAnInitialRun_ReturnsValid()
-    {
-        // Arrange
-        var run = AddRun(RunClassification.Initial);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.InitialCompleted, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenCompletingARecalculationRun_ReturnsValid()
-    {
-        // Arrange
-        AddRun(RunClassification.InitialCompleted, fssSentAt: FssSentAt);
-        var run = AddRun(RunClassification.Recalculation, createdAt: FssSentAt.AddDays(1));
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.RecalculationCompleted, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenRunWasCreatedBeforeTheBillingFileWasSentToFss_RejectsDesignation()
-    {
-        // Arrange
-        AddRun(RunClassification.InitialCompleted, fssSentAt: FssSentAt);
-        var run = AddRun(RunClassification.Unclassified, createdAt: FssSentAt.AddDays(-1));
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe("This '2024' run cannot be classified as it is outdated.");
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenSeveralBillingFilesHaveBeenSentToFss_ComparesAgainstTheLatest()
-    {
-        // Arrange - the run predates only the most recent billing file
-        AddRun(RunClassification.InitialCompleted, fssSentAt: FssSentAt);
-        AddRun(RunClassification.RecalculationCompleted, fssSentAt: FssSentAt.AddDays(60));
-        var run = AddRun(RunClassification.Unclassified, createdAt: FssSentAt.AddDays(30));
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldHaveSingleItem()
-            .ShouldBe("This '2024' run cannot be classified as it is outdated.");
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenDesignatedRunsBelongToAnotherRelativeYear_IgnoresThem()
-    {
-        // Arrange
-        AddRun(RunClassification.Initial, relativeYear: Year2025);
-        var run = AddRun(RunClassification.Unclassified);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    [TestMethod]
-    public async Task ValidateAsync_WhenOtherRunsInTheYearAreNotDesignated_IgnoresThem()
-    {
-        // Arrange
-        AddRun(RunClassification.Running);
-        AddRun(RunClassification.Errored);
-        AddRun(RunClassification.Test);
-        AddRun(RunClassification.Deleted);
-        var run = AddRun(RunClassification.Unclassified);
-
-        // Act
-        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken);
-
-        // Assert
-        result.Errors.ShouldBeEmpty();
-    }
-
-    /// <summary>
-    ///     Adds a run to the database. Supplying <paramref name="fssSentAt"/> also attaches billing file
-    ///     metadata authorised at that moment, which is what marks a completed run as sent to FSS.
-    /// </summary>
-    private CalculatorRun AddRun(
-        RunClassification classification,
-        RelativeYear? relativeYear = null,
-        DateTime? createdAt = null,
-        DateTime? fssSentAt = null)
-    {
-        var run = new CalculatorRun
-        {
-            Id = ++lastRunId,
-            Name = $"Test Run {lastRunId}",
-            Classification = classification,
-            RelativeYear = relativeYear ?? Year2024,
-            CreatedBy = "Test User",
-            CreatedAt = createdAt ?? FssSentAt.AddDays(1)
-        };
-
+        // Arrange: the run being reclassified is itself an incomplete Initial run in the database. If it weren't
+        // excluded from the year query, it would be flagged as an "outstanding" conflict against itself.
+        var run = CreateRun(1, RunClassification.Initial, Year);
         dbContext.CalculatorRuns.Add(run);
-
-        if (fssSentAt is not null)
-        {
-            dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = run.Id,
-                BillingCsvFileName = $"billing-{run.Id}.csv",
-                BillingJsonFileName = $"billing-{run.Id}.json",
-                BillingFileCreatedBy = "Test User",
-                BillingFileCreatedDate = fssSentAt.Value,
-                BillingFileAuthorisedBy = "Test User",
-                BillingFileAuthorisedDate = fssSentAt
-            });
-        }
-
         dbContext.SaveChanges();
 
-        return run;
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeFalse();
     }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsInvalid_WhenYearHasIncompleteInitialRun_AndDesignatingRecalculation()
+    {
+        // Arrange
+        dbContext.CalculatorRuns.Add(CreateRun(2, RunClassification.Initial, Year));
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"There are outstanding runs for '{Year}' that have not been completed.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsInvalid_WhenYearHasIncompleteRecalculationRun_AndDesignatingInitial()
+    {
+        // Arrange: an incomplete run of *either* Official classification blocks a new Official designation.
+        dbContext.CalculatorRuns.Add(CreateRun(2, RunClassification.Recalculation, Year));
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"There are outstanding runs for '{Year}' that have not been completed.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsInvalid_WhenInitialAlreadyCompletedForYear()
+    {
+        // Arrange
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
+        dbContext.CalculatorRuns.Add(completedInitial);
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"A completed Initial run already exists for '{Year}'.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRecalculationRequested_ButYearHasNoCompletedInitialRun()
+    {
+        // Arrange: no runs exist for the year at all.
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"Recalculation is not possible as there are no completed Initial runs for '{Year}'.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsInvalid_WhenRunPredatesTheLatestSharedBillingFileForTheYear()
+    {
+        // Arrange: an Official run for the year already had its billing file authorised *after* this run was
+        // created, so this (now out-of-sequence) run can no longer be classified as Official.
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
+        dbContext.CalculatorRuns.Add(completedInitial);
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year, createdAt: sharedAt.AddDays(-1));
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeTrue();
+        result.Errors.ShouldHaveSingleItem().ShouldBe($"This '{Year}' run cannot be classified as it is outdated.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsValid_WhenDesignatingInitial_AndYearHasNoOtherOfficialRuns()
+    {
+        // Arrange
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeFalse();
+        result.Errors.ShouldBeEmpty();
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_ReturnsValid_WhenDesignatingRecalculation_AfterInitialWasCompletedEarlier()
+    {
+        // Arrange
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitial = CreateRun(2, RunClassification.Initial, Year, sharedAt);
+        completedInitial.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
+        dbContext.CalculatorRuns.Add(completedInitial);
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year, createdAt: sharedAt.AddDays(1));
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Recalculation, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeFalse();
+        result.Errors.ShouldBeEmpty();
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_IgnoresCompletedRuns_FromOtherRelativeYears()
+    {
+        // Arrange: a completed Initial run exists, but for a different year - it must not affect this year's checks.
+        var otherYear = new RelativeYear(Year.Value - 1);
+        dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = otherYear });
+        var sharedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        var completedInitialOtherYear = CreateRun(2, RunClassification.Initial, otherYear, sharedAt);
+        completedInitialOtherYear.CalculatorRunBillingFileMetadata.Add(CreateSharedBillingFileMetadata());
+        dbContext.CalculatorRuns.Add(completedInitialOtherYear);
+        dbContext.SaveChanges();
+        var run = CreateRun(1, RunClassification.None, Year);
+
+        // Act
+        var result = await validator.ValidateAsync(run, RunClassification.Initial, CancellationToken.None);
+
+        // Assert
+        result.IsInvalid.ShouldBeFalse();
+    }
+
+    private static CalculatorRun CreateRun(
+        int id,
+        RunClassification classification,
+        RelativeYear relativeYear,
+        DateTime? billingFileSharedAt = null,
+        DateTime? createdAt = null,
+        CalculationRunStatus calculationRunStatus = CalculationRunStatus.Completed) => new()
+    {
+        Id = id,
+        Name = $"Run {id}",
+        Classification = classification,
+        CalculationRunStatus = calculationRunStatus,
+        RelativeYear = relativeYear,
+        IsBillingFileShared = billingFileSharedAt != null,
+        BillingFileSharedAt = billingFileSharedAt,
+        CreatedBy = "Test",
+        CreatedAt = createdAt ?? DateTime.UtcNow,
+    };
+
+    private static CalculatorRunBillingFileMetadata CreateSharedBillingFileMetadata() => new()
+    {
+        BillingCsvFileName = "billing.csv",
+        BillingJsonFileName = "billing.json",
+        BillingFileCreatedDate = DateTime.UtcNow,
+        BillingFileCreatedBy = "Test"
+    };
 }

@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers;
@@ -19,6 +18,7 @@ public static class CalcRunMapper
             CreatedBy = run.CreatedBy,
             UpdatedAt = run.UpdatedAt,
             UpdatedBy = run.UpdatedBy,
+            CalculationRunStatus = run.CalculationRunStatus,
             BillingRunStatus = run.BillingRunStatus,
             BillingRunStartedAt = run.BillingRunStartedAt,
             BillingFile = run.CalculatorRunBillingFileMetadata
@@ -33,9 +33,9 @@ public static class CalcRunMapper
                     JsonFileName = m.BillingJsonFileName,
                     CreatedAt = m.BillingFileCreatedDate,
                     CreatedBy = m.BillingFileCreatedBy,
-                    HasBeenSentToFss = RunClassificationHelper.CompletedClassifications.Contains(run.Classification),
-                    SentAt = m.BillingFileAuthorisedDate,
-                    SentBy = m.BillingFileAuthorisedBy
+                    IsShared = run.IsBillingFileShared,
+                    SharedAt = run.BillingFileSharedAt,
+                    SharedBy = run.BillingFileSharedBy
                 })
                 .FirstOrDefault()
         };

@@ -6,12 +6,24 @@ namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 
 public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
 {
-    private static readonly ImmutableHashSet<RunClassification> ValidClassifications = [
-        RunClassification.Running
-    ];
-
     public CalculatorRunValidator()
     {
+        RuleFor(run => run.Classification)
+            .Must(classification => classification == RunClassification.None)
+            .WithMessage($"Run classification must be {RunClassification.None}");
+
+        RuleFor(run => run.CalculationRunStatus)
+            .Must(status => status == CalculationRunStatus.None)
+            .WithMessage($"Run calculation status must be {CalculationRunStatus.None}");
+
+        RuleFor(run => run.BillingRunStatus)
+            .Must(status => status == BillingRunStatus.None)
+            .WithMessage($"Run billing status must be {BillingRunStatus.None}");
+
+        RuleFor(run => run.IsBillingFileShared)
+            .Must(isBillingFileShared => !isBillingFileShared)
+            .WithMessage("Run billing file has already been shared.");
+
         RuleFor(run => run.Name)
             .NotEmpty()
             .WithMessage("Run has no name");
@@ -33,9 +45,5 @@ public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
         RuleFor(run => run.CalculatorRunPomDataMasterId)
             .Null()
             .WithMessage("Run already has PomDataMaster associated");
-
-        RuleFor(run => run.Classification)
-            .Must(classification => ValidClassifications.Contains(classification))
-            .WithMessage($"Run classification must be one of [{string.Join(", ", ValidClassifications)}]");
     }
 }

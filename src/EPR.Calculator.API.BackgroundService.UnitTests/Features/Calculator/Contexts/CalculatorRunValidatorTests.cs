@@ -10,13 +10,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator.Con
 [TestClass]
 public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
 {
-    [DataRow(RunClassification.Running)]
     [TestMethod]
-    public void Should_not_error_when_run_is_valid(RunClassification classification)
+    public void Should_not_error_when_run_is_valid()
     {
         var run = new CalculatorRun
         {
-            Classification = classification,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -27,8 +28,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [DataRow(RunClassification.Unclassified)]
-    [DataRow(RunClassification.Errored)]
+    [DataRow(RunClassification.Test)]
+    [DataRow(RunClassification.Initial)]
+    [DataRow(RunClassification.Recalculation)]
     [DataRow(RunClassification.Deleted)]
     [TestMethod]
     public void Should_error_when_classification_is_invalid(RunClassification classification)
@@ -36,6 +38,8 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
         var run = new CalculatorRun
         {
             Classification = classification,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -54,7 +58,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = name!,
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -72,7 +78,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = id,
             LapcapDataMasterId = 1
@@ -90,7 +98,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = id
@@ -106,7 +116,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
@@ -123,7 +135,9 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
+            CalculationRunStatus = CalculationRunStatus.None,
+            BillingRunStatus = BillingRunStatus.None,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
