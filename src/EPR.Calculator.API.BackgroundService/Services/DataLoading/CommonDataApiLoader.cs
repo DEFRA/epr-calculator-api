@@ -81,12 +81,17 @@ public class CommonDataApiLoader(
     private async Task<(InitialisedStream<PomData> pomStream, InitialisedStream<OrganisationData> orgStream)>
         GetStreams(RunContext runContext, DateTimeOffset loadTime, CancellationToken linkedCt)
     {
-        var pomStream = httpClient.StreamPoms(runContext.RelativeYear, runContext.DefaultParameters.CutOffDate, linkedCt)
+        DateTimeOffset? cutOffDateTime =
+            runContext.DefaultParameters.CutOffDate.HasValue
+                ? new DateTimeOffset(runContext.DefaultParameters.CutOffDate.Value.Date.AddDays(1).AddTicks(-1), TimeSpan.Zero)
+                : null;
+
+        var pomStream = httpClient.StreamPoms(runContext.RelativeYear, cutOffDateTime, linkedCt)
             .Select(CommonDataApiLoaderMapper.MapPom(loadTime, logger))
             .Chunk(options.Value.PomBatchSize)
             .GetAsyncEnumerator(linkedCt);
 
-        var orgStream = httpClient.StreamOrganisations(runContext.RelativeYear, runContext.DefaultParameters.CutOffDate, linkedCt)
+        var orgStream = httpClient.StreamOrganisations(runContext.RelativeYear, cutOffDateTime, linkedCt)
             .Select(CommonDataApiLoaderMapper.MapOrganisation(loadTime))
             .Chunk(options.Value.OrganisationBatchSize)
             .GetAsyncEnumerator(linkedCt);

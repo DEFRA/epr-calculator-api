@@ -14,12 +14,12 @@ namespace EPR.Calculator.API.BackgroundService.Services.CommonDataApi
     {
         IAsyncEnumerable<PomResponse> StreamPoms(
             RelativeYear relativeYear,
-            DateTime? cutOffDate,
+            DateTimeOffset? cutOffDate,
             CancellationToken cancellationToken = default);
 
         IAsyncEnumerable<OrganisationResponse> StreamOrganisations(
             RelativeYear relativeYear,
-            DateTime? cutOffDate,
+            DateTimeOffset? cutOffDate,
             CancellationToken cancellationToken = default);
     }
 
@@ -63,13 +63,13 @@ namespace EPR.Calculator.API.BackgroundService.Services.CommonDataApi
         /// <returns>An async enumerable of <see cref="OrganisationResponse" /> records.</returns>
         public IAsyncEnumerable<OrganisationResponse> StreamOrganisations(
             RelativeYear relativeYear,
-            DateTime? cutOffDate,
+            DateTimeOffset? cutOffDate,
             CancellationToken cancellationToken = default)
         {
             var url = $"/api/paycal/organisations/stream?relativeYear={relativeYear}";
 
             if (cutOffDate.HasValue)
-                url += $"&cutOffDate={cutOffDate.Value:yyyy-MM-dd}";
+                url += $"&cutOffDate={Uri.EscapeDataString(cutOffDate.Value.UtcDateTime.ToString("O"))}";
 
             return ReadNdJsonStreamAsync<OrganisationResponse>(url, cancellationToken);
         }
@@ -83,13 +83,13 @@ namespace EPR.Calculator.API.BackgroundService.Services.CommonDataApi
         /// <returns>An async enumerable of <see cref="PomResponse" /> records.</returns>
         public IAsyncEnumerable<PomResponse> StreamPoms(
             RelativeYear relativeYear,
-            DateTime? cutOffDate,
+            DateTimeOffset? cutOffDate,
             CancellationToken cancellationToken = default)
         {
             var url = $"/api/paycal/poms/stream?relativeYear={relativeYear}";
 
             if (cutOffDate.HasValue)
-                url += $"&cutOffDate={cutOffDate.Value:yyyy-MM-dd}";
+                url += $"&cutOffDate={Uri.EscapeDataString(cutOffDate.Value.UtcDateTime.ToString("O"))}";
 
             return ReadNdJsonStreamAsync<PomResponse>(url, cancellationToken);
         }
