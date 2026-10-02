@@ -1,5 +1,5 @@
 #!/bin/bash
-# Applies a SQL migrations script with sqlcmd.
+# Applies a SQL migrations script with sqlcmd. USER is expected to be SA or have equivalent permissions.
 #
 # Required environment variables: SERVER, PORT, USER, PASSWORD and DATABASE.
 # Optional: TRUST_SERVER_CERTIFICATE=true skips validation of the server's TLS certificate, for SQL Servers with
@@ -23,9 +23,22 @@ fi
 # sqlcmd reads the password from SQLCMDPASSWORD, which keeps it off the command line.
 export SQLCMDPASSWORD="$PASSWORD"
 
-options=(
+common_options=(
   -S "$SERVER,$PORT"
   -U "$USER"
+)
+
+if [[ "${TRUST_SERVER_CERTIFICATE:-false}" == "true" ]]; then
+  common_options+=(-C)
+fi
+
+# Create the database first if it doesn't already exist - a fresh SQL Server instance starts out with no databases at
+# all, and connecting straight to "$DATABASE" below would otherwise fail.
+echo "Ensuring database '$DATABASE' exists on '$SERVER,$PORT'"
+/opt/mssql-tools18/bin/sqlcmd "${common_options[@]}" -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = N'$DATABASE') CREATE DATABASE [$DATABASE]"
+
+options=(
+  "${common_options[@]}"
   -d "$DATABASE"
   -i "$script"
   -I # QUOTED_IDENTIFIER ON, as EF Core expects.
@@ -33,10 +46,6 @@ options=(
   # sp_rename's caution) are only printed.
   -b -V 10
 )
-
-if [[ "${TRUST_SERVER_CERTIFICATE:-false}" == "true" ]]; then
-  options+=(-C)
-fi
 
 echo "Applying $script to database '$DATABASE' on '$SERVER,$PORT'"
 exec /opt/mssql-tools18/bin/sqlcmd "${options[@]}"
