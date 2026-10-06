@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260921160000_DataApiSchemaChanges")]
+    [Migration("20260928111900_DataApiSchemaChanges")]
     partial class DataApiSchemaChanges
     {
         /// <inheritdoc />

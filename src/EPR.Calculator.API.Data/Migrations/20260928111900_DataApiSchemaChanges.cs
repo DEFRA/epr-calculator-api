@@ -99,13 +99,17 @@ namespace EPR.Calculator.API.Data.Migrations
                 column: "calculator_run_id");
 
             // Carry historical run data forward. Each run had its own master row, so created_at is the
-            // run's org/POM load time.
+            // run's org/POM load time. Wrapped in EXEC so org_pom_data_loaded_at (added above, in the
+            // same batch) resolves at execution time rather than failing batch-wide compile-time
+            // validation, which still sees the pre-ALTER column list.
             migrationBuilder.Sql(@"
-                UPDATE r
-                SET org_pom_data_loaded_at = m.created_at
-                FROM calculator_run r
-                INNER JOIN calculator_run_organization_data_master m
-                    ON m.id = r.calculator_run_organization_data_master_id;");
+                EXEC(N'
+                    UPDATE r
+                    SET org_pom_data_loaded_at = m.created_at
+                    FROM calculator_run r
+                    INNER JOIN calculator_run_organization_data_master m
+                        ON m.id = r.calculator_run_organization_data_master_id;
+                ');");
 
             // is_error is derived from the old obligation status: an "E" organisation was one excluded
             // from calculation by a hard error, which is what is_error now records.
@@ -126,18 +130,20 @@ namespace EPR.Calculator.API.Data.Migrations
             // The obligation columns moved onto producer_detail; backfill historical runs from the
             // matching organisation-detail row so consumers (e.g. partial-obligation export) still work.
             migrationBuilder.Sql(@"
-                UPDATE pd
-                SET num_days_obligated = d.num_days_obligated,
-                    status_code = d.status_code,
-                    joiner_date = d.joiner_date,
-                    leaver_date = d.leaver_date
-                FROM producer_detail pd
-                INNER JOIN calculator_run r
-                    ON r.id = pd.calculator_run_id
-                INNER JOIN calculator_run_organization_data_detail d
-                    ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
-                   AND d.organisation_id = pd.producer_id
-                   AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '');");
+                EXEC(N'
+                    UPDATE pd
+                    SET num_days_obligated = d.num_days_obligated,
+                        status_code = d.status_code,
+                        joiner_date = d.joiner_date,
+                        leaver_date = d.leaver_date
+                    FROM producer_detail pd
+                    INNER JOIN calculator_run r
+                        ON r.id = pd.calculator_run_id
+                    INNER JOIN calculator_run_organization_data_detail d
+                        ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
+                       AND d.organisation_id = pd.producer_id
+                       AND ISNULL(d.subsidiary_id, '''') = ISNULL(pd.subsidiary_id, '''');
+                ');");
 
             // See the comment on BackedUpTables for renamed vs. copied.
             foreach (var (table, renamed) in BackedUpTables)
