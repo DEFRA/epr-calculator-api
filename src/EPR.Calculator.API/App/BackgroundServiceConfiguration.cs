@@ -78,6 +78,10 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorFileGenerator, CalculatorFileGenerator>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
+            // Register HistoricalCalculatorRunReprocessing
+            services.AddTransient<IHistoricalCalculatorRunReprocessor, HistoricalCalculatorRunReprocessor>();
+            services.AddHostedService<HistoricalCalculatorRunReprocessingBackgroundService>();
+
             // Register CommonDataApi
             services
                 .AddOptions<CommonDataApiHttpClientOptions>()
