@@ -6,10 +6,12 @@ namespace EPR.Calculator.API.DataApi.UnitTests.AcceptedFileSelection;
 /// <summary>
 ///     Validates <see cref="AcceptedFileSelector" /> against the winning-file scenarios from epr-data's
 ///     test_paycal_orgdata_sql.py / test_paycal_pomdata_sql.py, which exercise exactly this cut-off/
-///     resubmission fallback rule. Only the scenarios where the candidate file's regulator status would
-///     have survived the (unchanged) SQL status filter are ported here - a file rejected by regulator
-///     status (e.g. Pending registrations, non-Accepted POMs) never reaches this selector, so those
-///     scenarios remain covered by the still-SQL-side status filtering, not by this class.
+///     resubmission fallback rule. Only the Granted/Accepted scenarios are ported: Pending is excluded by
+///     a SQL-side status filter upstream of this class entirely, and Cancelled reaches this selector but
+///     wins in exactly the same way an Accepted file would - regulator status plays no part in picking a
+///     winner here, it only affects the obligation status computed afterwards by
+///     ProducerObligationDeterminer (see its own tests) - so a Cancelled case would just duplicate an
+///     existing Accepted one.
 /// </summary>
 [TestClass]
 public class AcceptedFileSelectorTests
@@ -22,9 +24,8 @@ public class AcceptedFileSelectorTests
 
     private readonly AcceptedFileSelector selector = new();
 
-    // Ported from epr-data's _REG_CASES (test_paycal_orgdata_sql.py), restricted to the Granted/Accepted/
-    // Cancelled scenarios - the file-selection rule is identical for all three since regulator-status
-    // filtering already happened upstream in SQL by the time rows reach this selector.
+    // Ported from epr-data's _REG_CASES (test_paycal_orgdata_sql.py), Granted/Accepted scenarios only -
+    // see the class summary for why Pending/Cancelled aren't duplicated here.
     private static IEnumerable<object[]> OrganisationScenarios()
     {
         (string CaseId, (string Marker, DateTime Created, bool IsResubmission)[] Files, string ExpectedWinner)[] cases =
