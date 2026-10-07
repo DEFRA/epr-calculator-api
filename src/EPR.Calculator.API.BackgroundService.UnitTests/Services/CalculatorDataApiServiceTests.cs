@@ -66,6 +66,32 @@ public class CalculatorDataApiServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerRecords_WithCutOffDate_PassesEndOfDayToDataApi()
+    {
+        // Arrange
+        var runContext = TestDataHelper.CalculatorRun2024 with
+        {
+            DefaultParameters = TestDataHelper.CalculatorRun2024.DefaultParameters with
+            {
+                CutOffDate = new DateTime(2024, 6, 15)
+            }
+        };
+        var expectedCutOff = new DateTimeOffset(2024, 6, 15, 23, 59, 59, TimeSpan.Zero).AddTicks(9_999_999);
+
+        mockProducerDataService
+            .Setup(s => s.GetProducerData(It.IsAny<int>(), expectedCutOff, It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IReadOnlyList<ProducerRecord>)[]);
+
+        var service = CreateService();
+
+        // Act
+        await service.GetProducerRecords(runContext);
+
+        // Assert
+        mockProducerDataService.VerifyAll();
+    }
+
+    [TestMethod]
     public async Task GetProducerRecords_WithNoCutOffDate_PassesNullThrough()
     {
         // Arrange
