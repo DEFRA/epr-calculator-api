@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.RejectedProduce
 public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultRejectedProducersBuilder>
 {
     [TestMethod]
-    public async Task Construct_ReturnsRejectedProducers_WithLatestOrganisationDetails()
+    public async Task Construct_ReturnsRejectedProducers_UsingOrganisationDetailsAtOrBeforeTheRunBeingProcessed()
     {
         // Arrange
         var runContextOld = TestDataHelper.CalculatorRun2025;
@@ -106,10 +106,10 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
 
         var rejected = result[0];
 
-        // Organisation details should come from the latest run
+        // Organisation details must come from the latest run (but no later than the run being processed - i.e. for historical reprocessing)
         Assert.AreEqual(organisationId, rejected.ProducerId);
-        Assert.AreEqual("Latest Org Name", rejected.ProducerName);
-        Assert.AreEqual("Latest Trading Name", rejected.TradingName);
+        Assert.AreEqual("Old Org Name", rejected.ProducerName);
+        Assert.AreEqual("Old Trading Name", rejected.TradingName);
 
         Assert.AreEqual("Instruction A", rejected.SuggestedBillingInstruction);
         Assert.AreEqual(123.45m, rejected.SuggestedInvoiceAmount);
@@ -117,6 +117,6 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
         Assert.AreEqual("User A", rejected.InstructionConfirmedBy);
         Assert.AreEqual("Invalid data", rejected.ReasonForRejection);
 
-        Assert.AreEqual(runLatest.Id, rejected.RunId);
+        Assert.AreEqual(runOld.Id, rejected.RunId);
     }
 }
