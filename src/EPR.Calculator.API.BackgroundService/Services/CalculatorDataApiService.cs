@@ -33,7 +33,7 @@ public class CalculatorDataApiService(
         CalculatorRunContext runContext, CancellationToken cancellationToken = default)
     {
         var cutOffDate = runContext.DefaultParameters.CutOffDate is { } d
-            ? new DateTimeOffset(DateTime.SpecifyKind(d, DateTimeKind.Utc))
+            ? new DateTimeOffset(DateTime.SpecifyKind(d.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc))
             : (DateTimeOffset?)null;
 
         var materials = await materialService.GetMaterials();
