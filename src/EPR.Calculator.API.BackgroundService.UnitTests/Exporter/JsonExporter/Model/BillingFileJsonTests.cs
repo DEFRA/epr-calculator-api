@@ -11,7 +11,7 @@ public class BillingFileJsonTests
     {
         var calcResult = TestDataHelper.GetCalcResult();
         var materials = TestDataHelper.GetMaterialDetails();
-        var result = BillingFileJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var result = BillingFileJson.From(TestDataHelper.BillingRun2025, calcResult, materials, TestDataHelper.GetProducerFeeDetails());
 
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.CalcResultDetail);

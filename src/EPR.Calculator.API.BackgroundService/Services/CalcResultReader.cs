@@ -15,7 +15,11 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
-        Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken);
+        Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken);
+
+        // Deferred - the query runs as the caller enumerates, so a downstream consumer streaming
+        // straight to a CSV/JSON writer never holds every producer's fee graph in memory at once.
+        IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
         Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
@@ -149,15 +153,20 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken)
-        {
-            return await dbContext.ProducerDisposalFee
+        public async Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken) =>
+            await dbContext.ProducerDisposalFee
                         .AsNoTracking()
-                        .AsSplitQuery() // avoid repeating the parent's JSON columns across every detail row
-                        .Include(p => p.Details)
                         .Where(p => p.CalculatorRunId == runId)
+                        .Select(p => p.Total)
                         .SingleAsync(cancellationToken);
-        }
+
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
+            dbContext.ProducerFeeDetails
+                        .AsNoTracking()
+                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
+                        .OrderBy(d => d.Id)
+                        .Select(d => d.FeeDetail)
+                        .AsEnumerable();
 
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>

@@ -8,7 +8,7 @@ public record CalcResultProducerCalculationResultsTotal
     [JsonPropertyName("producerCalculationResultsTotal")]
     public string? ProducerCalculationResultsTotal { get; set; }
 
-    public static CalcResultProducerCalculationResultsTotal? From(ProducerFees producerFees)
+    public static CalcResultProducerCalculationResultsTotal? From(FeeDetail total)
     {
         // specified in user story as remaining null
         return null;
