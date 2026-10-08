@@ -4,6 +4,7 @@ using System.Text;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
@@ -23,10 +24,8 @@ namespace EPR.Calculator.API.Controllers;
 public class CalculatorNewController(
     ApplicationDBContext dbContext,
     IRunClassificationValidator runClassificationValidator,
-    IBillingFileService billingFileService,
     IInvoiceDetailsService invoiceDetailsService,
     ILogger<CalculatorNewController> logger,
-    ICalculationRunService calculationRunService,
     IFileExportService fileExportService,
     IBlobStorageService blobStorage,
     IStorageUploadService storageUploadService,
