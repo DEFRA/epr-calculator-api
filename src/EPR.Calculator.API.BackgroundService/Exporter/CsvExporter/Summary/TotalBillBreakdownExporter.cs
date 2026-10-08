@@ -27,7 +27,7 @@ public class TotalBillBreakdownExporter : IProducerFeesPartExporter
     internal static string FormatTotalWithBadDebtProvision(FeeWithBadDebt costs) =>
         CsvSanitiser.SanitiseData(costs.ByCountry.Total, DecimalPlaces.Two, null, isCurrency: true);
 
-    public void AppendSectionHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
+    public void AppendSectionHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         int count = GetColumnHeaders(materials, applyModulation).Count();
         csvContent.Append(CsvSanitiser.SanitiseData("Total Producer Bill Breakdown"));

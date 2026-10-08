@@ -18,7 +18,6 @@ public class BlobStorageServiceTests
     private const string TestFilename = "test-file.csv";
     private Mock<BlobContainerClient> billingCsvContainer = null!;
     private Mock<BlobContainerClient> billingJsonContainer = null!;
-
     private Mock<BlobServiceClient> blobServiceClient = null!;
     private Mock<BlobContainerClient> fssContainer = null!;
     private Mock<ILogger<BlobStorageService>> logger = null!;
@@ -83,7 +82,7 @@ public class BlobStorageServiceTests
     // ── OpenResultCsvStream ───────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task OpenResultCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    public async Task OpenResultCsvStream_WhenBlobExists()
     {
         // Arrange
         const string content = "col1,col2\nval1,val2";
@@ -113,7 +112,7 @@ public class BlobStorageServiceTests
     // ── OpenBillingCsvStream ──────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task OpenBillingCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    public async Task OpenBillingCsvStream_WhenBlobExists()
     {
         // Arrange
         const string content = "billing,data\n1,2";
@@ -135,6 +134,36 @@ public class BlobStorageServiceTests
 
         // Act
         var result = await service.OpenBillingCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    // ── OpenBillingJsonStream ─────────────────────────────────────────────────
+
+    [TestMethod]
+    public async Task OpenBillingJsonStream_WhenBlobExists()
+    {
+        // Arrange
+        const string content = "{\"billing\":true}";
+        SetupBlobClientWithContent(fssContainer, TestFilename, content);
+
+        // Act
+        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        (await ReadContentAsync(result)).ShouldBe(content);
+    }
+
+    [TestMethod]
+    public async Task OpenBillingJsonStream_ReturnsNull_WhenBlobNotFound()
+    {
+        // Arrange
+        SetupBlobClientWith404(fssContainer, TestFilename);
+
+        // Act
+        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
 
         // Assert
         result.ShouldBeNull();
@@ -223,6 +252,14 @@ public class BlobStorageServiceTests
         container.Setup(x => x.GetBlobClient(filename)).Returns(blobClient.Object);
     }
 
+    private static async Task<string> ReadContentAsync(Stream stream)
+    {
+        // detectEncodingFromByteOrderMarks reads the UTF-16 LE BOM written by ReEncodeAsUtf16Async
+        // and decodes the stream correctly, returning the original string content.
+        using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+        return await reader.ReadToEndAsync();
+    }
+
     private Mock<BlobClient> SetupCopyScenario(bool throwOnCopy)
     {
         var sourceBlobClient = new Mock<BlobClient>();
@@ -291,12 +328,4 @@ public class BlobStorageServiceTests
                 It.IsAny<Exception?>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
-
-    private static async Task<string> ReadContentAsync(Stream stream)
-    {
-        // detectEncodingFromByteOrderMarks reads the UTF-16 LE BOM written by ReEncodeAsUtf16Async
-        // and decodes the stream correctly, returning the original string content.
-        using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
-        return await reader.ReadToEndAsync();
-    }
 }

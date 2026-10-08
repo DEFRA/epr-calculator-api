@@ -143,17 +143,27 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ReadProducerFees_WorksAsExpected()
+        public async Task ReadProducerFeesTotal_WorksAsExpected()
         {
             var producerFees = TestDataHelper.GetProducerFees();
             _dbContext.Add(producerFees);
             await _dbContext.SaveChangesAsync();
 
-            var result = await _sut.ReadProducerFees(0, CancellationToken.None);
+            var result = await _sut.ReadProducerFeesTotal(0, CancellationToken.None);
 
-            result.CalculatorRunId.ShouldBeEquivalentTo(producerFees.CalculatorRunId);
-            result.Details.ShouldBeEquivalentTo(producerFees.Details);
-            result.Total.ShouldBeEquivalentTo(producerFees.Total);
+            result.ShouldBeEquivalentTo(producerFees.Total);
+        }
+
+        [TestMethod]
+        public async Task StreamProducerFeeDetails_WorksAsExpected()
+        {
+            var producerFees = TestDataHelper.GetProducerFees();
+            _dbContext.Add(producerFees);
+            await _dbContext.SaveChangesAsync();
+
+            var result = _sut.StreamProducerFeeDetails(0).ToList();
+
+            result.ShouldBeEquivalentTo(producerFees.Details.Select(d => d.FeeDetail).ToList());
         }
 
         [TestMethod]

@@ -13,8 +13,9 @@ public class ProducerInvoiceNetTonnageServiceTests : TestsFor<ProducerInvoiceNet
         // Arrange
         var runContext = TestDataHelper.CalculatorRun2025;
         var calcResult = TestDataHelper.GetCalcResult();
+        var producerFeeDetails = TestDataHelper.GetProducerFeeDetails();
 
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateProducerInvoiceNetTonnage(runContext, calcResult, CancellationToken.None));
+        await Should.NotThrowAsync(testSubject.CreateProducerInvoiceNetTonnage(runContext, calcResult, producerFeeDetails, CancellationToken.None));
     }
 }
