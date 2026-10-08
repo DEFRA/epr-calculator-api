@@ -7,7 +7,6 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
@@ -17,7 +16,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -53,10 +51,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             controller = new CalculatorNewController(
                 context,
                 Mock.Of<IRunClassificationValidator>(),
-                mockBillingFileService.Object,
                 Mock.Of<IInvoiceDetailsService>(),
                 Mock.Of<ILogger<CalculatorNewController>>(),
-                Mock.Of<ICalculationRunService>(),
                 fileExportServiceMock.Object,
                 blobStorageMock.Object,
                 storageUploadServiceMock.Object,
@@ -258,7 +254,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.Initial;
 
             AddBillingFileMetadata(CalculatorRunId);
 
@@ -267,10 +263,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controllerWithFlagDisabled = new CalculatorNewController(
                 context,
-                Mock.Of<ICalculatorRunStatusDataValidator>(),
+                Mock.Of<IRunClassificationValidator>(),
                 Mock.Of<IInvoiceDetailsService>(),
                 Mock.Of<ILogger<CalculatorNewController>>(),
-                Mock.Of<ICalculationRunService>(),
                 fileExportServiceMock.Object,
                 Mock.Of<IBlobStorageService>(),
                 storageUploadServiceMock.Object,
@@ -291,12 +286,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (IStatusCodeActionResult)await controllerWithFlagDisabled.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
+            var newClassification = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).Classification;
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
-            newClassification.ShouldBe(RunClassification.INITIAL_RUN_COMPLETED);
+            newClassification.ShouldBe(RunClassification.InitialCompleted);
             fileExportServiceMock.Verify(
                 x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
                 Times.Never);
@@ -337,59 +331,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalculatorRunId = calculatorRunId,
             });
             context.SaveChanges();
-        }
-
-
-        [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_SkipsExportAndUpload_WhenFeatureFlagDisabled()
-        {
-            // Arrange
-            var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-
-            AddBillingFileMetadata(CalculatorRunId);
-
-            var fileExportServiceMock = new Mock<IFileExportService>();
-            var storageUploadServiceMock = new Mock<IStorageUploadService>();
-
-            var controllerWithFlagDisabled = new CalculatorNewController(
-                context,
-                Mock.Of<ICalculatorRunStatusDataValidator>(),
-                Mock.Of<IInvoiceDetailsService>(),
-                Mock.Of<ILogger<CalculatorNewController>>(),
-                Mock.Of<ICalculationRunService>(),
-                fileExportServiceMock.Object,
-                Mock.Of<IBlobStorageService>(),
-                storageUploadServiceMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
-                {
-                    ConnectionString = "UseDevelopmentStorage=true",
-                    ResultFileCsvContainer = "result-csv",
-                    BillingFileCsvContainer = "billing-csv",
-                    FssContainer = "fss",
-                }),
-                Microsoft.Extensions.Options.Options.Create(new FeatureFlagOptions
-                {
-                    UploadFssBillingFileToBlobStorage = false,
-                }))
-            {
-                ControllerContext = CreateAuthenticatedControllerContext(),
-            };
-
-            // Act
-            var result = (IStatusCodeActionResult)await controllerWithFlagDisabled.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
-
-            // Assert
-            result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
-            newClassification.ShouldBe(RunClassification.INITIAL_RUN_COMPLETED);
-            fileExportServiceMock.Verify(
-                x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            storageUploadServiceMock.Verify(
-                x => x.UploadFileContentAsync(It.IsAny<IStorageUploadService.Request>(), It.IsAny<CancellationToken>()),
-                Times.Never);
         }
 
         private static ControllerContext CreateAuthenticatedControllerContext()

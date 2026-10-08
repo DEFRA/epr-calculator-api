@@ -66,12 +66,12 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
                 var status = await db.CalculatorRuns
                     .AsNoTracking()
                     .Where(x => x.Id == runId)
-                    .Select(x => x.CalculatorRunClassificationId)
+                    .Select(x => x.Classification)
                     .SingleAsync();
 
-                return status == RunClassificationStatusIds.ERRORID
+                return status == RunClassification.Errored
                     ? throw new Exception($"Calculator run {runId} entered Errored state.")
-                    : status == RunClassificationStatusIds.UNCLASSIFIEDID;
+                    : status == RunClassification.Unclassified;
             },
             $"Calculator run {runId} did not complete.");
 
@@ -85,16 +85,16 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         foreach (var run in await db.CalculatorRuns
                                     .Where(x =>
                                         x.RelativeYear == relativeYear &&
-                                        x.CalculatorRunClassificationId == RunClassificationStatusIds.INITIALRUNID)
+                                        x.Classification == RunClassification.Initial)
                                     .ToListAsync())
         {
-            run.CalculatorRunClassificationId = RunClassificationStatusIds.DELETEDID;
+            run.Classification = RunClassification.Deleted;
         }
         await db.SaveChangesAsync();
 
-        var setBillingClassificationResult = await calculatorNewController.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto {
+        var setBillingClassificationResult = await calculatorNewController.PutCalculatorRunStatus(new SetRunClassificationRequest {
                 RunId = runId,
-                ClassificationId = RunClassificationStatusIds.INITIALRUNID
+                Classification = RunClassification.Initial
             });
 
         if (setBillingClassificationResult is StatusCodeResult statusCodeResult)
@@ -265,22 +265,6 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         var templates = await db.LapcapDataTemplateMaster.ToImmutableListAsync();
         db.LapcapDataDetail.AddRange(LapcapDataDetails(lapcapPath, lapcap, templates));
         await db.SaveChangesAsync();
-
-        var run = new CalculatorRun
-        {
-            Name                            = name,
-            RelativeYear                    = relativeYear,
-            CreatedBy                       = "some-user",
-            CreatedAt                       = Now,
-            Classification                  = RunClassification.Running,
-            DefaultParameterSettingMasterId = parameterMaster.Id,
-            LapcapDataMasterId              = lapcap.Id,
-            BillingRunStatus                = BillingRunStatus.None
-        };
-        db.CalculatorRuns.Add(run);
-        await db.SaveChangesAsync();
-
-        return run.Id;
     }
 
     private static async Task SeedAcceptOrRejectProducers(ApplicationDBContext db, int calculatorRunId, string modifiedBy, string csvPath)

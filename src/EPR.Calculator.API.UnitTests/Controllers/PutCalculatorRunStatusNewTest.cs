@@ -39,7 +39,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.calculatorNewControllerUnderTest = new CalculatorNewController(
                 this.context,
                 this.mockValidator.Object,
-                Mock.Of<IBillingFileService>(),
                 Mock.Of<IInvoiceDetailsService>(),
                 Mock.Of<ILogger<CalculatorNewController>>(),
                 Mock.Of<IFileExportService>(),
