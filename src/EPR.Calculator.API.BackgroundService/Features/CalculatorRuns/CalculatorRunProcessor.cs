@@ -34,10 +34,10 @@ public class CalculatorRunProcessor(
 
             // This reads the required data to memory and builds the CalcResult object.
             // For CalculatorRunContext, it causes external state mutations.
-            var calcResult = await resultBuilder.BuildAsync(runContext, cancellationToken);
+            var (calcResult, producerFeeDetails) = await resultBuilder.BuildAsync(runContext, cancellationToken);
 
             // This mutates the state of various database entities to reflect the completed run.
-            await finalizer.FinalizeAsCompleted(runContext, calcResult, cancellationToken);
+            await finalizer.FinalizeAsCompleted(runContext, calcResult, producerFeeDetails, cancellationToken);
 
             return new CalculatorRunResult();
         }

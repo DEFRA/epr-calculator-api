@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 
 public interface IBillingInstructionService
 {
-    Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
+    Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
 }
 
 public class BillingInstructionService(
@@ -22,11 +22,11 @@ public class BillingInstructionService(
 ) : IBillingInstructionService
 {
     [ActivityTrace]
-    public async Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    public async Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
         try
         {
-            var billingInstructions = GetBillingInstructions(calcResult);
+            var billingInstructions = GetBillingInstructions(calcResult, producerFeeDetails);
 
             await bulkOps.BulkInsertAsync(dbContext, billingInstructions, cancellationToken);
 
@@ -38,14 +38,13 @@ public class BillingInstructionService(
         }
     }
 
-    private static ImmutableList<ProducerResultFileSuggestedBillingInstruction> GetBillingInstructions(CalcResult calcResult)
+    private static ImmutableList<ProducerResultFileSuggestedBillingInstruction> GetBillingInstructions(CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails)
     {
-        var producers = calcResult.ProducerFees.Details
-            .Where(producer => producer.FeeDetail.Level == CommonConstants.LevelOne.ToString());
+        var producers = producerFeeDetails.Where(producer => producer.Level == CommonConstants.LevelOne.ToString());
 
         var billingInstructions = ImmutableList.CreateBuilder<ProducerResultFileSuggestedBillingInstruction>();
 
-        foreach (var producer in producers.Select(fee => fee.FeeDetail))
+        foreach (var producer in producers)
         {
             var billingInstructionSection = producer.BillingInstruction;
 

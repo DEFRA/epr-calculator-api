@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
 
         public IEnumerable<CalcResultRejectedProducer> CalcResultRejectedProducers { get; set; } = [];
 
-        public ProducerFees ProducerFees { get; set; } = new() { CalculatorRunId = 0, Total = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty } };
+        public FeeDetail ProducerFeesTotal { get; set; } = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty };
 
         public IEnumerable<CalcResultErrorReport> CalcResultErrorReports { get; set; } = [];
 

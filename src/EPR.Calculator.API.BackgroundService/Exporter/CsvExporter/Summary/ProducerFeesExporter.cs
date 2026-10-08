@@ -9,11 +9,12 @@ public interface IProducerFeesExporter
 {
     void Export(
         RunContext runContext,
-        ProducerFees producerFees,
+        FeeDetail producerFeesTotal,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        StringBuilder csvContent,
+        IEnumerable<FeeDetail> producerFeeDetails
     );
 }
 
@@ -22,11 +23,12 @@ public class ProducerFeesExporter : IProducerFeesExporter
     [ActivityTrace]
     public void Export(
         RunContext runContext,
-        ProducerFees producerFees,
+        FeeDetail producerFeesTotal,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        StringBuilder csvContent,
+        IEnumerable<FeeDetail> producerFeeDetails
     )
     {
         var partExporters = BuildPartExporters(scaledupProducerIds, partialProducerSubsidiaryIds);
@@ -34,12 +36,12 @@ public class ProducerFeesExporter : IProducerFeesExporter
         csvContent.AppendLine();
         csvContent.AppendLine();
 
-        AddSummaryDataHeader(producerFees, materials, runContext.RequiresModulation, csvContent, partExporters);
+        AddSummaryDataHeader(producerFeesTotal, materials, runContext.RequiresModulation, csvContent, partExporters);
 
-        foreach (var producer in producerFees.Details.Select(fee => fee.FeeDetail))
+        foreach (var producer in producerFeeDetails)
             AddNewRow(csvContent, new ProducerFeeExportRow(producer.Level, producer), runContext.RequiresModulation, partExporters, isOverallTotal: false);
 
-        AddNewRow(csvContent, new ProducerFeeExportRow(string.Empty, producerFees.Total), runContext.RequiresModulation, partExporters, isOverallTotal: true);
+        AddNewRow(csvContent, new ProducerFeeExportRow(string.Empty, producerFeesTotal), runContext.RequiresModulation, partExporters, isOverallTotal: true);
     }
 
     private static void AddNewRow(StringBuilder csvContent, ProducerFeeExportRow producer, bool applyModulation, IReadOnlyList<IProducerFeesPartExporter> partExporters, bool isOverallTotal)
@@ -73,7 +75,7 @@ public class ProducerFeesExporter : IProducerFeesExporter
         new BillingInstructionsExporter(),
     ];
 
-    private static void AddSummaryDataHeader(ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation, StringBuilder csvContent, IReadOnlyList<IProducerFeesPartExporter> partExporters)
+    private static void AddSummaryDataHeader(FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation, StringBuilder csvContent, IReadOnlyList<IProducerFeesPartExporter> partExporters)
     {
         csvContent.AppendLine(CsvSanitiser.SanitiseData("Calculation Result"))
             .AppendLine()
@@ -84,11 +86,11 @@ public class ProducerFeesExporter : IProducerFeesExporter
             "See 'Scaled-up Producers' table for details."));
 
         foreach (var exporter in partExporters)
-            exporter.AppendSectionHeader(csvContent, producerFees, materials, applyModulation);
+            exporter.AppendSectionHeader(csvContent, producerFeesTotal, materials, applyModulation);
         csvContent.AppendLine();
 
         foreach (var exporter in partExporters)
-            exporter.AppendGroupHeader(csvContent, producerFees, materials, applyModulation);
+            exporter.AppendGroupHeader(csvContent, producerFeesTotal, materials, applyModulation);
         csvContent.AppendLine();
 
         foreach (var exporter in partExporters)

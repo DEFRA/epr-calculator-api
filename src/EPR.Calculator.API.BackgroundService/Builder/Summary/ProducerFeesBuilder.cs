@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Summary;
 
 public interface IProducerFeesBuilder
 {
-    Task<ProducerFees> ConstructAsync(
+    Task<(FeeDetail Total, IReadOnlyList<FeeDetail> Details)> ConstructAsync(
         RunContext runContext,
         IImmutableList<MaterialDetail> materialDetails,
         CalcResult calcResult,
@@ -27,7 +27,7 @@ public class ProducerFeesBuilder(
     : IProducerFeesBuilder
 {
     [ActivityTrace]
-    public async Task<ProducerFees> ConstructAsync(
+    public async Task<(FeeDetail Total, IReadOnlyList<FeeDetail> Details)> ConstructAsync(
         RunContext runContext,
         IImmutableList<MaterialDetail> materialDetails,
         CalcResult calcResult,
@@ -90,7 +90,7 @@ public class ProducerFeesBuilder(
             BuildParentOrganisationsById(parentOrganisations)
         );
 
-        return GetProducerFees(
+        var producerFees = GetProducerFees(
             runContext,
             projectedMaterialsLookup,
             producerDetails,
@@ -101,6 +101,8 @@ public class ProducerFeesBuilder(
             smcw,
             rowBuilder
         );
+
+        return (producerFees.Total, producerFees.Details.Select(d => d.FeeDetail).ToList());
     }
 
     private static ImmutableDictionary<(int, int), decimal?> BuildInvoicedNetTonnageByProducerMaterial(

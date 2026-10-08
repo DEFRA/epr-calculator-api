@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.Summary;
 [TestClass]
 public class BillingInstructionsProducerTests
 {
-    private readonly CalcResult calcResult = TestDataHelper.GetCalcResult();
+    private readonly ProducerFees producerFees = TestDataHelper.GetProducerFees();
 
     private readonly InvoicedProducer defaultInvoicedProducer = new()
     {
@@ -54,10 +54,10 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = -99999m, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, producerInvoicedMaterialNetTonnage, otherCost);
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction;
+        BillingInstructionsProducer.SetValues(producerFees, producerInvoicedMaterialNetTonnage, otherCost);
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction;
 
-        var calcTotal = calcResult.ProducerFees.Details.First().FeeDetail.TotalBillBreakdown!.ByCountry.Total;
+        var calcTotal = producerFees.Details.First().FeeDetail.TotalBillBreakdown!.ByCountry.Total;
         var expectedLiabilityDiff = MathUtils.RoundAwayFromZero(calcTotal, 2) - MathUtils.RoundAwayFromZero(20.00m, 2);
 
         // Assert
@@ -897,20 +897,20 @@ public class BillingInstructionsProducerTests
     [TestMethod]
     public void CalculatePercentageLiabilityDifference_LevelNot1_ReturnsNull()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.Level = "2";
+        producerFees.Details.First().FeeDetail.Level = "2";
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.IsNull(fee.PercentageLiabilityDifference);
     }
 
     [TestMethod]
     public void CalculatePercentageLiabilityDifference_Level1_ComputesRoundedDifference()
     {
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(52348.00m, fee.PercentageLiabilityDifference);
     }
 
@@ -927,11 +927,11 @@ public class BillingInstructionsProducerTests
     [TestMethod]
     public void CalculateMaterialPercentageThresholdBreached_LevelNot1_ReturnsHypen()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.Level = "2";
+        producerFees.Details.First().FeeDetail.Level = "2";
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(null, fee.MaterialityPercentageLiabilityDirection);
     }
 
@@ -943,9 +943,9 @@ public class BillingInstructionsProducerTests
             MaterialityIncrease = new Materiality { Amount = 0, Percentage = 50m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(LiabilityDirection.Positive, fee.MaterialityPercentageLiabilityDirection);
     }
 
@@ -958,9 +958,9 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(LiabilityDirection.Negative, fee.MaterialityPercentageLiabilityDirection);
     }
 
@@ -973,20 +973,20 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = -99999m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(null, fee.MaterialityPercentageLiabilityDirection);
     }
 
     [TestMethod]
     public void CalculateTonnagePercentageThresholdBreached_LevelNot1_ReturnsHypen()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.Level = "2";
+        producerFees.Details.First().FeeDetail.Level = "2";
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(null, fee.TonnageAmountPercentageLiabilityDirection);
     }
 
@@ -998,32 +998,32 @@ public class BillingInstructionsProducerTests
             TonnageChangeIncrease = new Materiality { Amount = 0, Percentage = 50m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(null, fee.TonnageAmountPercentageLiabilityDirection);
     }
 
     [TestMethod]
     public void CalculateTonnagePercentageThresholdBreached_Level1_ReturnsPositive()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.TonnageChangeAdvice = "CHANGE";
+        producerFees.Details.First().FeeDetail.TonnageChangeAdvice = "CHANGE";
 
         var otherCost = new CalcResultParameterOtherCost
         {
             TonnageChangeIncrease = new Materiality { Amount = 0, Percentage = 50m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(LiabilityDirection.Positive, fee.TonnageAmountPercentageLiabilityDirection);
     }
 
     [TestMethod]
     public void CalculateTonnagePercentageThresholdBreached_Level1_ReturnsNegative()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.TonnageChangeAdvice = "CHANGE";
+        producerFees.Details.First().FeeDetail.TonnageChangeAdvice = "CHANGE";
 
         var otherCost = new CalcResultParameterOtherCost
         {
@@ -1031,29 +1031,29 @@ public class BillingInstructionsProducerTests
             TonnageChangeDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(LiabilityDirection.Negative, fee.TonnageAmountPercentageLiabilityDirection);
     }
 
     [TestMethod]
     public void CalculateTonnagePercentageThresholdBreached_Level1_ReturnsHypen()
     {
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(null, fee.TonnageAmountPercentageLiabilityDirection);
     }
 
     [TestMethod]
     public void CalculateSuggestedBillingInstruction_NotLevel1_ReturnsHypen()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.Level = "2";
+        producerFees.Details.First().FeeDetail.Level = "2";
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(CommonConstants.Hyphen, fee.SuggestedBillingInstruction);
     }
 
@@ -1068,9 +1068,9 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(BillingConstants.Suggestion.Delta, fee.SuggestedBillingInstruction);
     }
 
@@ -1085,9 +1085,9 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(BillingConstants.Suggestion.Rebill, fee.SuggestedBillingInstruction);
     }
 
@@ -1096,20 +1096,20 @@ public class BillingInstructionsProducerTests
     {
         var invoicedProducer = defaultInvoicedProducer with { CurrentYearInvoicedTotalAfterThisRun = 10491.17m };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(CommonConstants.Hyphen, fee.SuggestedBillingInstruction);
     }
 
     [TestMethod]
     public void CalculateGetSuggestedInvoiceAmount_NotLevel1_ReturnsHypen()
     {
-        calcResult.ProducerFees.Details.First().FeeDetail.Level = "2";
+        producerFees.Details.First().FeeDetail.Level = "2";
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [defaultInvoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.IsNull(fee.SuggestedInvoiceAmount);
     }
 
@@ -1124,9 +1124,9 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(fee.LiabilityDifference, fee.SuggestedInvoiceAmount);
     }
 
@@ -1141,9 +1141,9 @@ public class BillingInstructionsProducerTests
             MaterialityDecrease = new Materiality { Amount = 0, Percentage = 55000m }
         };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], otherCost);
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], otherCost);
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.AreEqual(10491.17m, MathUtils.RoundAwayFromZero(fee.SuggestedInvoiceAmount ?? 0m, 2));
     }
 
@@ -1152,9 +1152,9 @@ public class BillingInstructionsProducerTests
     {
         var invoicedProducer = defaultInvoicedProducer with { CurrentYearInvoicedTotalAfterThisRun = 10491.17m };
 
-        BillingInstructionsProducer.SetValues(calcResult.ProducerFees, [invoicedProducer], new CalcResultParameterOtherCost());
+        BillingInstructionsProducer.SetValues(producerFees, [invoicedProducer], new CalcResultParameterOtherCost());
 
-        var fee = calcResult.ProducerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
+        var fee = producerFees.Details.ToList()[0].FeeDetail.BillingInstruction!;
         Assert.IsNull(fee.SuggestedInvoiceAmount);
     }
 }
