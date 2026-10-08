@@ -2,10 +2,10 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
+using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
-using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing;
@@ -23,6 +23,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
         runContext = TestDataHelper.BillingRun2025;
         finalizer = fixture.Freeze<Mock<IBillingRunFinalizer>>();
         logger = fixture.Freeze<Mock<ILogger<BillingRunProcessor>>>();
+        fixture.Inject<ICalcResultReader>(new CalcResultReader(dbContext, Mock.Of<IMaterialService>()));
         dbContext.ProducerDisposalFee.Add(new ProducerFees
         {
             CalculatorRunId = runContext.RunId,
@@ -43,7 +44,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     {
         var exception = new OperationCanceledException("Test cancelled");
         finalizer
-            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<ProducerFees>(), CancellationToken.None))
+            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<IReadOnlyList<FeeDetail>>(), CancellationToken.None))
             .ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
@@ -57,7 +58,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     {
         var exception = new Exception("Test failure");
         finalizer
-            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<ProducerFees>(), CancellationToken.None))
+            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<IReadOnlyList<FeeDetail>>(), CancellationToken.None))
             .ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
@@ -83,16 +84,16 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
         dbContext.SaveChanges();
         dbContext.ChangeTracker.Clear();
 
-        ProducerFees? capturedProducerFees = null;
+        IReadOnlyList<FeeDetail>? capturedProducerFeeDetails = null;
         finalizer
-            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<ProducerFees>(), CancellationToken.None))
-            .Callback<BillingRunContext, ProducerFees, CancellationToken>((_, fees, _) => capturedProducerFees = fees)
+            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<IReadOnlyList<FeeDetail>>(), CancellationToken.None))
+            .Callback<BillingRunContext, IReadOnlyList<FeeDetail>, CancellationToken>((_, details, _) => capturedProducerFeeDetails = details)
             .Returns(Task.CompletedTask);
 
         await testSubject.Process(runContext, CancellationToken.None);
 
-        capturedProducerFees.ShouldNotBeNull();
-        capturedProducerFees!.Details.ShouldNotBeEmpty();
+        capturedProducerFeeDetails.ShouldNotBeNull();
+        capturedProducerFeeDetails!.ShouldNotBeEmpty();
     }
 
     [TestMethod]

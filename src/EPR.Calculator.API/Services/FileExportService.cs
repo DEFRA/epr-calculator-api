@@ -82,7 +82,7 @@ public class FileExportService(
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var content = await resultsFileExporter.Export(runContext, result);
+        var content = await resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId));
         var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
         return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
     }
@@ -99,26 +99,29 @@ public class FileExportService(
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var filteredResult = FilterResult(runId, result, runContext.AcceptedProducerIds);
+        var filteredResult = FilterResult(result, runContext.AcceptedProducerIds);
         var billingCsvFileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, isDraftBillingFile: true);
+        var acceptedFeeDetails = calcResultReader.StreamProducerFeeDetails(runContext.RunId)
+            .Where(d => runContext.AcceptedProducerIds.Contains(d.ProducerId));
+
         return billingFileType switch
         {
             FileExportType.Csv => new FileExportResult.Exported(
-                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult)),
+                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails)),
                 billingCsvFileName
             ),
             FileExportType.Json => new FileExportResult.Exported(
-                await WriteBillingJson(runContext, filteredResult, cancellationToken),
+                await WriteBillingJson(runContext, filteredResult, acceptedFeeDetails, cancellationToken),
                 new CalcResultsAndBillingFileName(runContext.RunId)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };
     }
 
-    private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
         using var stream = new MemoryStream();
-        await billingJsonWriter.WriteTo(stream, runContext, calcResult, cancellationToken);
+        await billingJsonWriter.WriteTo(stream, runContext, calcResult, producerFeeDetails, cancellationToken);
         return stream.ToArray();
     }
 
@@ -216,7 +219,7 @@ public class FileExportService(
         if (runContext.RequiresModulation)
             result.CalcResultModulation = await calcResultReader.ReadModulationResult(runContext.RunId, cancellationToken);
 
-        result.ProducerFees = await calcResultReader.ReadProducerFees(runContext.RunId, cancellationToken);
+        result.ProducerFeesTotal = await calcResultReader.ReadProducerFeesTotal(runContext.RunId, cancellationToken);
 
         if (runContext.RunType is RunType.Calculator)
             result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
@@ -224,7 +227,7 @@ public class FileExportService(
         return result;
     }
 
-    private static CalcResult FilterResult(int runId, CalcResult calcResult, ImmutableHashSet<int> acceptedProducerIds)
+    private static CalcResult FilterResult(CalcResult calcResult, ImmutableHashSet<int> acceptedProducerIds)
     {
         ImmutableList<T> FilterAccepted<T>(IEnumerable<T> producers, Func<T, int> producerId) =>
                 producers.Where(producer => acceptedProducerIds.Contains(producerId(producer))).ToImmutableList();
@@ -240,12 +243,7 @@ public class FileExportService(
             },
             CalcResultScaledupProducers = calcResult.CalcResultScaledupProducers with { ScaledupProducers = FilterAccepted(calcResult.CalcResultScaledupProducers.ScaledupProducers, p => p.ProducerId) },
             CalcResultPartialObligations = calcResult.CalcResultPartialObligations with { PartialObligations = FilterAccepted(calcResult.CalcResultPartialObligations.PartialObligations, p => p.ProducerId) },
-            ProducerFees = new ProducerFees
-            {
-                CalculatorRunId = runId,
-                Details         = FilterAccepted(calcResult.ProducerFees.Details, p => p.FeeDetail.ProducerId),
-                Total           = BillingTotal(calcResult.ProducerFees.Total)
-            },
+            ProducerFeesTotal = BillingTotal(calcResult.ProducerFeesTotal),
             CalcResultCancelledProducers = calcResult.CalcResultCancelledProducers.Where(p => !rejectedProducerIds.Contains(p.ProducerId)).ToList()
         };
     }

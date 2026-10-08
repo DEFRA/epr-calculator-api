@@ -27,7 +27,7 @@ public class CalcResultSummaryCommsCostTwoBTotalBillTests
             CalcResultLaDisposalCostData = TestDataHelper.GetCalcResultLaDisposalCostData(),
             CalcResultLapcapData = TestDataHelper.GetCalcResultLapcapData(),
             CalcResultOnePlusFourApportionment = GetCalcResultOnePlusFourApportionment(),
-            ProducerFees = TestDataHelper.GetProducerFees(),
+            ProducerFeesTotal = TestDataHelper.GetProducerFees().Total,
             CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
             CalcResultLateReportingTonnageData = GetCalcResultLateReportingTonnage(),
             CalcResultScaledupProducers = TestDataHelper.GetScaledupProducers(),

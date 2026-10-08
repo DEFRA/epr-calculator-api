@@ -1,5 +1,6 @@
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ public interface IBillingRunProcessor
 
 public class BillingRunProcessor(
     ApplicationDBContext dbContext,
+    ICalcResultReader calcResultReader,
     IBillingRunFinalizer finalizer,
     ILogger<BillingRunProcessor> logger
 ) : IBillingRunProcessor
@@ -21,16 +23,17 @@ public class BillingRunProcessor(
     {
         try
         {
-            var producerFees = await dbContext.ProducerDisposalFee
+            var hasProducerFees = await dbContext.ProducerDisposalFee
                 .AsNoTracking()
-                .Include(f => f.Details)
-                .SingleOrDefaultAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
+                .AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
-            if(producerFees is null)
+            if (!hasProducerFees)
                 throw new InvalidOperationException("ProducerFees cannot be null for billing file run");
 
+            var producerFeeDetails = calcResultReader.StreamProducerFeeDetails(runContext.RunId).ToList();
+
             // This mutates the state of various database entities to reflect the completed run.
-            await finalizer.FinalizeAsCompleted(runContext, producerFees, cancellationToken);
+            await finalizer.FinalizeAsCompleted(runContext, producerFeeDetails, cancellationToken);
 
             return new BillingRunResult();
         }

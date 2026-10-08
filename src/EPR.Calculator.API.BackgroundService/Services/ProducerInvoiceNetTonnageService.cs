@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 
 public interface IProducerInvoiceNetTonnageService
 {
-    Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
+    Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
 }
 
 public class ProducerInvoiceNetTonnageService(
@@ -20,12 +20,12 @@ public class ProducerInvoiceNetTonnageService(
 ) : IProducerInvoiceNetTonnageService
 {
     [ActivityTrace]
-    public async Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    public async Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
         try
         {
             var materials = await materialService.GetMaterials();
-            var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult, materials);
+            var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult, producerFeeDetails, materials);
 
             await bulkOps.BulkInsertAsync(dbContext, producerInvoicedNetTonnage, cancellationToken);
 
@@ -37,16 +37,15 @@ public class ProducerInvoiceNetTonnageService(
         }
     }
 
-    private static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<MaterialDetail> materials)
+    private static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, IReadOnlyList<MaterialDetail> materials)
     {
-        var producers = calcResult.ProducerFees.Details
-            .Where(producer => producer.FeeDetail.Level == CommonConstants.LevelOne.ToString());
+        var producers = producerFeeDetails.Where(producer => producer.Level == CommonConstants.LevelOne.ToString());
 
         var runId = calcResult.CalcResultDetail.RunId;
 
         var producerInvoiceNetTonnages = ImmutableList.CreateBuilder<ProducerInvoicedMaterialNetTonnage>();
 
-        foreach (var producer in producers.Select(fee => fee.FeeDetail))
+        foreach (var producer in producers)
         {
             foreach (var material in materials)
             {

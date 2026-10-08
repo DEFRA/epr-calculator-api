@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 /// </summary>
 public interface IBillingRunFinalizer
 {
-    Task FinalizeAsCompleted(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken);
+    Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
     Task FinalizeAsErrored(BillingRunContext runContext, CancellationToken cancellationToken);
 }
 
@@ -28,13 +28,13 @@ public class BillingRunFinalizer(
 ) : IBillingRunFinalizer
 {
     [ActivityTrace]
-    public async Task FinalizeAsCompleted(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken)
+    public async Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            await SaveSuggestedBillingFees(runContext, producerFees, cancellationToken);
+            await SaveSuggestedBillingFees(runContext, producerFeeDetails, cancellationToken);
             await SaveExportMetadata(runContext, cancellationToken);
             await SaveCompletedRunStatus(runContext, cancellationToken);
 
@@ -67,11 +67,11 @@ public class BillingRunFinalizer(
     }
 
     [ActivityTrace]
-    private async Task SaveSuggestedBillingFees(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken)
+    private async Task SaveSuggestedBillingFees(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
-        var level1FeesByProducerId = producerFees.Details
-            .Where(f => f.FeeDetail.Level == CommonConstants.LevelOne.ToString())
-            .ToImmutableDictionary(f => f.FeeDetail.ProducerId, f => f);
+        var level1FeesByProducerId = producerFeeDetails
+            .Where(f => f.Level == CommonConstants.LevelOne.ToString())
+            .ToImmutableDictionary(f => f.ProducerId, f => f);
 
         if (level1FeesByProducerId.Count == 0) return;
 
@@ -84,15 +84,15 @@ public class BillingRunFinalizer(
         foreach (var suggestedInstruction in suggestedInstructions)
         {
             var fee = level1FeesByProducerId[suggestedInstruction.ProducerId];
-            suggestedInstruction.CurrentYearInvoiceTotalToDate = fee.FeeDetail.BillingInstruction?.CurrentYearInvoiceTotalToDate;
-            suggestedInstruction.TonnageChangeSinceLastInvoice = fee.FeeDetail.BillingInstruction?.TonnageChangeSinceLastInvoice;
-            suggestedInstruction.AmountLiabilityDifferenceCalcVsPrev = fee.FeeDetail.BillingInstruction?.LiabilityDifference;
-            suggestedInstruction.MaterialPoundThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.FeeDetail.BillingInstruction?.MaterialityLiabilityDirection);
-            suggestedInstruction.TonnagePoundThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.FeeDetail.BillingInstruction?.TonnageAmountLiabilityDirection);
-            suggestedInstruction.PercentageLiabilityDifferenceCalcVsPrev = fee.FeeDetail.BillingInstruction?.PercentageLiabilityDifference;
-            suggestedInstruction.TonnagePercentageThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.FeeDetail.BillingInstruction?.TonnageAmountPercentageLiabilityDirection);
-            suggestedInstruction.SuggestedBillingInstruction = fee.FeeDetail.BillingInstruction?.SuggestedBillingInstruction!;
-            suggestedInstruction.SuggestedInvoiceAmount = fee.FeeDetail.BillingInstruction?.SuggestedInvoiceAmount ?? 0m;
+            suggestedInstruction.CurrentYearInvoiceTotalToDate = fee.BillingInstruction?.CurrentYearInvoiceTotalToDate;
+            suggestedInstruction.TonnageChangeSinceLastInvoice = fee.BillingInstruction?.TonnageChangeSinceLastInvoice;
+            suggestedInstruction.AmountLiabilityDifferenceCalcVsPrev = fee.BillingInstruction?.LiabilityDifference;
+            suggestedInstruction.MaterialPoundThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.BillingInstruction?.MaterialityLiabilityDirection);
+            suggestedInstruction.TonnagePoundThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.BillingInstruction?.TonnageAmountLiabilityDirection);
+            suggestedInstruction.PercentageLiabilityDifferenceCalcVsPrev = fee.BillingInstruction?.PercentageLiabilityDifference;
+            suggestedInstruction.TonnagePercentageThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.BillingInstruction?.TonnageAmountPercentageLiabilityDirection);
+            suggestedInstruction.SuggestedBillingInstruction = fee.BillingInstruction?.SuggestedBillingInstruction!;
+            suggestedInstruction.SuggestedInvoiceAmount = fee.BillingInstruction?.SuggestedInvoiceAmount ?? 0m;
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
