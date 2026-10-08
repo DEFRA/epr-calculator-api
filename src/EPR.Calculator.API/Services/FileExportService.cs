@@ -50,11 +50,11 @@ public class FileExportService(
     IBillingFileJsonWriter billingJsonWriter
 )  : IFileExportService
 {
-    private static readonly ImmutableHashSet<int> NonDownloadableClassifications = [
-        RunClassificationStatusIds.INTHEQUEUEID,
-        RunClassificationStatusIds.RUNNINGID,
-        RunClassificationStatusIds.ERRORID,
-        RunClassificationStatusIds.DELETEDID
+    private static readonly ImmutableHashSet<RunClassification> NonDownloadableClassifications = [
+        RunClassification.None,
+        RunClassification.Running,
+        RunClassification.Errored,
+        RunClassification.Deleted
     ];
 
     private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
@@ -126,7 +126,7 @@ public class FileExportService(
     {
         var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        if(run is null || NonDownloadableClassifications.Contains(run.CalculatorRunClassificationId))
+        if(run is null || NonDownloadableClassifications.Contains(run.Classification))
             return null;
 
         return new CalculatorRunContext
@@ -146,7 +146,7 @@ public class FileExportService(
             .AsNoTracking()
             .SingleOrDefaultAsync(r => r.Id == runId, cancellationToken);
 
-        if (run is null || run.BillingRunStatus != BillingRunStatus.Completed || run.CalculatorRunClassificationId == RunClassificationStatusIds.DELETEDID)
+        if (run is null || run.BillingRunStatus != BillingRunStatus.Completed || run.Classification == RunClassification.Deleted)
             return null;
 
         var billingFileMetadata = await dbContext.CalculatorRunBillingFileMetadata

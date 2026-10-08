@@ -100,7 +100,7 @@ public class FileExportServiceTests
     public async Task Export_ResultCsv_ReturnsExported_HasData()
     {
         var createdAt = new DateTime(2026, 3, 15, 9, 30, 0, DateTimeKind.Utc);
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, createdAt: createdAt);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName, createdAt: createdAt);
         AddProducerFeeRow(RunId);
         resultsFileExporterMock
             .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
@@ -119,7 +119,7 @@ public class FileExportServiceTests
     public async Task Export_BillingCsv_ReturnsExported_HasData()
     {
         var billingFileCreatedDate = new DateTime(2026, 3, 15, 9, 30, 0, DateTimeKind.Utc);
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId, createdDate: billingFileCreatedDate);
         AddProducerFeeRow(RunId);
         billingFileExporterMock
@@ -138,7 +138,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_BillingJson_ReturnsExported_HasData()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
         AddProducerFeeRow(RunId);
         billingJsonWriterMock
@@ -159,7 +159,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_GetResult_NoScalingOrModulation()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, relativeYear: 2024);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName, relativeYear: 2024);
         AddProducerFeeRow(RunId);
 
         var calcResultDetail = new Mock<CalcResultDetail>().Object;
@@ -208,7 +208,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_GetResult_Modulation()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, relativeYear: 2026);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName, relativeYear: 2026);
         AddProducerFeeRow(RunId);
 
         var h1Data = new Mock<List<CalcResultH1ProjectedProducer>>().Object;
@@ -239,7 +239,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_GetResult_Scaling()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, relativeYear: 2025);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName, relativeYear: 2025);
         AddProducerFeeRow(RunId);
 
         var scaledUpData = new Mock<List<CalcResultScaledupProducer>>().Object;
@@ -277,7 +277,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_ResultCsv_ReturnsNotFound_WhenCalculatorRunClassificationIsNotDownloadable()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.RUNNINGID, BillingRunStatus.None, RunName);
+        AddCalculatorRun(RunId, RunClassification.Running, BillingRunStatus.None, RunName);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
         result.ShouldBeOfType<FileExportResult.NotFound>();
@@ -286,7 +286,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_Billing_ReturnsNotFound_WhenBillingRunStatusIsNotCompleted()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName);
         AddBillingFileMetadata(RunId);
 
         var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
@@ -299,7 +299,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_Billing_ReturnsNotFound_WhenBillingRunClassificationIsDeleted()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.DELETEDID, BillingRunStatus.Completed, RunName);
+        AddCalculatorRun(RunId, RunClassification.Deleted, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
 
         var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
@@ -312,7 +312,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_Billing_ReturnsNotFound_WhenBillingRunHasNoBillingFileMetadata()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.Completed, RunName);
 
         var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
         var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
@@ -324,7 +324,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_ResultCsv_ReturnsLegacy_WhenCalculatorRunHasNoProducerFeeData()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.None, RunName);
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
         result.ShouldBeOfType<FileExportResult.Legacy>();
     }
@@ -332,7 +332,7 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_Billing_ReturnsLegacy_WhenBillingRunHasNoProducerFeeData()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
+        AddCalculatorRun(RunId, RunClassification.InitialCompleted, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
 
         var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
@@ -344,7 +344,7 @@ public class FileExportServiceTests
 
     private void AddCalculatorRun(
         int runId,
-        int classificationId,
+        RunClassification classification,
         BillingRunStatus billingRunStatus,
         string name,
         int relativeYear = 2026,
@@ -357,7 +357,7 @@ public class FileExportServiceTests
             RelativeYear = new RelativeYear(relativeYear),
             CreatedBy = "test-user",
             CreatedAt = createdAt ?? DateTime.UtcNow,
-            CalculatorRunClassificationId = classificationId,
+            Classification = classification,
             BillingRunStatus = billingRunStatus,
             BillingRunStartedAt = DateTime.UtcNow,
         });
