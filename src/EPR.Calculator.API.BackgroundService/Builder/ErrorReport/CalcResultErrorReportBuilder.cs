@@ -44,6 +44,9 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
                     into prodGroup
                 from prodLeft in prodGroup.DefaultIfEmpty()
 
+                // A producer can have several organisation rows (one per submitter) - order so First() below is repeatable.
+                orderby er.Id, subLeft == null ? 0 : subLeft.Id, prodLeft == null ? 0 : prodLeft.Id
+
                 select new CalcResultErrorReport
                 {
                     Id = er.Id,
@@ -93,6 +96,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
             var holdingCompanies = context.CalculatorRunOrganisations
                 .AsNoTracking()
                 .Where(o => o.CalculatorRunId == runId && o.SubsidiaryId == null && producerIds.Contains(o.OrganisationId))
+                .OrderBy(o => o.Id)
                 .AsEnumerable()
                 .GroupBy(o => o.OrganisationId)
                 .ToDictionary(g => g.Key, g => g.First());
