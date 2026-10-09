@@ -102,7 +102,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     }
 
     [TestMethod]
-    public void Should_error_for_existing_CalculatorRunOrganisationDataMasterId()
+    public void Should_error_for_existing_OrgPomDataLoadedAt()
     {
         var run = new CalculatorRun
         {
@@ -110,28 +110,11 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
-            CalculatorRunOrganisationDataMasterId = 1
+            OrgPomDataLoadedAt = DateTime.UtcNow
         };
 
         var result = testSubject.TestValidate(run);
 
-        result.ShouldHaveValidationErrorFor(r => r.CalculatorRunOrganisationDataMasterId);
-    }
-
-    [TestMethod]
-    public void Should_error_for_existing_CalculatorRunPomDataMasterId()
-    {
-        var run = new CalculatorRun
-        {
-            Classification = RunClassification.Running,
-            Name = "TestRun",
-            DefaultParameterSettingMasterId = 1,
-            LapcapDataMasterId = 1,
-            CalculatorRunPomDataMasterId = 1
-        };
-
-        var result = testSubject.TestValidate(run);
-
-        result.ShouldHaveValidationErrorFor(r => r.CalculatorRunPomDataMasterId);
+        result.ShouldHaveValidationErrorFor(r => r.OrgPomDataLoadedAt);
     }
 }
