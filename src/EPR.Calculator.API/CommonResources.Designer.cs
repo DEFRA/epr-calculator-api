@@ -60,6 +60,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Billing file has already been shared..
+        /// </summary>
+        public static string BillingFileAlreadyShared {
+            get {
+                return ResourceManager.GetString("BillingFileAlreadyShared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing file is either missing or outdated..
         /// </summary>
         public static string BillingFileOutdated {

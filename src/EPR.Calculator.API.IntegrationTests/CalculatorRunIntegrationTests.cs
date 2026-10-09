@@ -5,7 +5,6 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -45,7 +44,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
-        var calculatorRunResult = await PerformCalculatorRun(calculatorRunId, rundBy);
+        var calculatorRunResult = await PerformCalculatorRun(db, calculatorRunId, rundBy);
         {
             var contents      = fakeBlobStorageUploadService.Get(calculatorRunResult.ExportResult.CsvMetadata.FileName);
             var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                   )).Trim().Split(Environment.NewLine);
@@ -101,7 +100,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         $"Full contents:\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n{contents}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 
 
-    private static async Task<CalculatorRunResult> PerformCalculatorRun(int runId, string user)
+    private static async Task<CalculatorRunResult> PerformCalculatorRun(ApplicationDBContext dbContext, int runId, string user)
     {
         await using var scope = Provider.CreateAsyncScope();
         var builder   = scope.ServiceProvider.GetRequiredService<ICalculatorRunContextBuilder>();
@@ -114,21 +113,29 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         using (logger.BeginRunScope(runContext))
         using (telemetry.BeginRunScope(runContext))
         {
-            var runResult = await processor.Process(runContext, CancellationToken.None);
-            runResult.Succeeded.ShouldBeTrue();
+            var runResult = await processor.Process(runContext, CancellationToken.None) as CalculatorRunResult;
+            runResult?.Succeeded.ShouldBeTrue();
 
-            return (CalculatorRunResult) runResult;
+            var run = await dbContext.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId);
+            run.Classification.ShouldBe(RunClassification.None);
+            run.CalculationRunStatus.ShouldBe(CalculationRunStatus.Completed);
+            run.BillingRunStatus.ShouldBe(BillingRunStatus.None);
+            run.BillingRunStartedAt.ShouldBeNull();
+            run.IsBillingFileShared.ShouldBeFalse();
+
+            return runResult!;
         }
     }
 
     private static async Task<BillingRunResult> PerformBillingRun(ApplicationDBContext dbContext, int runId, string user)
     {
         // Simulates the billing run being started by a user in the FE
-        var calcRun = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId);
-        calcRun.Classification = RunClassification.Initial;
-        calcRun.BillingRunStatus = BillingRunStatus.Running;
-        calcRun.BillingRunStartedAt = DateTime.UtcNow;
-        await dbContext.SaveChangesAsync();
+        {
+            var calcRun = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId);
+            calcRun.Classification = RunClassification.Initial;
+            calcRun.BillingRunStatus = BillingRunStatus.None;
+            await dbContext.SaveChangesAsync();
+        }
 
         await using var scope = Provider.CreateAsyncScope();
         var builder   = scope.ServiceProvider.GetRequiredService<IBillingRunContextBuilder>();
@@ -141,10 +148,17 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         using (logger.BeginRunScope(runContext))
         using (telemetry.BeginRunScope(runContext))
         {
-            var runResult = await processor.Process(runContext, CancellationToken.None);
-            runResult.Succeeded.ShouldBeTrue();
+            var runResult = await processor.Process(runContext, CancellationToken.None) as BillingRunResult;
+            runResult?.Succeeded.ShouldBeTrue();
 
-            return (BillingRunResult) runResult;
+            var run = await dbContext.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId);
+            run.Classification.ShouldBe(RunClassification.Initial);
+            run.CalculationRunStatus.ShouldBe(CalculationRunStatus.Completed);
+            run.BillingRunStatus.ShouldBe(BillingRunStatus.Completed);
+            run.BillingRunStartedAt.ShouldNotBeNull();
+            run.IsBillingFileShared.ShouldBeFalse();
+
+            return runResult!;
         }
     }
 
@@ -197,12 +211,13 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         {
             Name                            = name,
             RelativeYear                    = relativeYear,
+            Classification                  = RunClassification.None,
+            CalculationRunStatus            = CalculationRunStatus.None,
+            BillingRunStatus                = BillingRunStatus.None,
             CreatedBy                       = "some-user",
             CreatedAt                       = Now,
-            Classification                  = RunClassification.Running,
             DefaultParameterSettingMasterId = parameterMaster.Id,
-            LapcapDataMasterId              = lapcap.Id,
-            BillingRunStatus                = BillingRunStatus.None
+            LapcapDataMasterId              = lapcap.Id
         };
         db.CalculatorRuns.Add(run);
         await db.SaveChangesAsync();

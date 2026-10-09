@@ -12,6 +12,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
     {
         private readonly int calcRunId = 85885;
         private readonly int unclassifiedRunId = 85886;
+        private readonly int erroredRunId = 85887;
 
         private ApplicationDBContext dbContext = null!;
         private CalcRelativeYearRequestDtoDataValidator validator = null!;
@@ -31,6 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 new()
                 {
                     Classification = RunClassification.Initial,
+                    CalculationRunStatus = CalculationRunStatus.Completed,
                     RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = calcRunId,
@@ -39,10 +41,21 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 },
                 new()
                 {
-                    Classification = RunClassification.Unclassified,
+                    Classification = RunClassification.None,
+                    CalculationRunStatus = CalculationRunStatus.Completed,
                     RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = unclassifiedRunId,
+                    CreatedBy = "Test",
+                    CreatedAt = DateTime.UtcNow,
+                },
+                new()
+                {
+                    Classification = RunClassification.None,
+                    CalculationRunStatus = CalculationRunStatus.Errored,
+                    RelativeYear = new RelativeYear(2024),
+                    Name = "Test",
+                    Id = erroredRunId,
                     CreatedBy = "Test",
                     CreatedAt = DateTime.UtcNow,
                 },
@@ -107,6 +120,24 @@ namespace EPR.Calculator.API.UnitTests.Validators
             // Assert
             result.IsInvalid.ShouldBeTrue();
             result.Errors.Where(e => e.Message == "Run is already classified.").ShouldHaveSingleItem();
+        }
+
+        [TestMethod]
+        public async Task Validate_ReturnsInvalid_WhenRunCalculationHasNotCompleted()
+        {
+            // Arrange
+            var request = new CalcRelativeYearRequestDto
+            {
+                RunId = erroredRunId,
+                RelativeYearValue = 2024,
+            };
+
+            // Act
+            var result = await validator.Validate(request, CancellationToken.None);
+
+            // Assert
+            result.IsInvalid.ShouldBeTrue();
+            result.Errors.ShouldHaveSingleItem().Message.ShouldBe("Run calculation has not completed.");
         }
 
         [TestMethod]

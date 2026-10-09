@@ -15,22 +15,32 @@ namespace EPR.Calculator.API.Data.Migrations
             // Runs referencing a retired classification must be remapped before the lookup rows are
             // deleted, otherwise the calculator_run foreign key rejects the deletes. Ids are written
             // literally because this migration must keep working as RunClassification evolves.
+            // Each statement is wrapped in EXEC() so that SQL Server resolves the column name when it runs, rather than
+            // when the batch containing it is compiled: calculator_run_classification_id is renamed by a later migration
+            // (SplitRunClassification), and the IF NOT EXISTS guards in idempotent scripts don't prevent the resulting
+            // Msg 207 (invalid column name), as they're only evaluated at run time.
             migrationBuilder.Sql(
                 """
                 -- 'IN THE QUEUE' (1) is not expected to exist; anything left in it is treated as errored.
+                EXEC(N'
                 UPDATE [calculator_run]
                 SET [calculator_run_classification_id] = 5
-                WHERE [calculator_run_classification_id] = 1;
+                WHERE [calculator_run_classification_id] = 1
+                ');
 
                 -- 'FINAL RUN' (10) and 'FINAL RE-CALCULATION RUN' (11) become 'RECALCULATION RUN' (9).
+                EXEC(N'
                 UPDATE [calculator_run]
                 SET [calculator_run_classification_id] = 9
-                WHERE [calculator_run_classification_id] IN (10, 11);
+                WHERE [calculator_run_classification_id] IN (10, 11)
+                ');
 
                 -- Their completed equivalents become 'RECALCULATION RUN COMPLETED' (12).
+                EXEC(N'
                 UPDATE [calculator_run]
                 SET [calculator_run_classification_id] = 12
-                WHERE [calculator_run_classification_id] IN (13, 14);
+                WHERE [calculator_run_classification_id] IN (13, 14)
+                ');
                 """);
 
             migrationBuilder.DeleteData(

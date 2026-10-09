@@ -32,16 +32,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             dbContext = new ApplicationDBContext(options);
 
-            // Add all possible classifications
-            foreach (RunClassification value in Enum.GetValues(typeof(RunClassification)))
-            {
-                dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
-                {
-                    Id = value,
-                    Status = value.ToString()
-                });
-            }
-
             // Add dummy RelativeYear for navigation property
             dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
             {
@@ -69,7 +59,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -89,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
 
             AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: false);
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -108,10 +98,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationToken); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -130,8 +120,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
-            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: true);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -150,8 +140,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
-            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: true);
             AddRunToDb(RunClassification.Recalculation, requestId: 11, isComplete: true);
 
             // Act
@@ -171,10 +161,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationToken); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -193,10 +183,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationToken); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.None, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassifications(request, TestContext.CancellationToken);
@@ -216,27 +206,34 @@ namespace EPR.Calculator.API.UnitTests.Services
             var currentTime = DateTime.UtcNow;
             string userName = "TestUser";
 
-            dbContext.CalculatorRuns.Add(new CalculatorRun
+            var run = new CalculatorRun
             {
                 Id = requestId,
                 Classification = classification,
+                CalculationRunStatus = CalculationRunStatus.Completed,
+                BillingRunStatus = BillingRunStatus.Completed,
+                IsBillingFileShared = true,
+                BillingFileSharedAt = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                BillingFileSharedBy = "Test user",
                 Name = "Test",
                 RelativeYear = new RelativeYear(2024),
                 CreatedBy = userName,
                 CreatedAt = currentTime,
-            });
+            };
+
+            dbContext.CalculatorRuns.Add(run);
 
             if (isComplete)
             {
+                run.IsBillingFileShared = true;
+
                 dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
                 {
                     CalculatorRunId = requestId,
                     BillingJsonFileName = "ignored",
                     BillingCsvFileName = "ignored",
                     BillingFileCreatedBy = userName,
-                    BillingFileCreatedDate = currentTime.AddMicroseconds(1),
-                    BillingFileAuthorisedBy = userName,
-                    BillingFileAuthorisedDate = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                    BillingFileCreatedDate = currentTime.AddMicroseconds(1)
                 });
             }
 

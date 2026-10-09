@@ -16,7 +16,15 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .IsRequired();
 
         builder.Property(p => p.Classification)
-            .HasColumnName("calculator_run_classification_id")
+            .HasColumnName("classification")
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .IsRequired();
+
+        builder.Property(p => p.CalculationRunStatus)
+            .HasColumnName("calculation_run_status")
+            .HasMaxLength(50)
+            .IsUnicode(false)
             .IsRequired();
 
         builder.Property(p => p.BillingRunStatus)
@@ -27,6 +35,17 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 
         builder.Property(p => p.BillingRunStartedAt)
             .HasColumnName("billing_run_started_at")
+            .HasConversion<UtcDateTimeConverter>();
+
+        builder.Property(p => p.IsBillingFileShared)
+            .HasColumnName("is_billing_file_shared");
+
+        builder.Property(p => p.BillingFileSharedBy)
+            .HasColumnName("billing_file_shared_by")
+            .HasMaxLength(400);
+
+        builder.Property(p => p.BillingFileSharedAt)
+            .HasColumnName("billing_file_shared_at")
             .HasConversion<UtcDateTimeConverter>();
 
         builder.Property(p => p.Name)
@@ -71,10 +90,6 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 
         builder.Property(p => p.DefaultParameterSettingMasterId)
             .HasColumnName("default_parameter_setting_master_id");
-
-        builder.HasOne<CalculatorRunClassification>()
-            .WithMany()
-            .HasForeignKey(e => e.Classification);
 
         builder.HasMany(e => e.CountryApportionments)
             .WithOne(e => e.CalculatorRun)

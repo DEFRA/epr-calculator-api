@@ -13,7 +13,6 @@ public interface IBillingFileService
 {
     Task<BillingFileService.Response> StartGeneratingBillingFileAsync(
         int runId,
-        string userName,
         CancellationToken cancellationToken);
 
     Task<BillingFileService.Response> UpdateProducerBillingInstructionsAsync(
@@ -55,7 +54,9 @@ public class BillingFileService(
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .SingleOrDefaultAsync(x => x.Id == runId && AcceptableRunStatusForBillingInstructions.Contains(x.Classification), cancellationToken)
+            .SingleOrDefaultAsync(x => x.Id == runId
+                                       && AcceptableRunStatusForBillingInstructions.Contains(x.Classification)
+                                       && !x.IsBillingFileShared, cancellationToken)
             .ConfigureAwait(false);
 
         if (calculatorRun is null)
@@ -196,12 +197,11 @@ public class BillingFileService(
 
     public async Task<Response> StartGeneratingBillingFileAsync(
         int runId,
-        string userName,
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
-            .ConfigureAwait(false);
+            .AsNoTracking()
+            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
 
         if (calculatorRun is null)
         {
@@ -221,11 +221,6 @@ public class BillingFileService(
             };
         }
 
-        calculatorRun.BillingRunStatus = BillingRunStatus.Running;
-        calculatorRun.BillingRunStartedAt = DateTime.UtcNow;
-
-        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return new Response
         {
             StatusCode = HttpStatusCode.OK
@@ -240,11 +235,12 @@ public class BillingFileService(
     private static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
     {
         // Valid if:
-        // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
-        // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
+        // * Run has an Official classification
+        // * Billing file has not already been shared with FSS
+        // * Billing run is not already underway (i.e. not Started, or Started over an hour ago so considered 'stuck')
         return AcceptableRunStatusForBillingInstructions.Contains(run.Classification)
-               && (run.BillingRunStatus != BillingRunStatus.Running
-                   || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
+               && !run.IsBillingFileShared
+               && !run.IsBillingRunUnderway(DateTimeOffset.UtcNow);
     }
 
     private static int DetermineProducerBillingInstructionsPageSize() => int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out var pageSize) ? pageSize : 10;
@@ -288,10 +284,9 @@ public class BillingFileService(
     {
         var runClassificationsToIgnore = new HashSet<RunClassification>
         {
+            RunClassification.Unknown,
             RunClassification.None,
-            RunClassification.Running,
             RunClassification.Test,
-            RunClassification.Errored,
             RunClassification.Deleted
         };
 

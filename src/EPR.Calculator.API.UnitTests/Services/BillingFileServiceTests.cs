@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenRunClassificationIsInvalid()
         {
             // Arrange
-            await SeedAsync(CreateRun(1, RunClassification.Unclassified));
+            await SeedAsync(CreateRun(1, RunClassification.None));
 
             // Act
             var result = await this.service.UpdateProducerBillingInstructionsAsync(
@@ -70,6 +70,26 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
             Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenBillingFileAlreadyShared()
+        {
+            // Arrange
+            var run = CreateRun(1);
+            run.IsBillingFileShared = true;
+            await SeedAsync(
+                run,
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
+
+            // Act
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1), CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
+            Assert.IsNull((await GetBillingInstructionAsync(producerId: 1, runId: 1)).BillingInstructionAcceptReject);
         }
 
         [TestMethod]
@@ -161,10 +181,77 @@ namespace EPR.Calculator.API.UnitTests.Services
             await SeedAsync(run);
 
             // Act
-            var result = await this.service.StartGeneratingBillingFileAsync(1, TestUser, CancellationToken.None);
+            var result = await this.service.StartGeneratingBillingFileAsync(1, CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [TestMethod]
+        [DataRow(BillingRunStatus.Completed)] // Regenerating the billing file
+        [DataRow(BillingRunStatus.Errored)]   // Retrying the billing run
+        public async Task StartGeneratingBillingFile_ReturnsOk_WhenBillingRunCanBeRestarted(BillingRunStatus billingRunStatus)
+        {
+            // Arrange
+            var run = CreateRun(1);
+            run.BillingRunStatus = billingRunStatus;
+            await SeedAsync(run);
+
+            // Act
+            var result = await this.service.StartGeneratingBillingFileAsync(1, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task StartGeneratingBillingFile_ReturnsOk_WhenBillingRunIsStuck()
+        {
+            // Arrange - started over an hour ago, e.g. before an unclean shutdown of the processor
+            var run = CreateRun(1);
+            run.BillingRunStatus = BillingRunStatus.Started;
+            run.BillingRunStartedAt = DateTime.UtcNow.AddHours(-2);
+            await SeedAsync(run);
+
+            // Act
+            var result = await this.service.StartGeneratingBillingFileAsync(1, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task StartGeneratingBillingFile_ReturnsUnprocessable_WhenBillingRunIsUnderway()
+        {
+            // Arrange
+            var run = CreateRun(1);
+            run.BillingRunStatus = BillingRunStatus.Started;
+            run.BillingRunStartedAt = DateTime.UtcNow.AddMinutes(-5);
+            await SeedAsync(run);
+
+            // Act
+            var result = await this.service.StartGeneratingBillingFileAsync(1, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
+        }
+
+        [TestMethod]
+        public async Task StartGeneratingBillingFile_ReturnsUnprocessable_WhenBillingFileAlreadyShared()
+        {
+            // Arrange
+            var run = CreateRun(1);
+            run.BillingRunStatus = BillingRunStatus.Completed;
+            run.IsBillingFileShared = true;
+            await SeedAsync(run);
+
+            // Act
+            var result = await this.service.StartGeneratingBillingFileAsync(1, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
         }
 
         [TestMethod]

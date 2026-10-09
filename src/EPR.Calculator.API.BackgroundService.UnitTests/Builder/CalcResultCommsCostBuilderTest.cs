@@ -253,7 +253,7 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
         var run = new CalculatorRun
         {
             Id = runContext.RunId,
-            Classification = RunClassification.Running,
+            Classification = RunClassification.None,
             Name = runContext.RunName,
             RelativeYear = runContext.RelativeYear,
             CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),

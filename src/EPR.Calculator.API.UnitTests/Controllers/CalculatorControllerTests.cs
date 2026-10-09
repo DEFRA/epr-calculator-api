@@ -125,7 +125,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task Create_Returns_UnprocessableEntity_When_AnotherRun_Is_Already_Running()
+        [DataRow(CalculationRunStatus.None)] // Queued, but not yet started by the background service
+        [DataRow(CalculationRunStatus.Started)]
+        public async Task Create_Returns_UnprocessableEntity_When_AnotherRun_Is_Already_Running(CalculationRunStatus calculationRunStatus)
         {
             // Arrange
             var relativeYear = new RelativeYear(2024);
@@ -138,7 +140,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RelativeYear = relativeYear,
                 CreatedBy = "Test user",
                 CreatedAt = DateTime.UtcNow,
-                Classification = RunClassification.Running,
+                Classification = RunClassification.None,
+                CalculationRunStatus = calculationRunStatus,
+                BillingRunStatus = BillingRunStatus.None,
             });
             DbContext.SaveChanges();
 
@@ -249,11 +253,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var run = new CalculatorRun
             {
                 Name = "Run Found By Id",
-                Classification = RunClassification.Running,
+                Classification = RunClassification.None,
                 RelativeYear = new RelativeYear(2024),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
-                BillingRunStatus = BillingRunStatus.Running,
+                BillingRunStatus = BillingRunStatus.Started,
             };
             DbContext.CalculatorRuns.Add(run);
             DbContext.SaveChanges();
@@ -266,8 +270,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runDto = result.Value as CalculatorRunDto;
             runDto.ShouldNotBeNull();
             runDto.RunId.ShouldBe(run.Id);
-            runDto.RunClassification.ShouldBe(RunClassification.Running);
-            runDto.BillingRunStatus.ShouldBe(BillingRunStatus.Running);
+            runDto.RunClassification.ShouldBe(RunClassification.None);
+            runDto.BillingRunStatus.ShouldBe(BillingRunStatus.Started);
             runDto.UpdatedAt.ShouldBeNull();
             runDto.UpdatedBy.ShouldBeNull();
         }
@@ -281,11 +285,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var run = new CalculatorRun
             {
                 Name = "Run With Billing File",
-                Classification = RunClassification.InitialCompleted,
+                Classification = RunClassification.Initial,
+                CalculationRunStatus = CalculationRunStatus.Completed,
+                BillingRunStatus = BillingRunStatus.Completed,
+                IsBillingFileShared = true,
+                BillingFileSharedAt = DateTime.UtcNow,
+                BillingFileSharedBy = "Test user",
                 RelativeYear = new RelativeYear(2024),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
-                BillingRunStatus = BillingRunStatus.Completed,
             };
             DbContext.CalculatorRuns.Add(run);
             DbContext.SaveChanges();
@@ -296,8 +304,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingJsonFileName = "test.json",
                 BillingFileCreatedBy = "Test user",
                 BillingFileCreatedDate = DateTime.UtcNow,
-                BillingFileAuthorisedDate = DateTime.UtcNow,
-                BillingFileAuthorisedBy = "Test user",
                 CalculatorRunId = run.Id,
             });
             DbContext.SaveChanges();
@@ -309,7 +315,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.ShouldNotBeNull();
             var runDto = result.Value as CalculatorRunDto;
             runDto.ShouldNotBeNull();
-            runDto.RunClassification.ShouldBe(RunClassification.InitialCompleted);
+            runDto.RunClassification.ShouldBe(RunClassification.Initial);
+            runDto.BillingFile?.IsShared.ShouldBe(true);
             runDto.BillingFile.ShouldNotBeNull();
             runDto.BillingFile.CsvFileName.ShouldBe("test.csv");
             runDto.BillingFile.JsonFileName.ShouldBe("test.json");
@@ -493,7 +500,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DeleteCalculatorRun_Returns_UnprocessableEntity_When_Run_Status_Validation_Fails()
         {
             // Arrange
-            var run = AddCalculatorRun(RunClassification.Unclassified);
+            var run = AddCalculatorRun(RunClassification.None);
 
             var mockRunStatusValidator = new Mock<IRunClassificationValidator>();
             mockRunStatusValidator
@@ -515,14 +522,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             errors.ShouldNotBeNull();
             errors[0].ShouldBe("Run cannot be deleted.");
             DbContext.CalculatorRuns.Single(r => r.Id == run.Id)
-                .Classification.ShouldBe(RunClassification.Unclassified);
+                .Classification.ShouldBe(RunClassification.None);
         }
 
         [TestMethod]
         public async Task DeleteCalculatorRun_Returns_UnprocessableEntity_When_Designated_Runs_Validation_Fails()
         {
             // Arrange
-            var run = AddCalculatorRun(RunClassification.Unclassified);
+            var run = AddCalculatorRun(RunClassification.None);
 
             var mockRunStatusValidator = new Mock<IRunClassificationValidator>();
             mockRunStatusValidator
@@ -541,14 +548,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             errors.ShouldNotBeNull();
             errors[0].ShouldBe("Test");
             DbContext.CalculatorRuns.Single(r => r.Id == run.Id)
-                .Classification.ShouldBe(RunClassification.Unclassified);
+                .Classification.ShouldBe(RunClassification.None);
         }
 
         [TestMethod]
         public async Task DeleteCalculatorRun_Marks_Run_As_Deleted_When_Validation_Passes()
         {
             // Arrange
-            var run = AddCalculatorRun(RunClassification.Unclassified);
+            var run = AddCalculatorRun(RunClassification.None);
             var designatedRuns = new List<CalculatorRunDto>();
 
             var mockRunStatusValidator = new Mock<IRunClassificationValidator>();
@@ -559,14 +566,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new GenericValidationResultDto());
 
-            var mockCalculationRunService = new Mock<ICalculationRunService>();
-            mockCalculationRunService
-                .Setup(s => s.GetDesignatedRunsByFinancialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(designatedRuns);
-
-            var controller = CreateCalculatorController(
-                runStatusValidator: mockRunStatusValidator.Object,
-                calculationRunService: mockCalculationRunService.Object);
+            var controller = CreateCalculatorController(runStatusValidator: mockRunStatusValidator.Object);
 
             // Act
             var result = await controller.DeleteCalculatorRun(run.Id, CancellationToken.None) as NoContentResult;
@@ -591,8 +591,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private CalculatorController CreateCalculatorController(
             ICalcRelativeYearRequestDtoDataValidator? validator = null,
             IAvailableClassificationsService? availableClassificationsService = null,
-            IRunClassificationValidator? runStatusValidator = null,
-            ICalculationRunService? calculationRunService = null)
+            IRunClassificationValidator? runStatusValidator = null)
         {
             return new CalculatorController(
                 DbContext,
@@ -600,8 +599,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBackgroundTaskQueue>(),
                 runStatusValidator ?? Mock.Of<IRunClassificationValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
-                availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),
-                calculationRunService ?? Mock.Of<ICalculationRunService>())
+                availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>())
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };

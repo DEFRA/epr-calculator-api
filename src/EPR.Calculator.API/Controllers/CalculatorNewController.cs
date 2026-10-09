@@ -73,39 +73,29 @@ public class CalculatorNewController(
         if (runDto.BillingFile is not { IsLatest: true })
             return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.BillingFileOutdated, runId));
 
-        var validTransitions = ImmutableDictionary.CreateRange(new KeyValuePair<RunClassification, RunClassification>[]
-        {
-            new(RunClassification.Initial,       RunClassification.InitialCompleted),
-            new(RunClassification.Recalculation, RunClassification.RecalculationCompleted)
-        });
+        if (runDto.BillingFile is not { IsShared: false })
+            return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.BillingFileAlreadyShared, runId));
 
-        if (!validTransitions.TryGetValue(runDto.RunClassification, out var newClassification))
+        if (runDto.RunClassification is not (RunClassification.Initial or RunClassification.Recalculation))
             return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToChangeStatusToCompleted, runDto.RunClassification));
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            var calculatorRun = await dbContext.CalculatorRuns
-                .Include(run => run.CalculatorRunBillingFileMetadata)
+            var run = await dbContext.CalculatorRuns
                 .SingleAsync(x => x.Id == runId, cancellationToken);
 
-            var metadata = calculatorRun.CalculatorRunBillingFileMetadata
-                .Single(m => m.Id == runDto.BillingFile.Id);
-
-            var sentBy = User.GetName();
-            var sentAt = DateTime.UtcNow;
-
-            calculatorRun.Classification = newClassification;
-            metadata.BillingFileAuthorisedBy = sentBy;
-            metadata.BillingFileAuthorisedDate = sentAt;
+            run.IsBillingFileShared = true;
+            run.BillingFileSharedBy = User.GetName();
+            run.BillingFileSharedAt = DateTime.UtcNow;
 
             var affectedRows = await invoiceDetailsService
-                .InsertInvoiceDetailsAtProducerLevel(runId, sentAt, sentBy, cancellationToken);
+                .InsertInvoiceDetailsAtProducerLevel(runId, run.BillingFileSharedAt.Value, run.BillingFileSharedBy, cancellationToken);
 
             logger.LogDebug("Inserting {RowsAffected} invoice details at producer level for run {RunId}", affectedRows, runId);
 
-            dbContext.CalculatorRuns.Update(calculatorRun);
+            dbContext.CalculatorRuns.Update(run);
             await dbContext.SaveChangesAsync(cancellationToken);
 
             var result = await billingFileService.MoveBillingJsonFile(runId, cancellationToken);
