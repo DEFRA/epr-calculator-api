@@ -429,6 +429,30 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerData_OrdersOrganisationsDeterministicallyBeforeObligationDetermination()
+    {
+        const string submitterA = "00000000-0000-0000-0000-00000000000a";
+        const string submitterB = "00000000-0000-0000-0000-00000000000b";
+        var orgTwo = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "Two", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
+        var orgOneSubmitterB = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One B", SubmitterId = submitterB, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
+        var orgOneSubmitterA = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One A", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
+
+        IReadOnlyList<PayCalOrganisation>? determined = null;
+        var mockDeterminer = new Mock<IProducerObligationDeterminer>();
+        mockDeterminer
+            .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
+            .Callback((IReadOnlyList<PayCalOrganisation> orgs) => determined = orgs)
+            .Returns([]);
+
+        var service = CreateService(orgsStream: ToAsyncEnumerable([orgTwo, orgOneSubmitterB, orgOneSubmitterA]), poms: [], determiner: mockDeterminer.Object);
+
+        await service.GetProducerData(2024, null, []);
+
+        determined.ShouldNotBeNull();
+        determined.ShouldBe([orgOneSubmitterA, orgOneSubmitterB, orgTwo]);
+    }
+
+    [TestMethod]
     public async Task GetProducerData_WhenBothStreamsFail_Throws()
     {
         var service = CreateService(

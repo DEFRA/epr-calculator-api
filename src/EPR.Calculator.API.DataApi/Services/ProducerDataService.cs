@@ -240,7 +240,14 @@ internal sealed class ProducerDataService(
             var buffer = new List<PayCalOrganisation>();
             await foreach (var organisation in dataSource.StreamOrganisations(relativeYear, cancellationToken).WithCancellation(cancellationToken))
                 buffer.Add(organisation);
-            return buffer;
+            // The source has no guaranteed order and later stages pick the first of several rows, so fix the order here.
+            return buffer
+                .OrderBy(o => o.OrganisationId)
+                .ThenBy(o => o.SubsidiaryId, StringComparer.Ordinal)
+                .ThenBy(o => o.SubmitterId, StringComparer.Ordinal)
+                .ThenBy(o => o.CreatedDateTime)
+                .ThenBy(o => o.FileName, StringComparer.Ordinal)
+                .ToList();
         });
 
         // Every candidate accepted file is streamed unfiltered - pick the winning file per
