@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,7 @@ public class BillingFileController(
     /// <response code="404">Returned when the billing file is not found for the specified run id.</response>
     [HttpGet]
     [Route("downloadBillingFile/{runId}")]
+    [Authorize(Roles = "FssApiPolicy,SASuperUser")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
