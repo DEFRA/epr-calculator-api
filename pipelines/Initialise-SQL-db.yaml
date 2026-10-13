@@ -16,7 +16,6 @@ parameters:
       - DEV8
       - DEV9
       - DEV14
-      - DEV16
   - name: envToDeploy
     displayName: 'Target env to deploy:    (select "development" for DEV1-15)'
     type: string
