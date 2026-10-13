@@ -784,7 +784,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var createdBy = "no error";
 
             _invoicedProducerService
-            .Setup(m => m.GetInvoicedProducers(It.IsAny<RelativeYear>(), It.IsAny<ImmutableHashSet<int>?>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetInvoicedProducers(It.IsAny<RelativeYear>(), It.IsAny<int>(), It.IsAny<ImmutableHashSet<int>?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => [
                 new() { ProducerId = producer6, CalculatorRunId = -1, CalculatorName = "ignored", ProducerName = "ignored", TradingName = null, MaterialId = 0, BillingInstructionId = null, InvoicedNetTonnage = null, CurrentYearInvoicedTotalAfterThisRun = null },
             ]);
