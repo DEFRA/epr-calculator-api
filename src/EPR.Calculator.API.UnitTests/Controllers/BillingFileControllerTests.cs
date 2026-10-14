@@ -46,19 +46,21 @@ public class BillingFileControllerTests
     }
 
     [TestMethod]
-    public async Task DownloadBillingCsv_Exported_ReturnsFile()
+    public async Task DownloadBillingCsv_Streamed_ReturnsStreamedFile()
     {
         var content = Encoding.UTF8.GetBytes("File");
         fileExportServiceMock
             .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new FileExportResult.Exported(content, CsvFilename));
+            .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), CsvFilename));
 
         var result = await controller.DownloadBillingCsv(RunId);
 
-        var fileResult = result.ShouldBeOfType<FileContentResult>();
+        var fileResult = result.ShouldBeOfType<PushStreamFileResult>();
         fileResult.ContentType.ShouldBe("text/csv");
         fileResult.FileDownloadName.ShouldBe(CsvFilename);
-        fileResult.FileContents.ShouldBe(content);
+        using var written = new MemoryStream();
+        await fileResult.WriteTo(written, CancellationToken.None);
+        written.ToArray().ShouldBe(content);
     }
 
     [TestMethod]

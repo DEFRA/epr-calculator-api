@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 
 public interface ICalcResultsExporter
 {
-    Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails);
+    Task Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, TextWriter writer);
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -46,7 +46,7 @@ public class CalcResultsExporter(
 ) : ICalcResultsExporter
 {
     [ActivityMetric(nameof(Metrics.SerializeDuration), threshold: "00:00:30")]
-    public async Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails)
+    public async Task Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, TextWriter writer)
     {
         var materials = await materialService.GetMaterials();
         var csvContent = new StringBuilder();
@@ -75,9 +75,12 @@ public class CalcResultsExporter(
         var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
         var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
 
-        producerFeesExporter.Export(runContext, calcResult.ProducerFeesTotal, materials, scaledupIds, partialIds, csvContent, producerFeeDetails);
+        await writer.WriteAsync(csvContent);
+        csvContent.Clear();
+
+        await producerFeesExporter.Export(runContext, calcResult.ProducerFeesTotal, materials, scaledupIds, partialIds, writer, producerFeeDetails);
         calcResultErrorReportExporter.Export(calcResult.CalcResultErrorReports, csvContent);
 
-        return csvContent.ToString();
+        await writer.WriteAsync(csvContent);
     }
 }
