@@ -87,6 +87,13 @@ public class FileExportServiceTests
             billingJsonWriterMock.Object);
     }
 
+    private static async Task<byte[]> WrittenBytes(FileExportResult.Streamed streamed)
+    {
+        using var stream = new MemoryStream();
+        await streamed.WriteTo(stream, CancellationToken.None);
+        return stream.ToArray();
+    }
+
     [TestCleanup]
     public void TestCleanup()
     {
@@ -101,14 +108,14 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.None, RunName, createdAt: createdAt);
         AddProducerFeeRow(RunId);
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
-            .ReturnsAsync(CsvContent);
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
+            .Returns<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, _, _, writer) => writer.WriteAsync(CsvContent));
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
 
-        var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, createdAt).ToString());
-        exported.Content.ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
+        var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
+        streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, createdAt).ToString());
+        (await WrittenBytes(streamed)).ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Once);
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -121,14 +128,14 @@ public class FileExportServiceTests
         AddBillingFileMetadata(RunId, createdDate: billingFileCreatedDate);
         AddProducerFeeRow(RunId);
         billingFileExporterMock
-            .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
-            .ReturnsAsync(CsvContent);
+            .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
+            .Returns<BillingRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, _, _, writer) => writer.WriteAsync(CsvContent));
 
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
 
-        var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, billingFileCreatedDate, isDraftBillingFile: true).ToString());
-        exported.Content.ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
+        var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
+        streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, billingFileCreatedDate, isDraftBillingFile: true).ToString());
+        (await WrittenBytes(streamed)).ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
     }
@@ -180,13 +187,13 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
-            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
-            .ReturnsAsync(CsvContent);
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
+            .Returns(Task.CompletedTask);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
 
-        result.ShouldBeOfType<FileExportResult.Exported>();
+        await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
         capturedResult.CalcResultDetail.ShouldBeSameAs(calcResultDetail);
         capturedResult.CalcResultLapcapData.ShouldBeSameAs(lapcapData);
@@ -219,13 +226,13 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
-            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
-            .ReturnsAsync(CsvContent);
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
+            .Returns(Task.CompletedTask);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
 
-        result.ShouldBeOfType<FileExportResult.Exported>();
+        await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
         capturedResult.CalcResultProjectedProducers.H1ProjectedProducers.ShouldBe(h1Data.ToImmutableList());
         capturedResult.CalcResultProjectedProducers.H2ProjectedProducers.ShouldBe(h2Data.ToImmutableList());
@@ -245,13 +252,13 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
-            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
-            .ReturnsAsync(CsvContent);
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
+            .Returns(Task.CompletedTask);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
 
-        result.ShouldBeOfType<FileExportResult.Exported>();
+        await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
         capturedResult.CalcResultScaledupProducers.ScaledupProducers.ShouldBe(scaledUpData.ToImmutableList());
 

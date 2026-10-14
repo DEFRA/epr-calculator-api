@@ -7,13 +7,13 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 
 public interface IProducerFeesExporter
 {
-    void Export(
+    Task Export(
         RunContext runContext,
         FeeDetail producerFeesTotal,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent,
+        TextWriter writer,
         IEnumerable<FeeDetail> producerFeeDetails
     );
 }
@@ -21,27 +21,46 @@ public interface IProducerFeesExporter
 public class ProducerFeesExporter : IProducerFeesExporter
 {
     [ActivityTrace]
-    public void Export(
+    public async Task Export(
         RunContext runContext,
         FeeDetail producerFeesTotal,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent,
+        TextWriter writer,
         IEnumerable<FeeDetail> producerFeeDetails
     )
     {
         var partExporters = BuildPartExporters(scaledupProducerIds, partialProducerSubsidiaryIds);
+        var csvContent = new StringBuilder();
 
         csvContent.AppendLine();
         csvContent.AppendLine();
 
         AddSummaryDataHeader(producerFeesTotal, materials, runContext.RequiresModulation, csvContent, partExporters);
+        await Flush(csvContent, writer);
 
         foreach (var producer in producerFeeDetails)
+        {
             AddNewRow(csvContent, new ProducerFeeExportRow(producer.Level, producer), runContext.RequiresModulation, partExporters, isOverallTotal: false);
+            await Flush(csvContent, writer);
+        }
 
-        AddNewRow(csvContent, new ProducerFeeExportRow(string.Empty, producerFeesTotal), runContext.RequiresModulation, partExporters, isOverallTotal: true);
+        var totalRow = new ProducerFeeExportRow(string.Empty, producerFeesTotal);
+
+        // A billing file's total row stops at its "Totals" label (the Leaver Date column), with no values and no line break.
+        if (runContext.RunType is RunType.Billing)
+            partExporters.OfType<ProducerIdentityExporter>().Single().AppendRow(csvContent, totalRow, runContext.RequiresModulation, isOverallTotal: true);
+        else
+            AddNewRow(csvContent, totalRow, runContext.RequiresModulation, partExporters, isOverallTotal: true);
+
+        await Flush(csvContent, writer);
+    }
+
+    private static async Task Flush(StringBuilder csvContent, TextWriter writer)
+    {
+        await writer.WriteAsync(csvContent);
+        csvContent.Clear();
     }
 
     private static void AddNewRow(StringBuilder csvContent, ProducerFeeExportRow producer, bool applyModulation, IReadOnlyList<IProducerFeesPartExporter> partExporters, bool isOverallTotal)
