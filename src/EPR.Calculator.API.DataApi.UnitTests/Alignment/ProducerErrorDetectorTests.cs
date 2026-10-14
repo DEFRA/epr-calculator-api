@@ -560,7 +560,8 @@ public class ProducerErrorDetectorTests
                 StatusCode = statusCode,
                 SubmissionPeriodYear = 2024,
                 RegulatorStatus = "Accepted",
-                SubmitterId = submitterId?.ToString()
+                SubmitterId = submitterId?.ToString(),
+                OrganisationSize = "L"
             },
             ObligationStatus = obligationStatus,
             ErrorCode = errorCode,

@@ -19,7 +19,8 @@ public class OrganisationPeriodFlagsCalculatorTests
                 SubmitterId = submitterId,
                 OrganisationName = "Org Co",
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "O"
         };
