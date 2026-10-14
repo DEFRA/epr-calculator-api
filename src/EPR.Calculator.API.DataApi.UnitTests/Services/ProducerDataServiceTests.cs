@@ -453,6 +453,91 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerData_PicksLatestRegistrationRegardlessOfSize_ThenKeepsOnlyLargeOrganisations()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        PayCalOrganisation Registration(int organisationId, string fileName, int day, string size) => new()
+        {
+            OrganisationId = organisationId, OrganisationName = $"Org {organisationId}", SubmitterId = submitterId, SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted", FileName = fileName, CreatedDateTime = new DateTime(2024, 1, day), OrganisationSize = size
+        };
+
+        var nowSmall = new[] { Registration(1, "org1-old", 1, "L"), Registration(1, "org1-new", 2, "S") };
+        var nowLarge = new[] { Registration(2, "org2-old", 1, "S"), Registration(2, "org2-new", 2, "L") };
+
+        IReadOnlyList<PayCalOrganisation>? determined = null;
+        var mockDeterminer = new Mock<IProducerObligationDeterminer>();
+        mockDeterminer
+            .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
+            .Callback((IReadOnlyList<PayCalOrganisation> orgs) => determined = orgs)
+            .Returns([]);
+
+        var service = CreateService(orgsStream: ToAsyncEnumerable([.. nowSmall, .. nowLarge]), poms: [], determiner: mockDeterminer.Object);
+
+        await service.GetProducerData(2024, null, []);
+
+        determined.ShouldNotBeNull();
+        determined.ShouldBe([nowLarge[1]]);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_SmallLineItemsInWinningPomFile_CountForEligibilityButAreNotCalculated()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        var org = new FlaggedOrganisation
+        {
+            Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" },
+            ObligationStatus = "O",
+            HasH1 = true,
+            HasH2 = true
+        };
+        PayCalPom LineItem(string size, double weight) => new()
+        {
+            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            PackagingMaterialWeight = weight, FileName = "pom-file", CreatedDateTime = new DateTime(2024, 1, 1), OrganisationSize = size
+        };
+
+        IReadOnlyList<PayCalPom>? eligibilityInput = null;
+        var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
+        mockEligibilityFilter
+            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+            .Callback((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => eligibilityInput = p)
+            .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
+
+        var service = CreateService(orgs: [org], poms: [LineItem("L", 1000), LineItem("S", 500)], eligibilityFilter: mockEligibilityFilter.Object);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        eligibilityInput.ShouldNotBeNull();
+        eligibilityInput.Select(p => p.OrganisationSize).ShouldBe(["L", "S"], ignoreOrder: true);
+        result.Single().ReportedMaterials.Single().TotalWeight.ShouldBe(1000);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_LaterSmallPomFile_ReplacesEarlierLargeFile()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        var org = new FlaggedOrganisation
+        {
+            Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" },
+            ObligationStatus = "O",
+            HasH1 = true,
+            HasH2 = true
+        };
+        PayCalPom LineItem(string fileName, int day, string size) => new()
+        {
+            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            PackagingMaterialWeight = 1000, FileName = fileName, CreatedDateTime = new DateTime(2024, 1, day), OrganisationSize = size
+        };
+
+        var service = CreateService(orgs: [org], poms: [LineItem("earlier-large", 1, "L"), LineItem("later-small", 2, "S")]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        result.Single().ReportedMaterials.ShouldBeEmpty();
+    }
+
+    [TestMethod]
     public async Task GetProducerData_WhenBothStreamsFail_Throws()
     {
         var service = CreateService(

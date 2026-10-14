@@ -22,6 +22,9 @@ internal record PayCalPom
     public double? PackagingMaterialWeight { get; init; }
     public string? RamRagRating { get; init; }
 
+    // Defaults to large until the common-data-api returns it - the v2 sprocs only return large rows.
+    public string? OrganisationSize { get; init; } = "L";
+
     // File-selection inputs only (see IAcceptedFileSelector) - not read past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }
