@@ -36,7 +36,8 @@ public class ProducerDataServiceTests
                 OrganisationName = "Org Co",
                 SubmitterId = submitterId,
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "O",
             HasH1 = true,
@@ -46,6 +47,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
             PackagingMaterial = "PL",
@@ -70,7 +72,7 @@ public class ProducerDataServiceTests
     public async Task GetProducerData_ObligationDeterminationRunsBeforeMapping()
     {
         var submitterId = Guid.NewGuid().ToString();
-        var rawOrganisation = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
+        var rawOrganisation = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" };
 
         var mockDeterminer = new Mock<IProducerObligationDeterminer>();
         mockDeterminer
@@ -102,7 +104,8 @@ public class ProducerDataServiceTests
                 OrganisationName = "Org Co",
                 SubmitterId = submitterId,
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
@@ -113,6 +116,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
             PackagingMaterial = "PL",
@@ -150,7 +154,8 @@ public class ProducerDataServiceTests
                 OrganisationName = "Org Co",
                 SubmitterId = Guid.NewGuid().ToString(),
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
@@ -182,7 +187,8 @@ public class ProducerDataServiceTests
                 OrganisationName = "Org Co",
                 SubmitterId = submitterId,
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "O",
             ErrorCode = "some warning",
@@ -193,6 +199,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
             PackagingMaterial = "PL",
@@ -234,19 +241,20 @@ public class ProducerDataServiceTests
             Org = new PayCalOrganisation
             {
                 OrganisationId = 1, OrganisationName = "Org Co",
-                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024
+                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024,
+                OrganisationSize = "L"
             },
             ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
 
         var reportablePom = new PayCalPom
         {
-            OrganisationId = 1, SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
         };
         var nonReportablePom = new PayCalPom
         {
-            OrganisationId = 1, SubsidiaryId = "99", SubmitterId = submitterId, PackagingType = "NH",
+            OrganisationId = 1, OrganisationSize = "L", SubsidiaryId = "99", SubmitterId = submitterId, PackagingType = "NH",
             PackagingMaterial = "AL", SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 500
         };
 
@@ -272,13 +280,14 @@ public class ProducerDataServiceTests
             Org = new PayCalOrganisation
             {
                 OrganisationId = 1, OrganisationName = "Org Co",
-                SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted"
+                SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
         var pom = new PayCalPom
         {
-            OrganisationId = 1, SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000, RamRagRating = "Not-A-Real-Rating"
         };
 
@@ -309,13 +318,14 @@ public class ProducerDataServiceTests
             Org = new PayCalOrganisation
             {
                 OrganisationId = 1, OrganisationName = "Org Co",
-                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024
+                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024,
+                OrganisationSize = "L"
             },
             ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
         var pom = new PayCalPom
         {
-            OrganisationId = 1, SubmitterId = submitterId, PackagingType = packagingType, PackagingMaterial = material,
+            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = packagingType, PackagingMaterial = material,
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
         };
 
@@ -336,6 +346,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 99,
+            OrganisationSize = "L",
             SubsidiaryId = "SUB",
             SubmitterId = Guid.NewGuid().ToString(),
             PackagingType = "HH",
@@ -373,7 +384,8 @@ public class ProducerDataServiceTests
                 StatusCode = "01",
                 SubmitterId = Guid.NewGuid().ToString(),
                 SubmissionPeriodYear = 2024,
-                RegulatorStatus = "Accepted"
+                RegulatorStatus = "Accepted",
+                OrganisationSize = "L"
             },
             ObligationStatus = "O",
             HasH1 = true,
@@ -383,6 +395,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            OrganisationSize = "L",
             SubsidiaryId = "SUB",
             SubmitterId = Guid.NewGuid().ToString(),
             PackagingType = "HH",
@@ -409,9 +422,9 @@ public class ProducerDataServiceTests
     public async Task GetProducerData_PomEligibility_ExcludesCancelledRegistrationsFromTheGate()
     {
         var submitterId = Guid.NewGuid().ToString();
-        var granted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024 }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
-        var accepted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", SubmitterId = submitterId, RegulatorStatus = "Accepted", SubmissionPeriodYear = 2024 }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
-        var cancelled = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", SubmitterId = submitterId, RegulatorStatus = "Cancelled", SubmissionPeriodYear = 2024 }, ObligationStatus = "E", HasH1 = false, HasH2 = false };
+        var granted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024, OrganisationSize = "L" }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
+        var accepted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", SubmitterId = submitterId, RegulatorStatus = "Accepted", SubmissionPeriodYear = 2024, OrganisationSize = "L" }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
+        var cancelled = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", SubmitterId = submitterId, RegulatorStatus = "Cancelled", SubmissionPeriodYear = 2024, OrganisationSize = "L" }, ObligationStatus = "E", HasH1 = false, HasH2 = false };
 
         IReadOnlyCollection<int>? capturedIds = null;
         var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
@@ -433,9 +446,9 @@ public class ProducerDataServiceTests
     {
         const string submitterA = "00000000-0000-0000-0000-00000000000a";
         const string submitterB = "00000000-0000-0000-0000-00000000000b";
-        var orgTwo = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "Two", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
-        var orgOneSubmitterB = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One B", SubmitterId = submitterB, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
-        var orgOneSubmitterA = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One A", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
+        var orgTwo = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "Two", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" };
+        var orgOneSubmitterB = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One B", SubmitterId = submitterB, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" };
+        var orgOneSubmitterA = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "One A", SubmitterId = submitterA, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" };
 
         IReadOnlyList<PayCalOrganisation>? determined = null;
         var mockDeterminer = new Mock<IProducerObligationDeterminer>();
@@ -450,6 +463,91 @@ public class ProducerDataServiceTests
 
         determined.ShouldNotBeNull();
         determined.ShouldBe([orgOneSubmitterA, orgOneSubmitterB, orgTwo]);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_PicksLatestRegistrationRegardlessOfSize_ThenKeepsOnlyLargeOrganisations()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        PayCalOrganisation Registration(int organisationId, string fileName, int day, string size) => new()
+        {
+            OrganisationId = organisationId, OrganisationName = $"Org {organisationId}", SubmitterId = submitterId, SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted", FileName = fileName, CreatedDateTime = new DateTime(2024, 1, day), OrganisationSize = size
+        };
+
+        var nowSmall = new[] { Registration(1, "org1-old", 1, "L"), Registration(1, "org1-new", 2, "S") };
+        var nowLarge = new[] { Registration(2, "org2-old", 1, "S"), Registration(2, "org2-new", 2, "L") };
+
+        IReadOnlyList<PayCalOrganisation>? determined = null;
+        var mockDeterminer = new Mock<IProducerObligationDeterminer>();
+        mockDeterminer
+            .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
+            .Callback((IReadOnlyList<PayCalOrganisation> orgs) => determined = orgs)
+            .Returns([]);
+
+        var service = CreateService(orgsStream: ToAsyncEnumerable([.. nowSmall, .. nowLarge]), poms: [], determiner: mockDeterminer.Object);
+
+        await service.GetProducerData(2024, null, []);
+
+        determined.ShouldNotBeNull();
+        determined.ShouldBe([nowLarge[1]]);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_SmallLineItemsInWinningPomFile_CountForEligibilityButAreNotCalculated()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        var org = new FlaggedOrganisation
+        {
+            Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" },
+            ObligationStatus = "O",
+            HasH1 = true,
+            HasH2 = true
+        };
+        PayCalPom LineItem(string? size, double weight) => new()
+        {
+            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            PackagingMaterialWeight = weight, FileName = "pom-file", CreatedDateTime = new DateTime(2024, 1, 1), OrganisationSize = size
+        };
+
+        IReadOnlyList<PayCalPom>? eligibilityInput = null;
+        var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
+        mockEligibilityFilter
+            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+            .Callback((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => eligibilityInput = p)
+            .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
+
+        var service = CreateService(orgs: [org], poms: [LineItem("L", 1000), LineItem("S", 500), LineItem(null, 250)], eligibilityFilter: mockEligibilityFilter.Object);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        eligibilityInput.ShouldNotBeNull();
+        eligibilityInput.Select(p => p.OrganisationSize).ShouldBe(["L", "S", null], ignoreOrder: true);
+        result.Single().ReportedMaterials.Single().TotalWeight.ShouldBe(1000);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_LaterSmallPomFile_ReplacesEarlierLargeFile()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        var org = new FlaggedOrganisation
+        {
+            Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", OrganisationSize = "L" },
+            ObligationStatus = "O",
+            HasH1 = true,
+            HasH2 = true
+        };
+        PayCalPom LineItem(string fileName, int day, string size) => new()
+        {
+            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            PackagingMaterialWeight = 1000, FileName = fileName, CreatedDateTime = new DateTime(2024, 1, day), OrganisationSize = size
+        };
+
+        var service = CreateService(orgs: [org], poms: [LineItem("earlier-large", 1, "L"), LineItem("later-small", 2, "S")]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        result.Single().ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]

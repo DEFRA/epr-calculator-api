@@ -37,6 +37,7 @@ internal sealed class ProducerDataService(
     private const string ErrorStatus = "E";
     private const string HouseholdDrinksContainersType = "HDC";
     private const string GlassMaterial = "GL";
+    private const string LargeOrganisationSize = "L";
     private static readonly HashSet<string> ReportablePackagingTypes = ["HH", "CW", "PB"];
     private static readonly HashSet<string> ValidRagRatings = ["R", "A", "G", "R-M", "A-M", "G-M"];
 
@@ -117,10 +118,10 @@ internal sealed class ProducerDataService(
         var organisationsWithPeriodFlags = pipeline.OrganisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
 
         var organisations = organisationsWithPeriodFlags.Select(ValidateOrganisation).ToImmutableList();
-        // sp_GetPaycalPomData applied the reportable-packaging filter upstream of every consumer,
-        // error detection included - not just alignment.
+        // sp_GetPaycalPomData applied the large-organisation and reportable-packaging filters upstream
+        // of every consumer, error detection included - but only after file selection and eligibility.
         var poms = eligiblePoms
-            .Where(p => IsReportablePackaging(p))
+            .Where(p => p.OrganisationSize == LargeOrganisationSize && IsReportablePackaging(p))
             .Select(NormalisePom)
             .ToImmutableList();
 
@@ -254,8 +255,11 @@ internal sealed class ProducerDataService(
         // org/submitter/period (honouring the cut-off date) before obligation determination, which
         // needs every row for the run up front since it aggregates across rows (per producer/submission
         // period) rather than deciding a row in isolation.
-        var latestOrganisations = pipeline.AcceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate);
-        return pipeline.ObligationDeterminer.Determine(latestOrganisations).ToList();
+        // The latest file is chosen regardless of size, so an organisation whose latest registration isn't large drops out.
+        var latestLargeOrganisations = pipeline.AcceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate)
+            .Where(o => o.OrganisationSize == LargeOrganisationSize)
+            .ToList();
+        return pipeline.ObligationDeterminer.Determine(latestLargeOrganisations).ToList();
     }
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)

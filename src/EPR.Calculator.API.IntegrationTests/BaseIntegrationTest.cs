@@ -370,6 +370,7 @@ public abstract class BaseIntegrationTest
                 JoinerDate       = Field(csv, "joiner_date"),
                 LeaverDate       = Field(csv, "leaver_date"),
                 SubmissionPeriodYear = relativeYear,
+                OrganisationSize = "L",
                 FileName         = Field(csv, "file_name"),
                 CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             });
@@ -402,6 +403,7 @@ public abstract class BaseIntegrationTest
                 SubmitterId                 = Field(csv, "submitter_id"),
                 PackagingMaterialSubtype    = Field(csv, "packaging_material_subtype"),
                 RamRagRating                = Field(csv, "ram_rag_rating"),
+                OrganisationSize            = "L",
                 FileName                    = Field(csv, "file_name"),
                 CreatedDateTime             = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             };

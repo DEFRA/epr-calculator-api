@@ -58,7 +58,8 @@ public class AcceptedFileSelectorTests
                 OrganisationName = f.Marker,
                 FileName = f.Marker,
                 CreatedDateTime = f.Created,
-                IsResubmission = f.IsResubmission
+                IsResubmission = f.IsResubmission,
+                OrganisationSize = "L"
             })
             .ToList();
 
@@ -82,7 +83,8 @@ public class AcceptedFileSelectorTests
                 RegulatorStatus = "Accepted",
                 FileName = "Resub",
                 CreatedDateTime = After,
-                IsResubmission = true
+                IsResubmission = true,
+                OrganisationSize = "L"
             }
         };
 
@@ -105,7 +107,8 @@ public class AcceptedFileSelectorTests
                 OrganisationName = "Initial",
                 FileName = "Initial",
                 CreatedDateTime = T0,
-                IsResubmission = false
+                IsResubmission = false,
+                OrganisationSize = "L"
             },
             new PayCalOrganisation
             {
@@ -116,7 +119,8 @@ public class AcceptedFileSelectorTests
                 OrganisationName = "Resub",
                 FileName = "Resub",
                 CreatedDateTime = After,
-                IsResubmission = true
+                IsResubmission = true,
+                OrganisationSize = "L"
             }
         };
 
@@ -130,10 +134,10 @@ public class AcceptedFileSelectorTests
     {
         var organisations = new[]
         {
-            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F1", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 2, SubmitterId = "A", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F2", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "B", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F3", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2026, RegulatorStatus = "Accepted", FileName = "F4", CreatedDateTime = T0 }
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F1", CreatedDateTime = T0, OrganisationSize = "L" },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 2, SubmitterId = "A", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F2", CreatedDateTime = T0, OrganisationSize = "L" },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "B", SubmissionPeriodYear = 2025, RegulatorStatus = "Accepted", FileName = "F3", CreatedDateTime = T0, OrganisationSize = "L" },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2026, RegulatorStatus = "Accepted", FileName = "F4", CreatedDateTime = T0, OrganisationSize = "L" }
         };
 
         var result = selector.SelectLatestOrganisationFiles(organisations, cutOffDate: null);
