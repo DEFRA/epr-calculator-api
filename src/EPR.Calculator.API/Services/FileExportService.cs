@@ -187,6 +187,7 @@ public class FileExportService(
 
     private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: AnyAsync returns a bool.
         var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
         if(!hasData)

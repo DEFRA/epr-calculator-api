@@ -103,6 +103,7 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
 
     private async Task<RelativeYearInfo> GetRelativeYearStatus(CalculatorRun runToValidate, CancellationToken cancellationToken = default)
     {
+        // AsNoTracking() not needed: projects to RelativeYearInfo.
         return await dbContext.CalculatorRuns
             .WhereOfficialForYear(runToValidate.RelativeYear)
             .Where(run => run.Id != runToValidate.Id)

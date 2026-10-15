@@ -23,6 +23,7 @@ public class SetDefaultParametersRequestValidator : AbstractValidator<SetDefault
         RuleFor(r => r.RelativeYear)
             .Cascade(CascadeMode.Stop)
             .NotNull()
+            // AsNoTracking() not needed: AnyAsync returns a bool.
             .MustAsync((requestYear, ct) => dbContext.CalculatorRunRelativeYears.AnyAsync(dbYear => dbYear.Value == requestYear!.Value, ct))
             .WithMessage(CommonResources.NoDataForSpecifiedYear);
 
@@ -52,6 +53,7 @@ public class SetDefaultParametersRequestValidator : AbstractValidator<SetDefault
         // Cache the master template for use in validator rules.
         masterTemplate = await dbContext
             .DefaultParameterTemplateMasterList
+            .AsNoTracking()
             .ToImmutableDictionaryAsync(t => t.ParameterUniqueReferenceId, StringComparer.OrdinalIgnoreCase, cancellation);
 
         return await base.ValidateAsync(context, cancellation);
