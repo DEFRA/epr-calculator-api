@@ -4,7 +4,11 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
+using System.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
@@ -160,13 +164,67 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .Select(p => p.Total)
                         .SingleAsync(cancellationToken);
 
-        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
-            dbContext.ProducerFeeDetails
-                        .AsNoTracking()
-                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
-                        .OrderBy(d => d.Id)
-                        .Select(d => d.FeeDetail)
-                        .AsEnumerable();
+        // EF materialising each owned-JSON document was most of a download's cost, so read the stored UTF-8 bytes and deserialise them directly.
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId)
+        {
+            dbContext.Database.OpenConnection();
+            try
+            {
+                var detail = JsonColumnName<ProducerFeeDetail>(nameof(ProducerFeeDetail.FeeDetail));
+
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
+                // Reading the JSON as raw bytes is faster than as text, but SQL Server only allows that for binary columns, hence the cast.
+                // The cast is SQL Server only, so the integration tests cover it; unit tests require the cast to be removed.
+                #pragma warning disable S2077 // Table and column names come from EF Core metadata, not user input
+                command.CommandText = $"""
+                    SELECT {(dbContext.Database.IsSqlServer() ? $"CAST({detail} AS varbinary(max))" : detail)}
+                    FROM {TableName<ProducerFeeDetail>()}
+                    WHERE {ColumnName<ProducerFeeDetail>(nameof(ProducerFeeDetail.ProducerFeesId))} IN (
+                        SELECT {ColumnName<ProducerFees>(nameof(ProducerFees.Id))}
+                        FROM {TableName<ProducerFees>()}
+                        WHERE {ColumnName<ProducerFees>(nameof(ProducerFees.CalculatorRunId))} = @runId)
+                    ORDER BY {ColumnName<ProducerFeeDetail>(nameof(ProducerFeeDetail.Id))}
+                    """;
+                #pragma warning restore S2077
+                command.CommandTimeout = dbContext.Database.GetCommandTimeout() ?? command.CommandTimeout;
+
+                var runIdParameter = command.CreateParameter();
+                runIdParameter.ParameterName = "@runId";
+                runIdParameter.Value = runId;
+                command.Parameters.Add(runIdParameter);
+
+                using var reader = command.ExecuteReader(CommandBehavior.SequentialAccess);
+                while (reader.Read())
+                {
+                    using var json = reader.GetStream(0);
+                    yield return JsonSerializer.Deserialize<FeeDetail>(json, FeeDetailJsonOptions)!;
+                }
+            }
+            finally
+            {
+                dbContext.Database.CloseConnection();
+            }
+        }
+
+        private IEntityType EntityType<T>() => dbContext.Model.FindEntityType(typeof(T))!;
+
+        private string TableName<T>() => EntityType<T>().GetTableName()!;
+
+        private string ColumnName<T>(string property)
+        {
+            var entityType = EntityType<T>();
+            return entityType.FindProperty(property)!.GetColumnName(StoreObjectIdentifier.Table(entityType.GetTableName()!, entityType.GetSchema()))!;
+        }
+
+        private string JsonColumnName<T>(string ownedNavigation) =>
+            EntityType<T>().FindNavigation(ownedNavigation)!.TargetEntityType.GetContainerColumnName()!;
+
+        // EF writes decimals in owned JSON as numbers on SQL Server but as strings on SQLite (the unit tests), and the liability directions as names (HasConversion<string>).
+        private static readonly JsonSerializerOptions FeeDetailJsonOptions = new()
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            Converters = { new JsonStringEnumConverter() }
+        };
 
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>

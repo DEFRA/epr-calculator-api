@@ -167,6 +167,27 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task StreamProducerFeeDetails_ReadsLiabilityDirections()
+        {
+            var producerFees = TestDataHelper.GetProducerFees();
+            var billingInstruction = new BillingInstruction
+            {
+                SuggestedBillingInstruction               = "REBILL",
+                MaterialityLiabilityDirection             = LiabilityDirection.Positive,
+                TonnageAmountLiabilityDirection           = LiabilityDirection.Negative,
+                MaterialityPercentageLiabilityDirection   = LiabilityDirection.Positive,
+                TonnageAmountPercentageLiabilityDirection = LiabilityDirection.Negative
+            };
+            producerFees.Details.First().FeeDetail.BillingInstruction = billingInstruction;
+            _dbContext.Add(producerFees);
+            await _dbContext.SaveChangesAsync();
+
+            var result = _sut.StreamProducerFeeDetails(0).ToList();
+
+            result.First().BillingInstruction.ShouldBeEquivalentTo(billingInstruction);
+        }
+
+        [TestMethod]
         public async Task ReadSmcw_WorksAsExpected()
         {
             var smcw = MkSelfManagedConsumerWaste(1);
