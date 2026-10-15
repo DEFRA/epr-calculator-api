@@ -188,21 +188,15 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ReadSmcw_WorksAsExpected()
+        public async Task ReadSmcwByMaterial_WorksAsExpected()
         {
             var smcw = MkSelfManagedConsumerWaste(1);
             _dbContext.Add(smcw);
             await _dbContext.SaveChangesAsync();
 
-            var result = await _sut.ReadSmcw(1, CancellationToken.None);
+            var result = await _sut.ReadSmcwByMaterial(1, CancellationToken.None);
 
-            result.CalculatorRunId.ShouldBe(1);
-            result.ProducerTotals.Count.ShouldBe(1);
-            result.ProducerTotals.First().ProducerId.ShouldBe(1);
-            result.ProducerTotals.First().SubsidiaryId.ShouldBe("A");
-            result.ProducerTotals.First().Level.ShouldBe(1);
-            result.ProducerTotals.First().SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage.ShouldBe(100);
-            result.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage.ShouldBe(100);
+            result[MaterialCodes.Aluminium].SmcwTonnage.ShouldBe(100);
         }
 
         [TestMethod]
