@@ -52,6 +52,7 @@ public class BillingFileController(
     private async Task<IActionResult> DownloadBillingCsvFromBlobStorage(int runId)
     {
         var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
             .Where(x => x.CalculatorRunId == runId)
             .OrderByDescending(x => x.BillingFileCreatedDate)
             .FirstOrDefaultAsync();
@@ -63,6 +64,7 @@ public class BillingFileController(
             return NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
 
         var csvFileMetadata = await context.CalculatorRunCsvFileMetadata
+            .AsNoTracking()
             .Where(x =>
                 x.CalculatorRunId == runId
                 && x.FileName == latestBillingFileMetaData.BillingCsvFileName)
@@ -82,6 +84,7 @@ public class BillingFileController(
     private async Task<IActionResult> DownloadBillingJsonFromBlobStorage(int runId)
     {
         var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
             .Where(x => x.CalculatorRunId == runId)
             .OrderByDescending(x => x.BillingFileCreatedDate)
             .FirstOrDefaultAsync();

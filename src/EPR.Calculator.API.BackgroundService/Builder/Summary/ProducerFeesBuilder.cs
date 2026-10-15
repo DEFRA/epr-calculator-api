@@ -43,7 +43,7 @@ public class ProducerFeesBuilder(
                 ProducerDetail = pd,
                 ProducerMaterialPackaging = prm,
             }
-        ).ToListAsync();
+        ).AsNoTracking().ToListAsync();
 
         var projectedMaterialsLookup = runProducerMaterialDetails
             .ToLookup(

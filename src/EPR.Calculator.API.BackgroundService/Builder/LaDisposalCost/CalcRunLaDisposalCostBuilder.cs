@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost
                     Tonnage = producerMaterial.PackagingTonnage,
                     ProducerDetail = producerMaterial.ProducerDetail,
                 }
-            ).ToListAsync();
+            ).AsNoTracking().ToListAsync();
         }
     }
 }

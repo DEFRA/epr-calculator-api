@@ -31,6 +31,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
             CancellationToken cancellationToken
         )
         {
+            // AsNoTracking() not needed: projects to ResultsClass.
             var results = await (
                 from run in dbContext.CalculatorRuns
                 join lapcapMaster in dbContext.LapcapDataMaster on run.LapcapDataMasterId equals lapcapMaster.Id

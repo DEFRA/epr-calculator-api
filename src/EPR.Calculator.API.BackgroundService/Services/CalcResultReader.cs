@@ -170,6 +170,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .SingleAsync(cancellationToken);
 
         // EF materialising each owned-JSON document was most of a download's cost, so read the stored UTF-8 bytes and deserialise them directly.
+        // This is a raw command, not an EF query, so AsNoTracking() can't be applied; nothing is tracked.
         public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId)
         {
             dbContext.Database.OpenConnection();

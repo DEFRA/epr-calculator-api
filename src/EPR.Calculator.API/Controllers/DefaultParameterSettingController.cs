@@ -30,6 +30,7 @@ public class DefaultParameterSettingController (
         {
             try
             {
+                // Tracked: setting EffectiveTo below is saved with the new master.
                 var oldMasters = await dbContext.DefaultParameterSettings
                     .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                     .ToListAsync(cancellationToken);
@@ -48,6 +49,7 @@ public class DefaultParameterSettingController (
                 await dbContext.DefaultParameterSettings.AddAsync(newMaster, cancellationToken);
 
                 var masterTemplate = await dbContext.DefaultParameterTemplateMasterList
+                    .AsNoTracking()
                     .ToImmutableDictionaryAsync(t => t.ParameterUniqueReferenceId, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
                 foreach (var parameter in request.Parameters!)
@@ -104,13 +106,14 @@ public class DefaultParameterSettingController (
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
 
         var currentDefaultSetting = await dbContext.DefaultParameterSettings
+            .AsNoTracking()
             .Include(x => x.Details)
             .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
 
         if (currentDefaultSetting == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-        var templateDetails = await dbContext.DefaultParameterTemplateMasterList.ToListAsync();
+        var templateDetails = await dbContext.DefaultParameterTemplateMasterList.AsNoTracking().ToListAsync();
 
         var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
         return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };

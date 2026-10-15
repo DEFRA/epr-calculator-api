@@ -56,10 +56,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
 
-            var actionResul2 = okResult.Value as List<LapCapParameterDto>;
-            Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
-            Assert.AreEqual(tempdateData.TotalCost, actionResul2?[0].TotalCost);
-            Assert.AreEqual(tempdateData.LapcapTempUniqueRef, actionResul2?[0].LapcapTempUniqueRef);
+            var actionResul2 = (okResult.Value as List<LapCapParameterDto>)?.Single(x => x.LapcapTempUniqueRef == tempdateData.LapcapTempUniqueRef);
+            Assert.AreEqual(tempdateData.Id, actionResul2?.Id);
+            Assert.AreEqual(tempdateData.TotalCost, actionResul2?.TotalCost);
+            Assert.AreEqual(tempdateData.LapcapTempUniqueRef, actionResul2?.LapcapTempUniqueRef);
         }
 
         [TestMethod]

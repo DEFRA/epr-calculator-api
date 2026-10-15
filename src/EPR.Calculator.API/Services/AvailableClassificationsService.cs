@@ -52,6 +52,7 @@ public class AvailableClassificationsService(
 
     private async Task<(CalculatorRunDto, ImmutableList<CalculatorRunDto>)> GetRuns(CalcRelativeYearRequestDto request, CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: projects to a DTO.
         var runsForYear = await context.CalculatorRuns
             .Where(run => run.RelativeYear == request.RelativeYearValue
                           && (run.Id == request.RunId

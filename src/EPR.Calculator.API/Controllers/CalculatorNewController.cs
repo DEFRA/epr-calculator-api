@@ -41,6 +41,7 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PutCalculatorRunStatus([FromBody] SetRunClassificationRequest request, CancellationToken cancellationToken = default)
     {
+        // Tracked: the run is updated and saved below.
         var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == request.RunId, cancellationToken: cancellationToken);
 
         if (run == null)
@@ -74,6 +75,7 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
     {
+        // AsNoTracking() not needed: projects to a DTO.
         var runDto = await dbContext.CalculatorRuns
             .Where(run => run.Id == runId)
             .Select(CalcRunMapper.ToDto)
@@ -95,6 +97,7 @@ public class CalculatorNewController(
 
         try
         {
+            // Tracked: the run is updated and saved below.
             var run = await dbContext.CalculatorRuns
                 .SingleAsync(x => x.Id == runId, cancellationToken);
 
