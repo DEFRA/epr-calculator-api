@@ -102,7 +102,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
             var csvContent = new StringBuilder();
 
             // Act
-            exporter.Export(calcResultLaDisposalCostData, smcw, modulationResult, csvContent);
+            exporter.Export(calcResultLaDisposalCostData, smcw.TotalByMaterial, modulationResult, csvContent);
             var result = csvContent.ToString().ReplaceLineEndings("\n").Split("\n").Select(s => s.TrimEnd(',')).ToArray();
             //Console.WriteLine($">> {JsonConvert.SerializeObject(result, Formatting.Indented)}");
             Console.WriteLine(string.Join("\n", result));

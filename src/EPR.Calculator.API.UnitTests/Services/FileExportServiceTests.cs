@@ -174,7 +174,7 @@ public class FileExportServiceTests
         var onePlusFourApportionment = new Mock<CalcResultOnePlusFourApportionment>().Object;
         var laDisposalCostData = new Mock<CalcResultLaDisposalCostData>().Object;
         var commsCost = new Mock<CalcResultCommsCost>().Object;
-        var smcw = new Mock<SelfManagedConsumerWaste>().Object;
+        IReadOnlyDictionary<string, SelfManagedConsumerWasteData> smcwByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>();
 
         calcResultDetailBuilderMock.Setup(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>())).ReturnsAsync(calcResultDetail);
         calcResultReaderMock.Setup(x => x.ReadLapcapData(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(lapcapData);
@@ -183,7 +183,7 @@ public class FileExportServiceTests
         calcResultReaderMock.Setup(x => x.ReadOnePlusFourApportionment(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(onePlusFourApportionment);
         calcResultReaderMock.Setup(x => x.ReadLaDisposalCostData(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(laDisposalCostData);
         calcResultReaderMock.Setup(x => x.ReadCommsCost(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(commsCost);
-        calcResultReaderMock.Setup(x => x.ReadSmcw(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(smcw);
+        calcResultReaderMock.Setup(x => x.ReadSmcwByMaterial(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(smcwByMaterial);
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
@@ -202,7 +202,7 @@ public class FileExportServiceTests
         capturedResult.CalcResultOnePlusFourApportionment.ShouldBeSameAs(onePlusFourApportionment);
         capturedResult.CalcResultLaDisposalCostData.ShouldBeSameAs(laDisposalCostData);
         capturedResult.CalcResultCommsCostReportDetail.ShouldBeSameAs(commsCost);
-        capturedResult.Smcw.ShouldBeSameAs(smcw);
+        capturedResult.SmcwByMaterial.ShouldBeSameAs(smcwByMaterial);
 
         calcResultReaderMock.Verify(x => x.ReadModulationResult(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         calcResultReaderMock.Verify(x => x.ReadH1ProjectedData(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);

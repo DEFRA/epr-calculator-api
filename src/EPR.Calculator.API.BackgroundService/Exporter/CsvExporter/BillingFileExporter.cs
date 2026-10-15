@@ -57,8 +57,8 @@ public class BillingFileExporter(
         commsCostExporter.Export(calcResult.CalcResultCommsCostReportDetail, materials, csvContent);
         laDisposalCostExporter.Export(runContext, calcResult.CalcResultLaDisposalCostData, materials, csvContent);
 
-        if (calcResult.Smcw is not null && calcResult.CalcResultModulation is not null)
-            modulationExporter.Export(calcResult.CalcResultLaDisposalCostData, calcResult.Smcw, calcResult.CalcResultModulation, csvContent);
+        if (calcResult.CalcResultModulation is not null && calcResult.SmcwByMaterial is not null)
+            modulationExporter.Export(calcResult.CalcResultLaDisposalCostData, calcResult.SmcwByMaterial, calcResult.CalcResultModulation, csvContent);
 
         cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, materials, csvContent);
 
