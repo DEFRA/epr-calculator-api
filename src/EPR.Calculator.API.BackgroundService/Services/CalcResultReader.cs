@@ -4,7 +4,11 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
+using System.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
@@ -160,13 +164,52 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .Select(p => p.Total)
                         .SingleAsync(cancellationToken);
 
-        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
-            dbContext.ProducerFeeDetails
-                        .AsNoTracking()
-                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
-                        .OrderBy(d => d.Id)
-                        .Select(d => d.FeeDetail)
-                        .AsEnumerable();
+        // EF materialising each owned-JSON document was most of a download's cost, so read the stored UTF-8 bytes and deserialise them directly.
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId)
+        {
+            dbContext.Database.OpenConnection();
+            try
+            {
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
+                command.CommandText = dbContext.Database.IsSqlServer() ? SqlServerProducerFeeDetailsQuery : ProducerFeeDetailsQuery;
+                command.Transaction = dbContext.Database.CurrentTransaction?.GetDbTransaction();
+                command.CommandTimeout = dbContext.Database.GetCommandTimeout() ?? command.CommandTimeout;
+
+                var runIdParameter = command.CreateParameter();
+                runIdParameter.ParameterName = "@runId";
+                runIdParameter.Value = runId;
+                command.Parameters.Add(runIdParameter);
+
+                using var reader = command.ExecuteReader(CommandBehavior.SequentialAccess);
+                while (reader.Read())
+                {
+                    using var json = reader.GetStream(0);
+                    yield return JsonSerializer.Deserialize<FeeDetail>(json, FeeDetailJsonOptions)!;
+                }
+            }
+            finally
+            {
+                dbContext.Database.CloseConnection();
+            }
+        }
+
+        // EF writes decimals in owned JSON as numbers on SQL Server but as strings on SQLite.
+        private static readonly JsonSerializerOptions FeeDetailJsonOptions = new() { NumberHandling = JsonNumberHandling.AllowReadingFromString };
+
+        // SQL Server's GetStream only reads binary columns, so the UTF-8 text is cast to varbinary there.
+        private const string SqlServerProducerFeeDetailsQuery = """
+            SELECT CAST(d.detail AS varbinary(max))
+            FROM calc_result_producer_fee_detail d
+            WHERE d.producer_fees_id IN (SELECT f.id FROM calc_result_producer_fees f WHERE f.calculator_run_id = @runId)
+            ORDER BY d.id
+            """;
+
+        private const string ProducerFeeDetailsQuery = """
+            SELECT d.detail
+            FROM calc_result_producer_fee_detail d
+            WHERE d.producer_fees_id IN (SELECT f.id FROM calc_result_producer_fees f WHERE f.calculator_run_id = @runId)
+            ORDER BY d.id
+            """;
 
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>
