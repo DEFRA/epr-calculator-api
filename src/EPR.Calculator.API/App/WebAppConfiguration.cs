@@ -1,6 +1,11 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
@@ -51,6 +56,31 @@ public static class WebAppConfiguration
             app.MapHealthChecks(HealthCheckPath, opts).AllowAnonymous();
 
             return app;
+        }
+
+        // Otherwise the first request after a start pays for the database token, connection pool, EF model and token-validation config.
+        public async Task WarmUpAsync()
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                await using (var scope = app.Services.CreateAsyncScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+                    await dbContext.CalculatorRuns.AsNoTracking().AnyAsync();
+                }
+
+                var jwtBearerOptions = app.Services.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
+                if (jwtBearerOptions.ConfigurationManager is not null)
+                    await jwtBearerOptions.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
+
+                app.Logger.LogInformation("Warmed up in {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning(ex, "Warm-up failed after {ElapsedMilliseconds} ms, so the first requests will be slower", stopwatch.ElapsedMilliseconds);
+            }
         }
     }
 }
