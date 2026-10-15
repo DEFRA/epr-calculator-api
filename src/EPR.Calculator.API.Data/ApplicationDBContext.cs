@@ -67,6 +67,7 @@ public class ApplicationDBContext : DbContext
     public async Task<RelativeYear?> FindRelativeYearAsync(int value, CancellationToken cancellationToken = default)
     {
         var entity = await CalculatorRunRelativeYears
+            .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Value == value, cancellationToken);
 
         return entity == null ? null : new RelativeYear(entity.Value);
