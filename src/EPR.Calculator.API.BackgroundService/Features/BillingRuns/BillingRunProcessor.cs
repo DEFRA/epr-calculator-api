@@ -4,7 +4,10 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 
@@ -14,6 +17,7 @@ public interface IBillingRunProcessor
 }
 
 public class BillingRunProcessor(
+    ApplicationDBContext dbContext,
     IBillingBuilder resultBuilder,
     IBillingFileGenerator fileGenerator,
     IBillingRunFinalizer finalizer,
@@ -25,6 +29,8 @@ public class BillingRunProcessor(
     {
         try
         {
+            await SetStartedStatus(runContext, cancellationToken);
+
             // This reads the required data to memory and builds the CalcResult object.
             // For BillingRunContext, it does not cause any external state mutations.
             var calcResult = await resultBuilder.BuildAsync(runContext, cancellationToken);
@@ -58,6 +64,17 @@ public class BillingRunProcessor(
                 Exception = ex
             };
         }
+    }
+
+    private async Task SetStartedStatus(BillingRunContext runContext, CancellationToken cancellationToken)
+    {
+        await dbContext.CalculatorRuns
+            .Where(r => r.Id == runContext.RunId)
+            .ExecuteUpdateAsync(s =>
+            {
+                s.SetProperty(r => r.BillingRunStatus, BillingRunStatus.Started);
+                s.SetProperty(r => r.BillingRunStartedAt, runContext.ProcessingStartedAt.UtcDateTime);
+            }, cancellationToken);
     }
 
     private static CalcResult GetFilteredCalcResult(CalcResult calcResult, BillingRunContext runContext)

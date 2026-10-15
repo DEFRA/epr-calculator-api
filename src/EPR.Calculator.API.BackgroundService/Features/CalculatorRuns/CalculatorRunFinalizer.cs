@@ -14,12 +14,12 @@ public interface ICalculatorRunFinalizer
 {
     /// <summary>
     ///     Persists any required state changes to the database, then marks the calculator run as
-    ///     <see cref="RunClassification.Unclassified" />.
+    ///     <see cref="CalculationRunStatus.Completed" />.
     /// </summary>
     Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CalculatorFileResult exportResult, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Marks the calculator run as <see cref="RunClassification.Errored" />.
+    ///     Marks the calculator run as <see cref="CalculationRunStatus.Errored" />.
     /// </summary>
     Task FinalizeAsErrored(CalculatorRunContext runContext, CancellationToken cancellationToken);
 }
@@ -58,17 +58,13 @@ public class CalculatorRunFinalizer(
     {
         try
         {
-            var calcRun = await dbContext
-                .CalculatorRuns
-                .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
-
-            calcRun.Classification = RunClassification.Errored;
-
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.CalculatorRuns
+                .Where(r => r.Id == runContext.RunId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.CalculationRunStatus, CalculationRunStatus.Errored), cancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to mark calculation run as failed");
+            logger.LogError(ex, $"Failed to mark calculation run as {nameof(CalculationRunStatus.Errored)}");
         }
     }
 
@@ -81,12 +77,8 @@ public class CalculatorRunFinalizer(
 
     private async Task SaveCompletedRunStatus(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
-        var calcRun = await dbContext
-            .CalculatorRuns
-            .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
-
-        calcRun.Classification = RunClassification.Unclassified;
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.CalculatorRuns
+            .Where(r => r.Id == runContext.RunId)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.CalculationRunStatus, CalculationRunStatus.Completed), cancellationToken);
     }
 }

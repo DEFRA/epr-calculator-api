@@ -32,8 +32,8 @@ public class AvailableClassificationsService(
             ];
         }
 
-        var hasIncompleteOfficialRun = officialRuns.Exists(r => r.RunClassification is { IsCompleted: false });
-        var hasNewerCompletedRun = officialRuns.Exists(r => r.BillingFile?.SentAt >= run.CreatedAt);
+        var hasIncompleteOfficialRun = officialRuns.Exists(r => !(r.BillingFile?.IsShared ?? false));
+        var hasNewerCompletedRun = officialRuns.Exists(r => r.BillingFile?.SharedAt >= run.CreatedAt);
 
         if (!hasIncompleteOfficialRun && !hasNewerCompletedRun)
         {
@@ -54,7 +54,9 @@ public class AvailableClassificationsService(
     {
         var runsForYear = await context.CalculatorRuns
             .Where(run => run.RelativeYear == request.RelativeYearValue
-                          && (run.Id == request.RunId || RunClassificationHelper.OfficialClassifications.Contains(run.Classification)))
+                          && (run.Id == request.RunId
+                              || run.Classification == RunClassification.Initial
+                              || run.Classification == RunClassification.Recalculation))
             .Select(CalcRunMapper.ToDto)
             .ToImmutableListAsync(cancellationToken);
 

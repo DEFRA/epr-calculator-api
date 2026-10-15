@@ -51,13 +51,9 @@ public class BillingRunFinalizer(
     {
         try
         {
-            var calcRun = await dbContext
-                .CalculatorRuns
-                .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
-
-            calcRun.BillingRunStatus = BillingRunStatus.Errored;
-
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.CalculatorRuns
+                .Where(r => r.Id == runContext.RunId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.BillingRunStatus, BillingRunStatus.Errored), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -107,12 +103,8 @@ public class BillingRunFinalizer(
 
     private async Task SaveCompletedRunStatus(BillingRunContext runContext, CancellationToken cancellationToken)
     {
-        var calcRun = await dbContext
-            .CalculatorRuns
-            .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
-
-        calcRun.BillingRunStatus = BillingRunStatus.Completed;
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbContext.CalculatorRuns
+            .Where(r => r.Id == runContext.RunId)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.BillingRunStatus, BillingRunStatus.Completed), cancellationToken);
     }
 }

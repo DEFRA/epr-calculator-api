@@ -29,8 +29,7 @@ public class ProducerBillingFileController(
     {
         var serviceProcessResponseDto = await billingFileService.StartGeneratingBillingFileAsync(
             runId,
-            User.GetName(),
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
         if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
         {

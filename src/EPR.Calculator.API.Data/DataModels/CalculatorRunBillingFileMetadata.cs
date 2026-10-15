@@ -8,8 +8,6 @@ public class CalculatorRunBillingFileMetadata
     public required string BillingJsonFileName { get; set; }
     public required DateTime BillingFileCreatedDate { get; set; }
     public required string BillingFileCreatedBy { get; set; }
-    public DateTime? BillingFileAuthorisedDate { get; set; }
-    public string? BillingFileAuthorisedBy { get; set; }
 
     #region EF navigational properties
 

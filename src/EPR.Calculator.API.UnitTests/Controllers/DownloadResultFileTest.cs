@@ -39,8 +39,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBackgroundTaskQueue>(),
                 Mock.Of<IRunClassificationValidator>(),
                 Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
-                Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>());
+                Mock.Of<IAvailableClassificationsService>());
         }
 
         [TestCleanup]

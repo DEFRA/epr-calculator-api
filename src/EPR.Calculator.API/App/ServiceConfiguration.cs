@@ -185,7 +185,6 @@ public static class ServiceConfiguration
             services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
             services.AddScoped<IBillingFileService, BillingFileService>();
             services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
-            services.AddScoped<ICalculationRunService, CalculationRunService>();
 
             return services;
         }

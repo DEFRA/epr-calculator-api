@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Queries;
 using EPR.Calculator.API.Dtos;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,36 +15,58 @@ public interface IRunClassificationValidator
 public class RunClassificationValidator(ApplicationDBContext dbContext)
     : IRunClassificationValidator
 {
-    private static readonly Dictionary<RunClassification, RunClassification> ValidTransitions = new()
-    {
-        [RunClassification.Initial]                 = RunClassification.Unclassified,
-        [RunClassification.InitialCompleted]       = RunClassification.Initial,
-        [RunClassification.Recalculation]           = RunClassification.Unclassified,
-        [RunClassification.RecalculationCompleted] = RunClassification.Recalculation
-    };
-
-    private static readonly Dictionary<RunClassification, RunClassification[]> InvalidFromStates = new()
-    {
-        [RunClassification.Deleted]  = [RunClassification.Deleted],
-        [RunClassification.Test] = [RunClassification.Test, RunClassification.Running, RunClassification.Errored, RunClassification.Deleted]
-    };
+    private static readonly ImmutableHashSet<RunClassification> Assignable =
+    [
+        RunClassification.Test,
+        RunClassification.Initial,
+        RunClassification.Recalculation,
+        RunClassification.Deleted
+    ];
 
     public async Task<GenericValidationResultDto> ValidateAsync(
         CalculatorRun runToValidate,
         RunClassification newClassification,
         CancellationToken cancellationToken)
     {
-        var initialCheck = ValidateClassificationTransition(runToValidate, newClassification);
+        if (!Assignable.Contains(newClassification))
+        {
+            return new GenericValidationResultDto
+            {
+                Errors = [ $"The classification '{newClassification}' is not assignable." ]
+            };
+        }
 
-        if(initialCheck.IsInvalid)
-            return initialCheck;
+        if (runToValidate.IsBillingFileShared)
+        {
+            return new GenericValidationResultDto
+            {
+                Errors = ["Cannot reclassify a run once the run is completed."]
+            };
+        }
 
-        if(!newClassification.IsOfficial)
+        if (runToValidate.Classification == RunClassification.Deleted)
+        {
+            return new GenericValidationResultDto
+            {
+                Errors = ["Cannot reclassify a run once the run is deleted."]
+            };
+        }
+
+        // Runs can be deleted regardless of their calculation status, e.g. to discard errored runs
+        if (newClassification == RunClassification.Deleted)
             return new GenericValidationResultDto();
+
+        if (runToValidate.CalculationRunStatus != CalculationRunStatus.Completed)
+        {
+            return new GenericValidationResultDto
+            {
+                Errors = ["Cannot classify a run until its calculation has completed."]
+            };
+        }
 
         var yearInfo = await GetRelativeYearStatus(runToValidate, cancellationToken);
 
-        if (IsDesignatingIncompleteButAlreadyExists(yearInfo, newClassification))
+        if (IsDesignatingOfficialButYearHasIncomplete(yearInfo, newClassification))
         {
             return new GenericValidationResultDto
             {
@@ -51,7 +74,7 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
             };
         }
 
-        if (IsDesignatingInitialButAlreadyCompleted(yearInfo, newClassification))
+        if (IsDesignatingInitialButYearHasCompleted(yearInfo, newClassification))
         {
             return new GenericValidationResultDto
             {
@@ -59,7 +82,7 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
             };
         }
 
-        if (IsDesignatingRecalculationWithoutInitial(yearInfo, newClassification))
+        if (IsDesignatingRecalculationButYearLacksInitialCompleted(yearInfo, newClassification))
         {
             return new GenericValidationResultDto
             {
@@ -67,7 +90,7 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
             };
         }
 
-        if (IsDesignatingOutdatedRun(yearInfo, newClassification, runToValidate.CreatedAt))
+        if (IsDesignatingOfficialButYearHasNewerFileShared(yearInfo, newClassification, runToValidate.CreatedAt))
         {
             return new GenericValidationResultDto
             {
@@ -78,108 +101,63 @@ public class RunClassificationValidator(ApplicationDBContext dbContext)
         return new GenericValidationResultDto();
     }
 
-    private static GenericValidationResultDto ValidateClassificationTransition(
-        CalculatorRun calculatorRun,
-        RunClassification requestedClassification)
-    {
-        if (calculatorRun.Classification.IsCompleted)
-        {
-            return new GenericValidationResultDto
-            {
-                Errors = ["Cannot reclassify a run once the run is completed."]
-            };
-        }
-
-        if (ValidTransitions.TryGetValue(requestedClassification, out var requiredCurrent))
-        {
-            return calculatorRun.Classification == requiredCurrent
-                ? ValidResultDto()
-                : InvalidResultDto(requestedClassification);
-        }
-
-        if (InvalidFromStates.TryGetValue(requestedClassification, out var invalidStates))
-        {
-            return invalidStates.Contains(calculatorRun.Classification)
-                ? InvalidResultDto(requestedClassification)
-                : ValidResultDto();
-        }
-
-        return new GenericValidationResultDto
-        {
-            Errors = ["Invalid Classification"]
-        };
-
-        static GenericValidationResultDto ValidResultDto() => new();
-
-        static GenericValidationResultDto InvalidResultDto(RunClassification classification) => new()
-        {
-            Errors = [string.Format(CommonResources.InvalidClassification, classification)]
-        };
-    }
-
     private async Task<RelativeYearInfo> GetRelativeYearStatus(CalculatorRun runToValidate, CancellationToken cancellationToken = default)
     {
         return await dbContext.CalculatorRuns
-            .Where(run => run.RelativeYear == runToValidate.RelativeYear
-                          && RunClassificationHelper.OfficialClassifications.Contains(run.Classification)
-                          && run.Id != runToValidate.Id)
+            .WhereOfficialForYear(runToValidate.RelativeYear)
+            .Where(run => run.Id != runToValidate.Id)
             .GroupBy(_ => 1)
             .Select(filteredRuns => new RelativeYearInfo
             {
-                HasInitial                = filteredRuns.Any(run => run.Classification == RunClassification.Initial),
-                HasInitialCompleted       = filteredRuns.Any(run => run.Classification == RunClassification.InitialCompleted),
-                HasRecalculation          = filteredRuns.Any(run => run.Classification == RunClassification.Recalculation),
-                HasRecalculationCompleted = filteredRuns.Any(run => run.Classification == RunClassification.RecalculationCompleted),
-                LatestFssFileSentAt       = filteredRuns
-                                            .Where(run => run.Classification == RunClassification.InitialCompleted
-                                                          || run.Classification == RunClassification.RecalculationCompleted)
-                                            .SelectMany(run => run.CalculatorRunBillingFileMetadata)
-                                            .Max(m => m.BillingFileAuthorisedDate)
+                HasInitialIncomplete       = filteredRuns.Any(run => run.Classification == RunClassification.Initial && !run.IsBillingFileShared),
+                HasInitialCompleted        = filteredRuns.Any(run => run.Classification == RunClassification.Initial && run.IsBillingFileShared),
+                HasRecalculationIncomplete = filteredRuns.Any(run => run.Classification == RunClassification.Recalculation && !run.IsBillingFileShared),
+                HasRecalculationCompleted  = filteredRuns.Any(run => run.Classification == RunClassification.Recalculation && run.IsBillingFileShared),
+                LatestFileSharedAt         = filteredRuns.Where(run => run.IsBillingFileShared).Max(run => run.BillingFileSharedAt)
             })
             .SingleOrDefaultAsync(cancellationToken) ?? new RelativeYearInfo();
     }
 
-    private sealed record RelativeYearInfo
-    {
-        public bool HasInitial { get; init; }
-        public bool HasInitialCompleted { get; init; }
-        public bool HasRecalculation { get; init; }
-        public bool HasRecalculationCompleted { get; init; }
-        public DateTime? LatestFssFileSentAt { get; init; }
-        public bool HasDesignated => HasInitial || HasInitialCompleted || HasRecalculation || HasRecalculationCompleted;
-        public bool HasCompleted => HasInitialCompleted || HasRecalculationCompleted;
-    }
-
-    private static bool IsDesignatingIncompleteButAlreadyExists(
+    private static bool IsDesignatingOfficialButYearHasIncomplete(
         RelativeYearInfo yearInfo,
         RunClassification requestedClassification)
     {
-        return requestedClassification is { IsOfficial: true, IsCompleted: false }
-               && yearInfo is { HasDesignated: true, HasCompleted: false };
+        return requestedClassification is RunClassification.Initial or RunClassification.Recalculation
+               && yearInfo is { HasOfficialIncomplete: true };
     }
 
-    private static bool IsDesignatingInitialButAlreadyCompleted(
+    private static bool IsDesignatingInitialButYearHasCompleted(
         RelativeYearInfo yearInfo,
         RunClassification requestedClassification)
     {
-        return requestedClassification is RunClassification.Initial or RunClassification.InitialCompleted
+        return requestedClassification is RunClassification.Initial
                && yearInfo is { HasInitialCompleted: true };
     }
 
-    private static bool IsDesignatingRecalculationWithoutInitial(
+    private static bool IsDesignatingRecalculationButYearLacksInitialCompleted(
         RelativeYearInfo yearInfo,
         RunClassification requestedClassification)
     {
-        return requestedClassification is RunClassification.Recalculation or RunClassification.RecalculationCompleted
+        return requestedClassification is RunClassification.Recalculation
                && yearInfo is { HasInitialCompleted: false };
     }
 
-    private static bool IsDesignatingOutdatedRun(
+    private static bool IsDesignatingOfficialButYearHasNewerFileShared(
         RelativeYearInfo yearInfo,
         RunClassification requestedClassification,
         DateTime requestedRunCreatedAt)
     {
-        return requestedClassification is { IsOfficial: true }
-               && yearInfo.LatestFssFileSentAt >= requestedRunCreatedAt;
+        return requestedClassification is RunClassification.Initial or RunClassification.Recalculation
+               && yearInfo.LatestFileSharedAt >= requestedRunCreatedAt;
+    }
+
+    private sealed record RelativeYearInfo
+    {
+        public bool HasInitialIncomplete { get; init; }
+        public bool HasInitialCompleted { get; init; }
+        public bool HasRecalculationIncomplete { get; init; }
+        public bool HasRecalculationCompleted { get; init; }
+        public DateTime? LatestFileSharedAt { get; init; }
+        public bool HasOfficialIncomplete => HasInitialIncomplete || HasRecalculationIncomplete;
     }
 }

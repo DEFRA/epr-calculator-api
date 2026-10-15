@@ -306,4 +306,7 @@
   <data name="BillingFileOutdated" xml:space="preserve">
     <value>Billing file is either missing or outdated.</value>
   </data>
+  <data name="BillingFileAlreadyShared" xml:space="preserve">
+    <value>Billing file has already been shared.</value>
+  </data>
 </root>
