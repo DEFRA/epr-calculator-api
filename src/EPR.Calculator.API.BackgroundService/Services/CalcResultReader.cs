@@ -41,9 +41,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
-            var rows = await dbContext.TransformProjectedH1
+            var rows = await ProjectedH1Rows(runId)
                         .AsNoTracking()
-                        .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
             return rows
@@ -66,9 +65,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
-            var rows = await dbContext.TransformProjectedH2
+            var rows = await ProjectedH2Rows(runId)
                         .AsNoTracking()
-                        .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
             return rows
@@ -86,6 +84,17 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ThenBy(p => p.SubsidiaryId)
                         .ToImmutableList();
         }
+
+        // Without FORCESEEK SQL Server scans every run's rows rather than look up each of this run's, which costs more as runs accumulate.
+        private IQueryable<TransformProjectedH1> ProjectedH1Rows(int runId) =>
+            dbContext.Database.IsSqlServer()
+                ? dbContext.TransformProjectedH1.FromSql($"SELECT * FROM transform_projected_h1 WITH (FORCESEEK) WHERE calculator_run_id = {runId}")
+                : dbContext.TransformProjectedH1.Where(p => p.CalculatorRunId == runId);
+
+        private IQueryable<TransformProjectedH2> ProjectedH2Rows(int runId) =>
+            dbContext.Database.IsSqlServer()
+                ? dbContext.TransformProjectedH2.FromSql($"SELECT * FROM transform_projected_h2 WITH (FORCESEEK) WHERE calculator_run_id = {runId}")
+                : dbContext.TransformProjectedH2.Where(p => p.CalculatorRunId == runId);
 
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
