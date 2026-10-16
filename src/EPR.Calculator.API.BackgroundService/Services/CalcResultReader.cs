@@ -1,9 +1,11 @@
 using EPR.Calculator.API.BackgroundService.Constants;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
+using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
 {
@@ -13,7 +15,11 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
-        Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken);
+        Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken);
+
+        // Deferred - the query runs as the caller enumerates, so a downstream consumer streaming
+        // straight to a CSV/JSON writer never holds every producer's fee graph in memory at once.
+        IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
         Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
@@ -25,7 +31,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<ImmutableList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken);
     }
 
-    public class CalcResultReader(ApplicationDBContext dbContext) : ICalcResultReader
+    public class CalcResultReader(ApplicationDBContext dbContext, IMaterialService materialService) : ICalcResultReader
     {
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
@@ -108,6 +114,10 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ThenBy(p => p.SubmissionPeriodCode)
                         .ToImmutableList();
 
+            var materials = await materialService.GetMaterials();
+            foreach (var producer in scaledupProducers)
+                producer.ScaledupProducerTonnageByMaterial = CalcResultScaledupProducersBuilder.GetTonnages(producer.PomData, materials);
+
             return scaledupProducers;
         }
 
@@ -143,15 +153,20 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken)
-        {
-            return await dbContext.ProducerDisposalFee
+        public async Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken) =>
+            await dbContext.ProducerDisposalFee
                         .AsNoTracking()
-                        .AsSplitQuery() // avoid repeating the parent's JSON columns across every detail row
-                        .Include(p => p.Details)
                         .Where(p => p.CalculatorRunId == runId)
+                        .Select(p => p.Total)
                         .SingleAsync(cancellationToken);
-        }
+
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
+            dbContext.ProducerFeeDetails
+                        .AsNoTracking()
+                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
+                        .OrderBy(d => d.Id)
+                        .Select(d => d.FeeDetail)
+                        .AsEnumerable();
 
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>

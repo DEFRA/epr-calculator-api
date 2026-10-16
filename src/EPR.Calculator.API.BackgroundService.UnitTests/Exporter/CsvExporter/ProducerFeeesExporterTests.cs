@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
             var calcResult = TestDataHelper.GetCalcResult();
             var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
             var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
-            _testClass.Export(runContext, producerFees, materials, scaledupIds, partialIds, csvContent);
+            _testClass.Export(runContext, producerFees.Total, materials, scaledupIds, partialIds, csvContent, producerFees.Details.Select(d => d.FeeDetail));
 
             // Assert
             Assert.IsNotNull(csvContent.ToString());

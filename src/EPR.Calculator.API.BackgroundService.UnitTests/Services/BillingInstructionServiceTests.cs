@@ -16,9 +16,10 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
         // Arrange
         var runContext = TestDataHelper.CalculatorRun2025;
         var calcResult = TestDataHelper.GetCalcResult();
+        var producerFeeDetails = TestDataHelper.GetProducerFeeDetails();
 
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, CancellationToken.None));
+        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, producerFeeDetails, CancellationToken.None));
     }
 
     [TestMethod]
@@ -55,12 +56,6 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
             {
                 ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()
             },
-            ProducerFees = new ProducerFees
-            {
-                CalculatorRunId = 0,
-                Details = fixture.Create<List<ProducerFeeDetail>>(),
-                Total = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty }
-            },
             CalcResultCancelledProducers = new List<CalcResultCancelledProducer>
             {
                 new()
@@ -83,7 +78,9 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
             }
         };
 
+        var producerFeeDetails = fixture.Create<List<ProducerFeeDetail>>().Select(d => d.FeeDetail).ToList();
+
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, CancellationToken.None));
+        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, producerFeeDetails, CancellationToken.None));
     }
 }
