@@ -53,6 +53,23 @@ public class StreamPomsRequestHandlerTests
         results[0].PackagingType.ShouldBe("HH");
         results[0].PackagingMaterial.ShouldBe("PL");
         results[0].PackagingMaterialWeight.ShouldBe(123.4);
+        results[0].OrganisationSize.ShouldBe("L");
+    }
+
+    [TestMethod]
+    public async Task Handle_WithOrganisationSize_DeserialisesIt()
+    {
+        var ndJson = JsonSerializer.Serialize(new
+        {
+            organisationId = 100,
+            submissionPeriod = "2024-H1",
+            organisationSize = "S"
+        });
+        var handler = CreateHandler(new MockHandler(_ => OkNdJson(ndJson)));
+
+        var results = await CollectAsync(handler.Handle(2025));
+
+        results.Single().OrganisationSize.ShouldBe("S");
     }
 
     [TestMethod]

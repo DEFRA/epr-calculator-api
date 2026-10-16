@@ -54,6 +54,25 @@ public class StreamOrganisationsRequestHandlerTests
         results[0].SubsidiaryId.ShouldBe("S1");
         results[0].StatusCode.ShouldBe("02");
         results[0].RegulatorStatus.ShouldBe("Granted");
+        results[0].OrganisationSize.ShouldBe("L");
+    }
+
+    [TestMethod]
+    public async Task Handle_WithOrganisationSize_DeserialisesIt()
+    {
+        var ndJson = JsonSerializer.Serialize(new
+        {
+            organisationId = 100,
+            organisationName = "Org Co",
+            regulatorStatus = "Granted",
+            submissionPeriodYear = 2025,
+            organisationSize = "S"
+        });
+        var handler = CreateHandler(new MockHandler(_ => OkNdJson(ndJson)));
+
+        var results = await CollectAsync(handler.Handle(2025));
+
+        results.Single().OrganisationSize.ShouldBe("S");
     }
 
     [TestMethod]

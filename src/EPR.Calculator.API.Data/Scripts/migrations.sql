@@ -9022,3 +9022,40 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+)
+BEGIN
+
+                        IF COL_LENGTH(N'[data_api_load_organisations]', N'organisation_size') IS NULL
+                        ALTER TABLE [data_api_load_organisations]
+                            ADD [organisation_size] nvarchar(10) NULL
+                            CONSTRAINT [DF_data_api_load_organisations_organisation_size] DEFAULT N'L' WITH VALUES;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+)
+BEGIN
+
+                        IF COL_LENGTH(N'[data_api_load_poms]', N'organisation_size') IS NULL
+                        ALTER TABLE [data_api_load_poms]
+                            ADD [organisation_size] nvarchar(10) NULL
+                            CONSTRAINT [DF_data_api_load_poms_organisation_size] DEFAULT N'L' WITH VALUES;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261012080843_AddOrganisationSizeToDataApiLoadTables', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

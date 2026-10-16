@@ -60,6 +60,7 @@ internal sealed class LoadTableDataSource(IDbContextFactory<DataApiLoadContext> 
                 JoinerDate = o.JoinerDate,
                 RegulatorStatus = o.RegulatorStatus,
                 SubmissionPeriodYear = o.SubmissionPeriodYear,
+                OrganisationSize = o.OrganisationSize,
                 FileName = o.FileName,
                 IsResubmission = o.IsResubmission,
                 CreatedDateTime = o.CreatedDateTime
@@ -93,6 +94,7 @@ internal sealed class LoadTableDataSource(IDbContextFactory<DataApiLoadContext> 
                 PackagingMaterialSubtype = p.PackagingMaterialSubtype,
                 PackagingMaterialWeight = p.PackagingMaterialWeight,
                 RamRagRating = p.RamRagRating,
+                OrganisationSize = p.OrganisationSize,
                 FileName = p.FileName,
                 IsResubmission = p.IsResubmission,
                 CreatedDateTime = p.CreatedDateTime
