@@ -284,11 +284,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (IStatusCodeActionResult)await controllerWithFlagDisabled.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var newClassification = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId).Classification;
+            var run = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
-            newClassification.ShouldBe(RunClassification.InitialCompleted);
+            run.IsBillingFileShared.ShouldBeTrue();
             fileExportServiceMock.Verify(
                 x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
                 Times.Never);

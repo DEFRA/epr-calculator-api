@@ -114,14 +114,14 @@ public class CalculatorNewController(
             {
                 var success = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
                 {
-                    FileExportResult.Exported s => await UploadBillingJson(s.Content, calculatorRun.Id, cancellationToken),
+                    FileExportResult.Exported s => await UploadBillingJson(s.Content, runId, cancellationToken),
                     FileExportResult.NotFound _ => false,
-                    FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(metadata.BillingJsonFileName, cancellationToken),
+                    FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken), cancellationToken),
                     _ => false
                 };
 
                 if (!success)
-                    return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", calculatorRun.Id));
+                    return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", runId));
             }
 
             await transaction.CommitAsync(cancellationToken);
@@ -134,6 +134,13 @@ public class CalculatorNewController(
             throw;
         }
     }
+
+    private Task<string> GetBillingJsonFileName(int billingFileId, CancellationToken cancellationToken) =>
+        dbContext.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
+            .Where(m => m.Id == billingFileId)
+            .Select(m => m.BillingJsonFileName)
+            .SingleAsync(cancellationToken);
 
     private async Task<bool> UploadBillingJson(byte[] content, int calculatorRunId, CancellationToken cancellationToken)
     {

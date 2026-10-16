@@ -50,13 +50,6 @@ public class FileExportService(
     IBillingFileJsonWriter billingJsonWriter
 )  : IFileExportService
 {
-    private static readonly ImmutableHashSet<RunClassification> NonDownloadableClassifications = [
-        RunClassification.None,
-        RunClassification.Running,
-        RunClassification.Errored,
-        RunClassification.Deleted
-    ];
-
     private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
     
     [ActivityMetric(nameof(Metrics.FileExportDuration), threshold: "00:00:10")]
@@ -129,7 +122,7 @@ public class FileExportService(
     {
         var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        if(run is null || NonDownloadableClassifications.Contains(run.Classification))
+        if(run is null || run.CalculationRunStatus != CalculationRunStatus.Completed || run.Classification == RunClassification.Deleted)
             return null;
 
         return new CalculatorRunContext
