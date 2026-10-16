@@ -4,7 +4,11 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
+using System.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
@@ -20,7 +24,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         // Deferred - the query runs as the caller enumerates, so a downstream consumer streaming
         // straight to a CSV/JSON writer never holds every producer's fee graph in memory at once.
         IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
-        Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken);
+        Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
         Task<CalcResultCommsCost> ReadCommsCost(int runId, CancellationToken cancellationToken);
@@ -37,8 +41,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
-            var rows = await dbContext.TransformProjectedH1
-                        .Where(p => p.CalculatorRunId == runId)
+            var rows = await ProjectedH1Rows(runId)
+                        .AsNoTracking()
                         .ToListAsync(cancellationToken);
 
             return rows
@@ -61,8 +65,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
-            var rows = await dbContext.TransformProjectedH2
-                        .Where(p => p.CalculatorRunId == runId)
+            var rows = await ProjectedH2Rows(runId)
+                        .AsNoTracking()
                         .ToListAsync(cancellationToken);
 
             return rows
@@ -81,11 +85,23 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ToImmutableList();
         }
 
+        // Without FORCESEEK SQL Server scans every run's rows rather than look up each of this run's, which costs more as runs accumulate.
+        private IQueryable<TransformProjectedH1> ProjectedH1Rows(int runId) =>
+            dbContext.Database.IsSqlServer()
+                ? dbContext.TransformProjectedH1.FromSql($"SELECT * FROM transform_projected_h1 WITH (FORCESEEK) WHERE calculator_run_id = {runId}")
+                : dbContext.TransformProjectedH1.Where(p => p.CalculatorRunId == runId);
+
+        private IQueryable<TransformProjectedH2> ProjectedH2Rows(int runId) =>
+            dbContext.Database.IsSqlServer()
+                ? dbContext.TransformProjectedH2.FromSql($"SELECT * FROM transform_projected_h2 WITH (FORCESEEK) WHERE calculator_run_id = {runId}")
+                : dbContext.TransformProjectedH2.Where(p => p.CalculatorRunId == runId);
+
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformScaled
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
@@ -125,6 +141,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformPartial
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
@@ -160,22 +177,64 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .Select(p => p.Total)
                         .SingleAsync(cancellationToken);
 
-        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
-            dbContext.ProducerFeeDetails
-                        .AsNoTracking()
-                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
-                        .OrderBy(d => d.Id)
-                        .Select(d => d.FeeDetail)
-                        .AsEnumerable();
+        // EF materialising each owned-JSON document was most of a download's cost, so read the stored UTF-8 bytes and deserialise them directly.
+        // This is a raw command, not an EF query, so AsNoTracking() can't be applied; nothing is tracked.
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId)
+        {
+            dbContext.Database.OpenConnection();
+            try
+            {
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
+                command.CommandText = dbContext.Database.IsSqlServer() ? SqlServerProducerFeeDetailsQuery : ProducerFeeDetailsQuery;
+                command.Transaction = dbContext.Database.CurrentTransaction?.GetDbTransaction();
+                command.CommandTimeout = dbContext.Database.GetCommandTimeout() ?? command.CommandTimeout;
+
+                var runIdParameter = command.CreateParameter();
+                runIdParameter.ParameterName = "@runId";
+                runIdParameter.Value = runId;
+                command.Parameters.Add(runIdParameter);
+
+                using var reader = command.ExecuteReader(CommandBehavior.SequentialAccess);
+                while (reader.Read())
+                {
+                    using var json = reader.GetStream(0);
+                    yield return JsonSerializer.Deserialize<FeeDetail>(json, FeeDetailJsonOptions)!;
+                }
+            }
+            finally
+            {
+                dbContext.Database.CloseConnection();
+            }
+        }
+
+        // EF writes decimals in owned JSON as numbers on SQL Server but as strings on SQLite.
+        private static readonly JsonSerializerOptions FeeDetailJsonOptions = new() { NumberHandling = JsonNumberHandling.AllowReadingFromString };
+
+        // SQL Server's GetStream only reads binary columns, so the UTF-8 text is cast to varbinary there.
+        private const string SqlServerProducerFeeDetailsQuery = """
+            SELECT CAST(d.detail AS varbinary(max))
+            FROM calc_result_producer_fee_detail d
+            WHERE d.producer_fees_id IN (SELECT f.id FROM calc_result_producer_fees f WHERE f.calculator_run_id = @runId)
+            ORDER BY d.id
+            """;
+
+        private const string ProducerFeeDetailsQuery = """
+            SELECT d.detail
+            FROM calc_result_producer_fee_detail d
+            WHERE d.producer_fees_id IN (SELECT f.id FROM calc_result_producer_fees f WHERE f.calculator_run_id = @runId)
+            ORDER BY d.id
+            """;
 
         [ActivityTrace]
-        public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>
-            await dbContext.SelfManagedConsumerWaste
+        public async Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken)
+        {
+            var smcw = await dbContext.SelfManagedConsumerWaste
                     .AsNoTracking()
-                    .Include(s => s.ProducerTotals)
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
 
+            return smcw.TotalByMaterial;
+        }
 
         [ActivityTrace]
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>

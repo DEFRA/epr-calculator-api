@@ -33,6 +33,7 @@ public abstract record FileExportResult
 {
     private FileExportResult() { }
     public sealed record Exported(byte[] Content, string FileName) : FileExportResult;
+    public sealed record Streamed(Func<Stream, CancellationToken, Task> WriteTo, string FileName) : FileExportResult;
     public sealed record NotFound() : FileExportResult;
     public sealed record Legacy() : FileExportResult;
 }
@@ -50,7 +51,7 @@ public class FileExportService(
     IBillingFileJsonWriter billingJsonWriter
 )  : IFileExportService
 {
-    private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
+    private static readonly UTF8Encoding Utf8WithBom = new(encoderShouldEmitUTF8Identifier: true);
     
     [ActivityMetric(nameof(Metrics.FileExportDuration), threshold: "00:00:10")]
     public Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken)
@@ -75,9 +76,10 @@ public class FileExportService(
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var content = await resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId));
         var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
-        return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
+        return new FileExportResult.Streamed(
+            (stream, ct) => WriteCsv(stream, writer => resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId), writer), ct),
+            fileName);
     }
 
     private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
@@ -99,8 +101,8 @@ public class FileExportService(
 
         return billingFileType switch
         {
-            FileExportType.Csv => new FileExportResult.Exported(
-                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails)),
+            FileExportType.Csv => new FileExportResult.Streamed(
+                (stream, ct) => WriteCsv(stream, writer => billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails, writer), ct),
                 billingCsvFileName
             ),
             FileExportType.Json => new FileExportResult.Exported(
@@ -109,6 +111,13 @@ public class FileExportService(
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };
+    }
+
+    private static async Task WriteCsv(Stream stream, Func<TextWriter, Task> export, CancellationToken cancellationToken)
+    {
+        await using var writer = new StreamWriter(stream, Utf8WithBom, bufferSize: 64 * 1024, leaveOpen: true);
+        await export(writer);
+        await writer.FlushAsync(cancellationToken);
     }
 
     private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
@@ -178,6 +187,7 @@ public class FileExportService(
 
     private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: AnyAsync returns a bool.
         var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
         if(!hasData)
@@ -202,7 +212,7 @@ public class FileExportService(
 
         result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
-        result.Smcw = await calcResultReader.ReadSmcw(runContext.RunId, cancellationToken);
+        result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
         result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);
         result.CalcResultCommsCostReportDetail = await calcResultReader.ReadCommsCost(runContext.RunId, cancellationToken);
 

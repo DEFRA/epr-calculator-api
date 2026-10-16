@@ -55,20 +55,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task DownloadResultCsv_Exported_ReturnsFile()
+        public async Task DownloadResultCsv_Streamed_ReturnsStreamedFile()
         {
             var content = Encoding.UTF8.GetBytes("File");
             var fileName = "test.csv";
             fileExportServiceMock
                 .Setup(x => x.Export(It.IsAny<int>(), RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Exported(content, fileName));
+                .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), fileName));
 
             var result = await controller.DownloadResultCsv(RunId);
 
-            var fileResult = result.ShouldBeOfType<FileContentResult>();
+            var fileResult = result.ShouldBeOfType<PushStreamFileResult>();
             fileResult.ContentType.ShouldBe("text/csv");
             fileResult.FileDownloadName.ShouldBe(fileName);
-            fileResult.FileContents.ShouldBe(content);
+            using var written = new MemoryStream();
+            await fileResult.WriteTo(written, CancellationToken.None);
+            written.ToArray().ShouldBe(content);
         }
 
         [TestMethod]

@@ -6,6 +6,7 @@ using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -174,6 +175,18 @@ public abstract class BaseIntegrationTest
     // Runs one controller action in its own DI scope, disposed straight after - so a caller that
     // makes many calls (e.g. the performance test) doesn't accumulate one scoped DbContext, and its
     // tracked graph, per call for the lifetime of the run.
+    protected static async Task<byte[]> ReadFileResult(IActionResult result)
+    {
+        if (result is PushStreamFileResult streamed)
+        {
+            using var stream = new MemoryStream();
+            await streamed.WriteTo(stream, CancellationToken.None);
+            return stream.ToArray();
+        }
+
+        return result.ShouldBeOfType<FileContentResult>().FileContents;
+    }
+
     protected static async Task<TResult> CallController<T, TResult>(IServiceProvider services, Func<T, Task<TResult>> action)
         where T : ControllerBase
     {

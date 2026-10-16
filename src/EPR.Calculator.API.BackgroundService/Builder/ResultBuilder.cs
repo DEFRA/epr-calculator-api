@@ -89,10 +89,11 @@ public class ResultBuilder(
         await calcResultWriter.StorePartialData(runContext.RunId, result.CalcResultPartialObligations.PartialObligations, cancellationToken);
         await calcResultWriter.StoreProducerMaterialPackaging(producers, cancellationToken);
 
-        result.Smcw = await selfManagedConsumerWasteService.Calculate(runContext, materials);
-        await calcResultWriter.StoreSmcw(runContext.RunId, result.Smcw, cancellationToken);
+        var smcw = await selfManagedConsumerWasteService.Calculate(runContext, materials);
+        result.SmcwByMaterial = smcw.TotalByMaterial;
+        await calcResultWriter.StoreSmcw(runContext.RunId, smcw, cancellationToken);
 
-        result.CalcResultLaDisposalCostData = await laDisposalCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultLapcapData, result.CalcResultLateReportingTonnageData, result.Smcw);
+        result.CalcResultLaDisposalCostData = await laDisposalCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultLapcapData, result.CalcResultLateReportingTonnageData, smcw);
         await calcResultWriter.StoreLaDisposalCostData(runContext.RunId, result.CalcResultLaDisposalCostData, cancellationToken);
 
         result.CalcResultCommsCostReportDetail = await commsCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultOnePlusFourApportionment, result.CalcResultLateReportingTonnageData);
@@ -100,11 +101,11 @@ public class ResultBuilder(
 
         if (runContext.RequiresModulation)
         {
-            result.CalcResultModulation = await modulationBuilder.ConstructAsync(runContext, materials, result.CalcResultLaDisposalCostData, result.Smcw);
+            result.CalcResultModulation = await modulationBuilder.ConstructAsync(runContext, materials, result.CalcResultLaDisposalCostData, smcw);
             await calcResultWriter.StoreModulationResult(runContext.RunId, result.CalcResultModulation, cancellationToken);
         }
 
-        var (producerFeesTotal, producerFeeDetails) = await producerFeesBuilder.ConstructAsync(runContext, materials, result, result.Smcw);
+        var (producerFeesTotal, producerFeeDetails) = await producerFeesBuilder.ConstructAsync(runContext, materials, result, smcw);
         result.ProducerFeesTotal = producerFeesTotal;
         await calcResultWriter.StoreProducerFees(runContext.RunId, producerFeesTotal, producerFeeDetails, cancellationToken);
 

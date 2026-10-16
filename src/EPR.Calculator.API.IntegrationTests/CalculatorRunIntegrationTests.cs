@@ -211,14 +211,14 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         throw new TimeoutException(failureMessage);
     }
 
-    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services, bool expectUtf8Bom)
+    private static async Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services, bool expectUtf8Bom)
     {
-        var fileContents = result.ShouldBeOfType<FileContentResult>().FileContents;
+        var fileContents = await ReadFileResult(result);
 
         if (expectUtf8Bom)
             fileContents.Take(3).ShouldBe([0xEF, 0xBB, 0xBF]);
 
-        return Task.FromResult(Encoding.UTF8.GetString(fileContents));
+        return Encoding.UTF8.GetString(fileContents);
     }
 
     private static CsvReader SlurpCsv(string csvPath) =>

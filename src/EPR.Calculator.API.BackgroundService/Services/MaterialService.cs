@@ -14,6 +14,7 @@ public class MaterialService(ApplicationDBContext dbContext)
 {
     public async Task<IImmutableList<MaterialDetail>> GetMaterials()
     {
+        // AsNoTracking() not needed: projects to MaterialDetail.
         return await dbContext
             .Material
             .Select(m => new MaterialDetail

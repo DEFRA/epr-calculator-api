@@ -21,6 +21,7 @@ public class SetLapcapDataRequestValidator : AbstractValidator<SetLapcapDataRequ
         RuleFor(r => r.RelativeYear)
             .Cascade(CascadeMode.Stop)
             .NotNull()
+            // AsNoTracking() not needed: AnyAsync returns a bool.
             .MustAsync((requestYear, ct) => dbContext.CalculatorRunRelativeYears.AnyAsync(dbYear => dbYear.Value == requestYear!.Value, ct))
             .WithMessage(CommonResources.NoDataForSpecifiedYear);
 
@@ -52,6 +53,7 @@ public class SetLapcapDataRequestValidator : AbstractValidator<SetLapcapDataRequ
         // Cache the master template for use in validator rules.
         masterTemplate = await dbContext
             .LapcapDataTemplateMaster
+            .AsNoTracking()
             .ToImmutableDictionaryAsync(LapcapKeyHelper.KeyFor, cancellation);
 
         return await base.ValidateAsync(context, cancellation);

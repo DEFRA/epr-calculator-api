@@ -11,25 +11,26 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Summary;
 internal sealed class ProducerRowBuilder(
     ImmutableDictionary<(int ProducerId, int MaterialId), decimal?> invoicedNetTonnageByProducerMaterial,
     ImmutableDictionary<(int OrganisationId, string? SubsidiaryId), Organisation> organisationsByKey,
-    ImmutableDictionary<int, Organisation> parentOrganisationsById)
+    ImmutableDictionary<int, Organisation> parentOrganisationsById,
+    ImmutableDictionary<(int ProducerId, string? SubsidiaryId, int Level), ProducerSelfManagedConsumerWaste> smcwTotalsByKey,
+    ImmutableDictionary<int, ProducerSelfManagedConsumerWaste> l1SmcwTotalsByProducerId)
 {
     /// <summary>
     /// Builds a Level-1 total row for a producer group by aggregating its already-computed L2 rows.
     /// Tonnage and cost fields are additive sums from the L2 rows; SMCW-derived fields use the
-    /// independently-computed Level-1 record from <paramref name="smcw"/> (cannot be derived by
+    /// independently-computed Level-1 SMCW record (cannot be derived by
     /// summing subsidiaries, because SMCW is computed at the group level).
     /// </summary>
     public ProducerFeeDetail GetL1TotalRow(
         int producerId,
         IReadOnlyList<ProducerFeeDetail> l2Rows,
         CalcResult calcResult,
-        SelfManagedConsumerWaste smcw,
         IReadOnlyList<MaterialDetail> materials
     )
     {
         var materialCosts = new Dictionary<string, Fees>();
 
-        var l1SmcwRecord = smcw.ProducerTotals.Single(x => x.Level == 1 && x.ProducerId == producerId);
+        var l1SmcwRecord = l1SmcwTotalsByProducerId[producerId];
 
         foreach (var material in materials)
         {
@@ -227,8 +228,7 @@ internal sealed class ProducerRowBuilder(
         ProducerDetail producer,
         IReadOnlyList<MaterialDetail> materials,
         CalcResult calcResult,
-        IReadOnlyList<TotalPackagingTonnagePerRun> totalPackagingTonnage,
-        SelfManagedConsumerWaste smcw
+        IReadOnlyList<TotalPackagingTonnagePerRun> totalPackagingTonnage
     )
     {
         var materialFeeSummary = new Dictionary<string, Fees>();
@@ -260,7 +260,7 @@ internal sealed class ProducerRowBuilder(
             // PERF: Hoist the loop invariants - both values depend only on (producerAndSubsidiaries, material)
             // and were previously recomputed once per subsidiary.
             var l1TotalReportedTonnage = producerAndSubsidiaries.Sum(p => ProducerFeesUtil.GetReportedTonnage(projectedMaterialsLookup, p, material));
-            var l1SelfManagedConsumerWasteData = ProducerFeesUtil.SumSelfManagedConsumerWasteData(producerAndSubsidiaries, material, smcw);
+            var l1SelfManagedConsumerWasteData = l1SmcwTotalsByProducerId[producer.ProducerId].SmcwByMaterial[material.Code];
 
             var producerDisposalFeesByMaterial = BuildProducerDisposalFeesByMaterial(
                 runContext,
@@ -268,7 +268,6 @@ internal sealed class ProducerRowBuilder(
                 producer,
                 material,
                 calcResult,
-                smcw,
                 level,
                 l1TotalReportedTonnage,
                 l1SelfManagedConsumerWasteData);
@@ -320,7 +319,6 @@ internal sealed class ProducerRowBuilder(
         ProducerDetail producer,
         MaterialDetail material,
         CalcResult calcResult,
-        SelfManagedConsumerWaste smcw,
         int level,
         decimal l1TotalReportedTonnage,
         SelfManagedConsumerWasteData l1SelfManagedConsumerWasteData
@@ -384,10 +382,9 @@ internal sealed class ProducerRowBuilder(
             GreenMedical = hhRamTonnage.GreenMedical + pbRamTonnage.GreenMedical + hdcRamTonnage.GreenMedical,
         };
 
-        var selfManagedConsumerWasteData = smcw
-            .ProducerTotals
-            .SingleOrDefault(x => x.ProducerId == producer.ProducerId && x.SubsidiaryId == producer.SubsidiaryId && x.Level == level)?
-            .SmcwByMaterial[material.Code] ?? SelfManagedConsumerWasteData.Zero;
+        var selfManagedConsumerWasteData = smcwTotalsByKey.TryGetValue((producer.ProducerId, producer.SubsidiaryId, level), out var smcwTotal)
+            ? smcwTotal.SmcwByMaterial[material.Code]
+            : SelfManagedConsumerWasteData.Zero;
 
         var producerDisposalFee =
             l1SelfManagedConsumerWasteData.SmcwTonnage > l1TotalReportedTonnage
