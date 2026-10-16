@@ -162,6 +162,15 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("BillingFileSharedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("billing_file_shared_at");
+
+                    b.Property<string>("BillingFileSharedBy")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("billing_file_shared_by");
+
                     b.Property<DateTime?>("BillingRunStartedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("billing_run_started_at");
@@ -173,9 +182,19 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("billing_run_status");
 
-                    b.Property<int>("CalculatorRunClassificationId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_classification_id");
+                    b.Property<string>("CalculationRunStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("calculation_run_status");
+
+                    b.Property<string>("Classification")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("classification");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
@@ -190,6 +209,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<int?>("DefaultParameterSettingMasterId")
                         .HasColumnType("int")
                         .HasColumnName("default_parameter_setting_master_id");
+
+                    b.Property<bool>("IsBillingFileShared")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_billing_file_shared");
 
                     b.Property<int?>("LapcapDataMasterId")
                         .HasColumnType("int")
@@ -226,11 +249,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("RelativeYear");
 
-                    b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id")
+                    b.HasIndex("Classification", "RelativeYear", "BillingRunStatus", "Id")
                         .HasDatabaseName("IX_index_calculator_run");
 
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("Classification", "RelativeYear", "BillingRunStatus", "Id"), false);
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Classification", "RelativeYear", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
 
                     b.ToTable("calculator_run", (string)null);
                 });
@@ -249,15 +272,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("billing_csv_filename");
-
-                    b.Property<string>("BillingFileAuthorisedBy")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("billing_file_authorised_by");
-
-                    b.Property<DateTime?>("BillingFileAuthorisedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_authorised_date");
 
                     b.Property<string>("BillingFileCreatedBy")
                         .IsRequired()
@@ -284,118 +298,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("CalculatorRunId");
 
                     b.ToTable("calculator_run_billing_file_metadata", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("calculator_run_classification", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedBy = "Test User",
-                            Status = "IN THE QUEUE"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedBy = "Test User",
-                            Status = "RUNNING"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedBy = "Test User",
-                            Status = "UNCLASSIFIED"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedBy = "Test User",
-                            Status = "TEST RUN"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedBy = "Test User",
-                            Status = "ERROR"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedBy = "System User",
-                            Status = "DELETED"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedBy = "System User",
-                            Status = "INITIAL RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedBy = "Test user",
-                            Status = "INITIAL RUN"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CreatedBy = "Test user",
-                            Status = "INTERIM RE-CALCULATION RUN"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CreatedBy = "Test user",
-                            Status = "FINAL RUN"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedBy = "Test user",
-                            Status = "FINAL RE-CALCULATION RUN"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CreatedBy = "System User",
-                            Status = "INTERIM RE-CALCULATION RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CreatedBy = "System User",
-                            Status = "FINAL RE-CALCULATION RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CreatedBy = "System User",
-                            Status = "FINAL RUN COMPLETED"
-                        });
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
@@ -3867,11 +3769,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
-                        .WithMany()
-                        .HasForeignKey("CalculatorRunClassificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
                         .WithMany("RunDetails")
