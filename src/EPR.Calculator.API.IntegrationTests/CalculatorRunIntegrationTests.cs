@@ -66,12 +66,12 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
                 var status = await db.CalculatorRuns
                     .AsNoTracking()
                     .Where(x => x.Id == runId)
-                    .Select(x => x.Classification)
+                    .Select(x => x.CalculationRunStatus)
                     .SingleAsync();
 
-                return status == RunClassification.Errored
+                return status == CalculationRunStatus.Errored
                     ? throw new Exception($"Calculator run {runId} entered Errored state.")
-                    : status == RunClassification.Unclassified;
+                    : status == CalculationRunStatus.Completed;
             },
             $"Calculator run {runId} did not complete.");
 
