@@ -182,7 +182,7 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_index_calculator_run",
                 table: "calculator_run",
-                columns: new[] { "calculator_run_classification_id", "relative_year", "billing_run_status", "id" })
+                columns: new[] { "classification", "relative_year", "billing_run_status", "id" })
                 .Annotation("SqlServer:Clustered", false)
                 .Annotation("SqlServer:Include", new[] { "name", "created_by", "created_at", "updated_by", "updated_at", "default_parameter_setting_master_id", "lapcap_data_master_id" });
 
@@ -369,7 +369,7 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_index_calculator_run",
                 table: "calculator_run",
-                columns: new[] { "calculator_run_classification_id", "relative_year", "billing_run_status", "id" })
+                columns: new[] { "classification", "relative_year", "billing_run_status", "id" })
                 .Annotation("SqlServer:Clustered", false)
                 .Annotation("SqlServer:Include", new[] { "name", "created_by", "created_at", "updated_by", "updated_at", "calculator_run_organization_data_master_id", "calculator_run_pom_data_master_id", "default_parameter_setting_master_id", "lapcap_data_master_id" });
 
