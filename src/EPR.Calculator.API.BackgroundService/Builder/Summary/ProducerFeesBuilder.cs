@@ -95,7 +95,9 @@ public class ProducerFeesBuilder(
         var rowBuilder = new ProducerRowBuilder(
             invoicedNetTonnageByProducerMaterial,
             organisationsByKey,
-            parentOrganisationsById
+            parentOrganisationsById,
+            smcw.ProducerTotals.ToImmutableDictionary(t => (t.ProducerId, t.SubsidiaryId, t.Level)),
+            smcw.ProducerTotals.Where(t => t.Level == 1).ToImmutableDictionary(t => t.ProducerId)
         );
 
         var producerFees = GetProducerFees(
@@ -106,7 +108,6 @@ public class ProducerFeesBuilder(
             calcResult,
             totalPackagingTonnage,
             producerInvoicedMaterialNetTonnage,
-            smcw,
             rowBuilder
         );
 
@@ -156,7 +157,6 @@ public class ProducerFeesBuilder(
         CalcResult calcResult,
         IReadOnlyList<TotalPackagingTonnagePerRun> totalPackagingTonnage,
         IReadOnlyList<InvoicedProducer> producerInvoicedMaterialNetTonnage,
-        SelfManagedConsumerWaste smcw,
         ProducerRowBuilder rowBuilder
     )
     {
@@ -178,11 +178,11 @@ public class ProducerFeesBuilder(
 
             // Build L2 rows first so the L1 total can be derived by aggregation.
             var l2Rows = subsidiariesList
-                .Select(producer => rowBuilder.GetProducerRow(runContext, projectedMaterialsLookup, hasGroupTotalRow, subsidiariesList, producer, materials, calcResult, totalPackagingTonnage, smcw))
+                .Select(producer => rowBuilder.GetProducerRow(runContext, projectedMaterialsLookup, hasGroupTotalRow, subsidiariesList, producer, materials, calcResult, totalPackagingTonnage))
                 .ToList();
 
             if (hasGroupTotalRow)
-                producerDisposalFees.Add(rowBuilder.GetL1TotalRow(subsidiariesList[0].ProducerId, l2Rows, calcResult, smcw, materials));
+                producerDisposalFees.Add(rowBuilder.GetL1TotalRow(subsidiariesList[0].ProducerId, l2Rows, calcResult, materials));
 
             producerDisposalFees.AddRange(l2Rows);
         }
