@@ -10,6 +10,12 @@ using EPR.Calculator.API.Filters;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using EPR.CommonDataService.DataApi.AcceptedFileSelection;
+using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.Alignment;
+using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.PomEligibility;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -149,6 +155,39 @@ public static class ServiceConfiguration
             });
 
             services.AddSingleton<IBulkOperations, BulkOperationsWrapper>();
+
+            return services;
+        }
+
+        public IServiceCollection AddPayCalDataApi()
+        {
+            services
+                .AddOptions<SynapseOptions>()
+                .BindConfiguration(SynapseOptions.SectionKey)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            // Factory, not a scoped context: the org and POM streams query concurrently (ProducerDataService).
+            services.AddDbContextFactory<SynapseContext>((provider, builder) =>
+            {
+                var synapseOptions = provider
+                    .GetRequiredService<IOptions<SynapseOptions>>()
+                    .Value;
+
+                builder
+                    .UseSqlServer(synapseOptions.ConnectionString)
+                    .AddInterceptors(new TimeoutInterceptor());
+            });
+
+            services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
+            services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
+            services.AddTransient<IAcceptedFileSelector, AcceptedFileSelector>();
+            services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
+            services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
+            services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
+            services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
+            services.AddTransient<IProducerErrorDetector, ProducerErrorDetector>();
+            services.AddTransient<IProducerDataService, ProducerDataService>();
 
             return services;
         }

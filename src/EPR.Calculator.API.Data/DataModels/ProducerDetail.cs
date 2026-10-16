@@ -8,6 +8,10 @@ public class ProducerDetail
     public string? TradingName { get; set; }
     public string? SubsidiaryId { get; set; }
     public string? ProducerName { get; set; }
+    public int? DaysObligated { get; set; }
+    public string? JoinerDate { get; set; }
+    public string? LeaverDate { get; set; }
+    public string? StatusCode { get; set; }
 
 
     #region EF navigational properties

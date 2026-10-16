@@ -44,7 +44,7 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
             ProducerName = "Current Name",
             TradingName = "Current Trading Name"
         });
-        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name", ObligationStates.Obligated);
+        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name");
 
         var confirmedDate = new DateTime(2024, 1, 1);
         AddRejectedInstruction(CurrentRunId, BillingConstants.Suggestion.Initial, suggestedInvoiceAmount: 123.45m, confirmedDate: confirmedDate);
@@ -80,9 +80,9 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
             ProducerName = "Subsidiary Name",
             TradingName = "Subsidiary Trading Name"
         });
-        AddOrganisation(CurrentRunId, "Not Obligated Name", null, ObligationStates.NotObligated);
-        AddOrganisation(CurrentRunId, "Holding Company Name", "Holding Company Trading Name", ObligationStates.Obligated);
-        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name", ObligationStates.Obligated);
+        AddOrganisation(CurrentRunId, "Error Name", null, isError: true);
+        AddOrganisation(CurrentRunId, "Holding Company Name", "Holding Company Trading Name");
+        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name");
 
         AddRejectedInstruction(CurrentRunId, BillingConstants.Suggestion.Initial, suggestedInvoiceAmount: 50m);
 
@@ -103,10 +103,10 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
     {
         // Arrange - invoiced in an earlier run (where obligated), now not in the current run, with two error
         // registrations in the current run's organisation data and different details in a later run
-        AddOrganisation(InvoicedRunId, "Invoiced Name", "Invoiced Trading Name", ObligationStates.Obligated);
-        AddOrganisation(CurrentRunId, "Error Name", null, ObligationStates.Error);
-        AddOrganisation(CurrentRunId, "Error Name", "Error Trading Name", ObligationStates.Error);
-        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name", ObligationStates.Obligated);
+        AddOrganisation(InvoicedRunId, "Invoiced Name", "Invoiced Trading Name");
+        AddOrganisation(CurrentRunId, "Error Name", null, isError: true);
+        AddOrganisation(CurrentRunId, "Error Name", "Error Trading Name", isError: true);
+        AddOrganisation(LaterRunId, "Later Name", "Later Trading Name");
 
         AddInstruction(InvoicedRunId, BillingConstants.Suggestion.Initial, BillingConstants.Action.Accepted);
         AddRejectedInstruction(CurrentRunId, BillingConstants.Suggestion.Cancel, currentYearInvoiceTotalToDate: 500m);
@@ -147,38 +147,25 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
     private static CalculatorRunContext CurrentRunContext =>
         TestDataHelper.CalculatorRun2025 with { RunId = CurrentRunId };
 
-    private void AddRun(int runId, bool isCompleted)
-    {
-        var master = new CalculatorRunOrganisationDataMaster
-        {
-            Id = runId,
-            RelativeYear = Year,
-            EffectiveFrom = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "testsuperuser.paycal"
-        };
-        dbContext.CalculatorRunOrganisationDataMaster.Add(master);
-
+    private void AddRun(int runId, bool isCompleted) =>
         dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = runId,
             Name = $"Run {runId}",
             RelativeYear = Year,
             Classification = RunClassification.Initial,
-            IsBillingFileShared = isCompleted,
-            CalculatorRunOrganisationDataMasterId = master.Id
+            IsBillingFileShared = isCompleted
         });
-    }
 
-    private void AddOrganisation(int runId, string name, string? tradingName, string obligationStatus) =>
-        dbContext.CalculatorRunOrganisationDataDetails.Add(new CalculatorRunOrganisationDataDetail
+    private void AddOrganisation(int runId, string name, string? tradingName, bool isError = false) =>
+        dbContext.CalculatorRunOrganisations.Add(new CalculatorRunOrganisation
         {
             Id = nextOrgRowId++,
-            CalculatorRunOrganisationDataMasterId = runId,
+            CalculatorRunId = runId,
             OrganisationId = ProducerId,
             OrganisationName = name,
             TradingName = tradingName,
-            ObligationStatus = obligationStatus
+            IsError = isError
         });
 
     private void AddInstruction(int runId, string suggestion, string acceptReject) =>

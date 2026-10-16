@@ -38,12 +38,8 @@ public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
             .GreaterThan(0)
             .WithMessage("Run is missing LapcapDataMaster");
 
-        RuleFor(run => run.CalculatorRunOrganisationDataMasterId)
+        RuleFor(run => run.OrgPomDataLoadedAt)
             .Null()
-            .WithMessage("Run already has OrganisationDataMaster associated");
-
-        RuleFor(run => run.CalculatorRunPomDataMasterId)
-            .Null()
-            .WithMessage("Run already has PomDataMaster associated");
+            .WithMessage("Run already has organisation/POM data loaded");
     }
 }
