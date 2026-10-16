@@ -1,8 +1,8 @@
-﻿using EPR.Calculator.API.BackgroundService.Exceptions;
+using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.Api.DataApi.Models;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 
@@ -13,9 +13,7 @@ public interface ICalculatorRunDataInitializer
 
 public class CalculatorRunDataInitializer(
     ApplicationDBContext dbContext,
-    IDataLoader dataLoader,
-    ICalculatorRunOrgData calculatorRunOrgData,
-    ICalculatorRunPomData calculatorRunPomData,
+    ICalculatorDataApiService calculatorDataApiService,
     IProducerDataTransposer transposer,
     ILogger<CalculatorRunDataInitializer> logger)
     : ICalculatorRunDataInitializer
@@ -23,21 +21,23 @@ public class CalculatorRunDataInitializer(
     [ActivityTrace]
     public async Task Initialize(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
-        // DataLoader handles its own transactions and telemetry
-        await dataLoader.LoadData(runContext, cancellationToken);
-        await TransposeData(runContext, cancellationToken);
+        // CalculatorDataApiService performs no persistence - it's a single request into DataApi
+        // returning data in memory.
+        var producerRecords = await calculatorDataApiService.GetProducerRecords(runContext, cancellationToken);
+        await TransposeData(runContext, producerRecords, cancellationToken);
     }
 
     [ActivityMetric(nameof(Metrics.DataDuration), threshold: "00:00:30")]
-    private async Task TransposeData(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    private async Task TransposeData(
+        CalculatorRunContext runContext,
+        IReadOnlyList<ProducerRecord> producerRecords,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            await calculatorRunOrgData.LoadData(runContext, cancellationToken);
-            await calculatorRunPomData.LoadData(runContext, cancellationToken);
-            await transposer.Transpose(runContext, cancellationToken);
+            await transposer.Transpose(runContext, producerRecords, cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
         catch (Exception ex)

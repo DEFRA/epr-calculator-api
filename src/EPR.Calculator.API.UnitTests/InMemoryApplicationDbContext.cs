@@ -106,8 +106,6 @@ namespace EPR.Calculator.API.UnitTests
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
-                        CalculatorRunOrganisationDataMasterId = 1,
-                        CalculatorRunPomDataMasterId = 1,
                     },
                     new()
                     {
@@ -116,8 +114,6 @@ namespace EPR.Calculator.API.UnitTests
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
-                        CalculatorRunOrganisationDataMasterId = 2,
-                        CalculatorRunPomDataMasterId = 2,
                         LapcapDataMasterId = 2,
                         DefaultParameterSettingMasterId = 2,
                     },
@@ -128,8 +124,6 @@ namespace EPR.Calculator.API.UnitTests
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
-                        CalculatorRunOrganisationDataMasterId = 2,
-                        CalculatorRunPomDataMasterId = 2,
                     },
                 };
 

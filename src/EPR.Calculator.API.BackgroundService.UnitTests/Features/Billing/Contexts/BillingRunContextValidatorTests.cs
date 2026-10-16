@@ -65,24 +65,12 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
         result.ShouldHaveValidationErrorFor(ctx => ctx.Run.LapcapDataMasterId);
     }
 
-    [DataRow(null)]
-    [DataRow(0)]
     [TestMethod]
-    public void Should_error_for_empty_CalculatorRunOrganisationDataMasterId(int? id)
+    public void Should_error_for_missing_OrgPomData()
     {
-        var preValidationContext = CreatePreValidationContext(orgMasterId: id);
+        var preValidationContext = CreatePreValidationContext(hasOrgPomData: false);
         var result = testSubject.TestValidate(preValidationContext);
-        result.ShouldHaveValidationErrorFor(ctx => ctx.Run.CalculatorRunOrganisationDataMasterId);
-    }
-
-    [DataRow(null)]
-    [DataRow(0)]
-    [TestMethod]
-    public void Should_error_for_empty_CalculatorRunPomDataMasterId(int? id)
-    {
-        var preValidationContext = CreatePreValidationContext(pomMasterId: id);
-        var result = testSubject.TestValidate(preValidationContext);
-        result.ShouldHaveValidationErrorFor(ctx => ctx.Run.CalculatorRunPomDataMasterId);
+        result.ShouldHaveValidationErrorFor(ctx => ctx.Run.OrgPomDataLoadedAt);
     }
 
     [DataRow(BillingRunStatus.None)]
@@ -149,8 +137,7 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
         DateTime? billingRunStartedAt = null,
         int? paramMasterId = 1,
         int? lapcapMasterId = 1,
-        int? orgMasterId = 1,
-        int? pomMasterId = 1,
+        bool hasOrgPomData = true,
         ICollection<ProducerResultFileSuggestedBillingInstruction>? instructions = null)
     {
         var ctx = new BillingRunContextBuilder.PreValidationContext
@@ -166,8 +153,7 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
                 BillingRunStartedAt = billingRunStartedAt,
                 DefaultParameterSettingMasterId = paramMasterId,
                 LapcapDataMasterId = lapcapMasterId,
-                CalculatorRunOrganisationDataMasterId = orgMasterId,
-                CalculatorRunPomDataMasterId = pomMasterId,
+                OrgPomDataLoadedAt = hasOrgPomData ? DateTime.UtcNow : null,
             }
         };
 

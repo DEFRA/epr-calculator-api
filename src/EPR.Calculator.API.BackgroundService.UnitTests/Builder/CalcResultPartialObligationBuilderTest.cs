@@ -29,49 +29,12 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
 
     private (IImmutableList<MaterialDetail>, List<L1Producer>) PrepareData(RunContext runContext)
     {
-        var calcRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
-        {
-            Id = 11,
-            RelativeYear = runContext.RelativeYear,
-            EffectiveFrom = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "Test User"
-        };
-        dbContext.CalculatorRunOrganisationDataMaster.Add(calcRunOrganisationDataMaster);
-
         dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = runContext.RunId,
             RelativeYear = runContext.RelativeYear,
-            Name = runContext.RunName,
-            CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster
+            Name = runContext.RunName
         });
-
-        dbContext.CalculatorRunOrganisationDataDetails.Add(
-            new CalculatorRunOrganisationDataDetail
-            {
-                Id = 1,
-                OrganisationId = 11,
-                SubsidiaryId = null,
-                OrganisationName = "Allied Packaging",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
-                ObligationStatus = ObligationStates.Obligated
-            });
-
-        dbContext.CalculatorRunOrganisationDataDetails.Add(
-            new CalculatorRunOrganisationDataDetail
-            {
-                Id = 2,
-                OrganisationId = 22,
-                SubsidiaryId = null,
-                OrganisationName = "Partial packaging",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
-                ObligationStatus = ObligationStates.Obligated,
-                DaysObligated = 183,
-                JoinerDate = "15/07/2025"
-            });
 
         var producerDetail = new ProducerDetail
         {
@@ -88,7 +51,9 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             CalculatorRunId = runContext.RunId,
             ProducerId = 22,
             SubsidiaryId = null,
-            ProducerName = "Partial Packaging"
+            ProducerName = "Partial Packaging",
+            DaysObligated = 183,
+            JoinerDate = "15/07/2025"
         };
 
         foreach (var subPeriod in new[] { "2024-P1", "2024-P4" })
@@ -150,49 +115,12 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
 
     private (IImmutableList<MaterialDetail>, List<L1Producer>) PrepareDataWithModulation(CalculatorRunContext runContext)
     {
-        var calcRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
-        {
-            Id = 11,
-            RelativeYear = runContext.RelativeYear,
-            EffectiveFrom = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "Test User"
-        };
-        dbContext.CalculatorRunOrganisationDataMaster.Add(calcRunOrganisationDataMaster);
-
         dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = runContext.RunId,
             RelativeYear = runContext.RelativeYear,
-            Name = runContext.RunName,
-            CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster
+            Name = runContext.RunName
         });
-
-        dbContext.CalculatorRunOrganisationDataDetails.Add(
-            new CalculatorRunOrganisationDataDetail
-            {
-                Id = 1,
-                OrganisationId = 11,
-                SubsidiaryId = null,
-                OrganisationName = "Allied Packaging",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
-                ObligationStatus = ObligationStates.Obligated
-            });
-
-        dbContext.CalculatorRunOrganisationDataDetails.Add(
-            new CalculatorRunOrganisationDataDetail
-            {
-                Id = 2,
-                OrganisationId = 22,
-                SubsidiaryId = null,
-                OrganisationName = "Partial packaging",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
-                ObligationStatus = ObligationStates.Obligated,
-                DaysObligated = 183,
-                JoinerDate = "15/07/2025"
-            });
 
         var producerDetail = new ProducerDetail
         {
@@ -209,7 +137,9 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             CalculatorRunId = runContext.RunId,
             ProducerId = 22,
             SubsidiaryId = null,
-            ProducerName = "Partial Packaging"
+            ProducerName = "Partial Packaging",
+            DaysObligated = 183,
+            JoinerDate = "15/07/2025"
         };
 
 
