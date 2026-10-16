@@ -20,12 +20,14 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 WORKDIR /src
 COPY ["EPR.Calculator.API/EPR.Calculator.API.csproj", "EPR.Calculator.API/"]
 COPY ["EPR.Calculator.API.Data/EPR.Calculator.API.Data.csproj", "EPR.Calculator.API.Data/"]
+COPY ["EPR.Calculator.API.DataApi/EPR.Calculator.API.DataApi.csproj", "EPR.Calculator.API.DataApi/"]
 COPY ["EPR.Calculator.API.BackgroundService/EPR.Calculator.API.BackgroundService.csproj", "EPR.Calculator.API.BackgroundService/"]
 
 RUN dotnet restore "./EPR.Calculator.API/EPR.Calculator.API.csproj"
 
 COPY EPR.Calculator.API/. ./EPR.Calculator.API/.
 COPY EPR.Calculator.API.Data/. ./EPR.Calculator.API.Data/.
+COPY EPR.Calculator.API.DataApi/. ./EPR.Calculator.API.DataApi/.
 COPY EPR.Calculator.API.BackgroundService/. ./EPR.Calculator.API.BackgroundService/.
 
 WORKDIR "/src/EPR.Calculator.API"

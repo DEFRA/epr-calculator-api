@@ -4146,7 +4146,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
 )
 BEGIN
-    EXEC(N'update dbo.calculator_run SET calculator_run_classification_id  = 6 where calculator_run_classification_id in (7,8)')
+    update dbo.calculator_run SET calculator_run_classification_id  = 6 where calculator_run_classification_id in (7,8)
 END;
 
 IF NOT EXISTS (
@@ -8179,378 +8179,280 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    -- 'IN THE QUEUE' (1) is not expected to exist; anything left in it is treated as errored.
-    EXEC(N'
-    UPDATE [calculator_run]
-    SET [calculator_run_classification_id] = 5
-    WHERE [calculator_run_classification_id] = 1
-    ');
-
-    -- 'FINAL RUN' (10) and 'FINAL RE-CALCULATION RUN' (11) become 'RECALCULATION RUN' (9).
-    EXEC(N'
-    UPDATE [calculator_run]
-    SET [calculator_run_classification_id] = 9
-    WHERE [calculator_run_classification_id] IN (10, 11)
-    ');
-
-    -- Their completed equivalents become 'RECALCULATION RUN COMPLETED' (12).
-    EXEC(N'
-    UPDATE [calculator_run]
-    SET [calculator_run_classification_id] = 12
-    WHERE [calculator_run_classification_id] IN (13, 14)
-    ');
+    ALTER TABLE [producer_detail] ADD [joiner_date] nvarchar(50) NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'DELETE FROM [calculator_run_classification]
-    WHERE [id] = 1;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_detail] ADD [leaver_date] nvarchar(50) NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'DELETE FROM [calculator_run_classification]
-    WHERE [id] = 10;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_detail] ADD [num_days_obligated] int NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'DELETE FROM [calculator_run_classification]
-    WHERE [id] = 11;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_detail] ADD [obligation_status] nvarchar(10) NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'DELETE FROM [calculator_run_classification]
-    WHERE [id] = 13;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_detail] ADD [status_code] nvarchar(400) NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'DELETE FROM [calculator_run_classification]
-    WHERE [id] = 14;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_detail] ADD [submitter_id] uniqueidentifier NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
-    WHERE [id] = 2;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [calculator_run] ADD [org_pom_data_loaded_at] datetime2 NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
-    WHERE [id] = 3;
-    SELECT @@ROWCOUNT');
+    CREATE TABLE [calculator_run_organisation] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [organisation_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [submitter_id] uniqueidentifier NULL,
+        [organisation_name] nvarchar(400) NOT NULL,
+        [trading_name] nvarchar(400) NULL,
+        [obligation_status] nvarchar(10) NOT NULL,
+        [num_days_obligated] int NULL,
+        [joiner_date] nvarchar(50) NULL,
+        [leaver_date] nvarchar(50) NULL,
+        [status_code] nvarchar(max) NULL,
+        [error_code] nvarchar(max) NULL,
+        [has_h1] bit NOT NULL,
+        [has_h2] bit NOT NULL,
+        CONSTRAINT [PK_calculator_run_organisation] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calculator_run_organisation_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
+    );
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
-    WHERE [id] = 4;
-    SELECT @@ROWCOUNT');
+    CREATE INDEX [IX_calculator_run_organisation_calculator_run_id] ON [calculator_run_organisation] ([calculator_run_id]);
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
-    WHERE [id] = 5;
-    SELECT @@ROWCOUNT');
+
+                    UPDATE r
+                    SET org_pom_data_loaded_at = m.created_at
+                    FROM calculator_run r
+                    INNER JOIN calculator_run_organization_data_master m
+                        ON m.id = r.calculator_run_organization_data_master_id;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User''
-    WHERE [id] = 8;
-    SELECT @@ROWCOUNT');
+
+                    INSERT INTO calculator_run_organisation
+                        (calculator_run_id, organisation_id, subsidiary_id, submitter_id, organisation_name,
+                         trading_name, obligation_status, num_days_obligated, joiner_date, leaver_date,
+                         status_code, error_code, has_h1, has_h2)
+                    SELECT
+                        r.id, d.organisation_id, d.subsidiary_id, d.submitter_id, d.organisation_name,
+                        d.trading_name, ISNULL(d.obligation_status, ''), d.num_days_obligated, d.joiner_date, d.leaver_date,
+                        d.status_code, d.error_code, d.has_h1, d.has_h2
+                    FROM calculator_run_organization_data_detail d
+                    INNER JOIN calculator_run r
+                        ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''System User'', [status] = N''RECALCULATION RUN''
-    WHERE [id] = 9;
-    SELECT @@ROWCOUNT');
+
+                    UPDATE pd
+                    SET obligation_status = d.obligation_status,
+                        num_days_obligated = d.num_days_obligated,
+                        status_code = d.status_code,
+                        submitter_id = d.submitter_id,
+                        joiner_date = d.joiner_date,
+                        leaver_date = d.leaver_date
+                    FROM producer_detail pd
+                    INNER JOIN calculator_run r
+                        ON r.id = pd.calculator_run_id
+                    INNER JOIN calculator_run_organization_data_detail d
+                        ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
+                       AND d.organisation_id = pd.producer_id
+                       AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '')
+                    WHERE pd.obligation_status IS NULL;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [status] = N''RECALCULATION RUN COMPLETED''
-    WHERE [id] = 12;
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260917104423_RemoveFinalRunClassifications'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260917104423_RemoveFinalRunClassifications', N'10.0.11');
-END;
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_classification_calculator_run_classification_id];
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    DROP TABLE [calculator_run_classification];
+    DROP TABLE [calculator_run_organization_data_detail];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    ALTER TABLE [calculator_run] ADD [calculation_run_status] varchar(50) NULL;
+    DROP TABLE [calculator_run_pom_data_detail];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    ALTER TABLE [calculator_run] ADD [is_billing_file_shared] bit NOT NULL DEFAULT CAST(0 AS bit);
+    DROP TABLE [organisation_data];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    ALTER TABLE [calculator_run] ADD [billing_file_shared_by] nvarchar(400) NULL;
+    DROP TABLE [pom_data];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    ALTER TABLE [calculator_run] ADD [billing_file_shared_at] datetime2 NULL;
+    DROP TABLE [calculator_run_organization_data_master];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    EXEC sp_rename N'[calculator_run].[calculator_run_classification_id]', N'classification', 'COLUMN';
+    DROP TABLE [calculator_run_pom_data_master];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_organization_data_master_id] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_pom_data_master_id] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
     DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
     DECLARE @var58 nvarchar(max);
     SELECT @var58 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'classification');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculator_run_organization_data_master_id');
     IF @var58 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var58 + ';');
-    ALTER TABLE [calculator_run] ALTER COLUMN [classification] varchar(50) NOT NULL;
-    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([classification], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+    ALTER TABLE [calculator_run] DROP COLUMN [calculator_run_organization_data_master_id];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    EXEC(N'
-    UPDATE
-        run
-    SET
-        run.classification = map.classification,
-        run.calculation_run_status = map.calculation_run_status,
-        run.is_billing_file_shared = map.is_billing_file_shared
-    FROM
-        dbo.calculator_run AS run
-    INNER JOIN
-        (VALUES
-            (''2'',  ''None'',          ''Started'',   0), -- RUNNING
-            (''3'',  ''None'',          ''Completed'', 0), -- UNCLASSIFIED
-            (''4'',  ''Test'',          ''Completed'', 0), -- TEST RUN
-            (''5'',  ''None'',          ''Errored'',   0), -- ERROR
-            (''6'',  ''Deleted'',       ''Completed'', 0), -- DELETED
-            (''7'',  ''Initial'',       ''Completed'', 1), -- INITIAL RUN COMPLETED
-            (''8'',  ''Initial'',       ''Completed'', 0), -- INITIAL RUN
-            (''9'',  ''Recalculation'', ''Completed'', 0), -- RECALCULATION RUN
-            (''12'', ''Recalculation'', ''Completed'', 1)  -- RECALCULATION RUN COMPLETED
-        ) AS map (legacy_id, classification, calculation_run_status, is_billing_file_shared)
-        ON map.legacy_id = run.classification
-    ')
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    EXEC(N'
-    UPDATE
-        dbo.calculator_run
-    SET
-        classification = ''Unknown'',
-        calculation_run_status = ''Unknown''
-    WHERE
-        calculation_run_status IS NULL
-    ')
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    EXEC(N'
-    UPDATE
-        run
-    SET
-        run.billing_file_shared_by = metadata.billing_file_authorised_by,
-        run.billing_file_shared_at = metadata.billing_file_authorised_date
-    FROM
-        dbo.calculator_run AS run
-    CROSS APPLY
-        (
-            SELECT TOP (1)
-                m.billing_file_authorised_by,
-                m.billing_file_authorised_date
-            FROM
-                dbo.calculator_run_billing_file_metadata AS m
-            WHERE
-                m.calculator_run_id = run.id
-                AND m.billing_file_authorised_date IS NOT NULL
-            ORDER BY
-                m.billing_file_authorised_date DESC,
-                m.id DESC
-        ) AS metadata
-    WHERE
-        run.is_billing_file_shared = 1
-    ')
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
     DECLARE @var59 nvarchar(max);
     SELECT @var59 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculation_run_status');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculator_run_pom_data_master_id');
     IF @var59 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var59 + ';');
-    ALTER TABLE [calculator_run] ALTER COLUMN [calculation_run_status] varchar(50) NOT NULL;
+    ALTER TABLE [calculator_run] DROP COLUMN [calculator_run_pom_data_master_id];
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
-    DECLARE @var60 nvarchar(max);
-    SELECT @var60 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_file_authorised_by');
-    IF @var60 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT ' + @var60 + ';');
-    ALTER TABLE [calculator_run_billing_file_metadata] DROP COLUMN [billing_file_authorised_by];
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [default_parameter_setting_master_id], [lapcap_data_master_id]);
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    DECLARE @var61 nvarchar(max);
-    SELECT @var61 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_file_authorised_date');
-    IF @var61 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT ' + @var61 + ';');
-    ALTER TABLE [calculator_run_billing_file_metadata] DROP COLUMN [billing_file_authorised_date];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
-)
-BEGIN
-    EXEC(N'
-    UPDATE
-        dbo.calculator_run
-    SET
-        billing_run_status = ''Started''
-    WHERE
-        billing_run_status = ''Running''
-    ')
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260925170235_SplitRunClassification'
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260925170235_SplitRunClassification', N'10.0.11');
+    VALUES (N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation', N'10.0.11');
 END;
 
 COMMIT;
@@ -8559,131 +8461,116 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260928111801_UpdateHistoricRunData'
+    WHERE [MigrationId] = N'20260910094953_AddIsErrorToCalculatorRunOrganisation'
 )
 BEGIN
-    UPDATE calculator_run_organization_data_detail SET obligation_status = 'O' WHERE obligation_status = ''
+    ALTER TABLE [calculator_run_organisation] ADD [is_error] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260928111801_UpdateHistoricRunData'
-)
-BEGIN
-
-                -- ============================================================
-                -- STEP 1: all producer_reported_material rows needing a submission_period split
-                -- ============================================================
-                DROP TABLE IF EXISTS ##historic_rows;
-
-                SELECT
-                    prm.id                              AS producer_reported_material_id,
-                    prm.producer_detail_id,
-                    prm.material_id,
-                    prm.packaging_type,
-                    pd.producer_id                      AS organisation_id,
-                    pd.subsidiary_id,
-                    cr.calculator_run_pom_data_master_id,
-                    cr.calculator_run_organization_data_master_id,
-                    m.code                              AS material_code
-                INTO ##historic_rows
-                FROM producer_reported_material prm
-                JOIN producer_detail pd ON pd.id = prm.producer_detail_id
-                JOIN calculator_run cr ON cr.id = pd.calculator_run_id
-                JOIN material m ON m.id = prm.material_id
-                WHERE prm.submission_period = ''
-
-                -- ============================================================
-                -- STEP 2: obligated producer/submitter
-                -- ============================================================
-                DROP TABLE IF EXISTS ##obligated_submitters;
-
-                WITH producers AS (
-                    SELECT DISTINCT
-                        producer_detail_id, organisation_id, subsidiary_id, calculator_run_organization_data_master_id
-                    FROM ##historic_rows
-                ),
-                candidates AS (
-                    SELECT DISTINCT
-                        p.producer_detail_id,
-                        codd.submitter_id
-                    FROM producers p
-                    JOIN calculator_run_organization_data_detail codd
-                        ON codd.calculator_run_organization_data_master_id = p.calculator_run_organization_data_master_id
-                    AND codd.organisation_id = p.organisation_id
-                    AND ISNULL(codd.subsidiary_id, '') = ISNULL(p.subsidiary_id, '')
-                    WHERE codd.obligation_status = 'O'
-                )
-                SELECT producer_detail_id, submitter_id
-                INTO ##obligated_submitters
-                FROM (
-                    SELECT *, COUNT(*) OVER (PARTITION BY producer_detail_id) AS obligated_submitter_count
-                    FROM candidates
-                ) c
-                WHERE obligated_submitter_count = 1;
-
-                -- ============================================================
-                -- STEP 3: split resolved rows by submission_period
-                -- ============================================================
-                DROP TABLE IF EXISTS ##rows_to_insert;
-
-                SELECT
-                    hr.producer_reported_material_id,
-                    hr.material_id,
-                    hr.producer_detail_id,
-                    hr.packaging_type,
-                    pomd.submission_period,
-                    CAST(ROUND(SUM(pomd.packaging_material_weight) / 1000.0, 3) AS decimal(18,3))                                                       AS packaging_tonnage,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'R'   THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_red,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'A'   THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_amber,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'G'   THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_green,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'R-M' THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_red_medical,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'A-M' THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_amber_medical,
-                    CAST(ROUND(SUM(CASE WHEN pomd.ram_rag_rating = 'G-M' THEN pomd.packaging_material_weight ELSE 0 END) / 1000.0, 3) AS decimal(18,3)) AS packaging_tonnage_green_medical
-                INTO ##rows_to_insert
-                FROM ##historic_rows hr
-                JOIN ##obligated_submitters os ON os.producer_detail_id = hr.producer_detail_id
-                JOIN calculator_run_pom_data_detail pomd
-                    ON pomd.calculator_run_pom_data_master_id = hr.calculator_run_pom_data_master_id
-                AND pomd.organisation_id = hr.organisation_id
-                AND ISNULL(pomd.subsidiary_id, '') = ISNULL(hr.subsidiary_id, '')
-                AND pomd.packaging_type = hr.packaging_type
-                AND pomd.packaging_material = hr.material_code
-                AND ISNULL(pomd.submitter_id, '00000000-0000-0000-0000-000000000000') = ISNULL(os.submitter_id, '00000000-0000-0000-0000-000000000000')
-                WHERE pomd.submission_period IS NOT NULL
-                GROUP BY
-                    hr.producer_reported_material_id, hr.material_id, hr.producer_detail_id,
-                    hr.packaging_type, pomd.submission_period;
-
-                -- ============================================================
-                -- STEP 4: write - every historic (summed) row is
-                -- removed; only rows the current logic can actually derive get replaced.
-                -- ============================================================
-                DELETE prm
-                FROM producer_reported_material prm
-                JOIN ##historic_rows hr ON hr.producer_reported_material_id = prm.id;
-
-                INSERT INTO producer_reported_material
-                    (material_id, producer_detail_id, packaging_type, packaging_tonnage,
-                    packaging_tonnage_red, packaging_tonnage_amber, packaging_tonnage_green,
-                    packaging_tonnage_red_medical, packaging_tonnage_amber_medical, packaging_tonnage_green_medical,
-                    submission_period)
-                SELECT
-                    material_id, producer_detail_id, packaging_type, packaging_tonnage,
-                    packaging_tonnage_red, packaging_tonnage_amber, packaging_tonnage_green,
-                    packaging_tonnage_red_medical, packaging_tonnage_amber_medical, packaging_tonnage_green_medical,
-                    submission_period
-                FROM ##rows_to_insert;
-                
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260928111801_UpdateHistoricRunData'
+    WHERE [MigrationId] = N'20260910094953_AddIsErrorToCalculatorRunOrganisation'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260928111801_UpdateHistoricRunData', N'10.0.11');
+    VALUES (N'20260910094953_AddIsErrorToCalculatorRunOrganisation', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var60 nvarchar(max);
+    SELECT @var60 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_detail]') AND [c].[name] = N'obligation_status');
+    IF @var60 IS NOT NULL EXEC(N'ALTER TABLE [producer_detail] DROP CONSTRAINT ' + @var60 + ';');
+    ALTER TABLE [producer_detail] DROP COLUMN [obligation_status];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var61 nvarchar(max);
+    SELECT @var61 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_detail]') AND [c].[name] = N'submitter_id');
+    IF @var61 IS NOT NULL EXEC(N'ALTER TABLE [producer_detail] DROP CONSTRAINT ' + @var61 + ';');
+    ALTER TABLE [producer_detail] DROP COLUMN [submitter_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var62 nvarchar(max);
+    SELECT @var62 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'has_h1');
+    IF @var62 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var62 + ';');
+    ALTER TABLE [calculator_run_organisation] DROP COLUMN [has_h1];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var63 nvarchar(max);
+    SELECT @var63 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'has_h2');
+    IF @var63 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var63 + ';');
+    ALTER TABLE [calculator_run_organisation] DROP COLUMN [has_h2];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var64 nvarchar(max);
+    SELECT @var64 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'obligation_status');
+    IF @var64 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var64 + ';');
+    ALTER TABLE [calculator_run_organisation] DROP COLUMN [obligation_status];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    DECLARE @var65 nvarchar(max);
+    SELECT @var65 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'submitter_id');
+    IF @var65 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var65 + ';');
+    ALTER TABLE [calculator_run_organisation] DROP COLUMN [submitter_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260910120849_RemoveUnusedObligationAndSubmitterColumns', N'10.0.11');
 END;
 
 COMMIT;
