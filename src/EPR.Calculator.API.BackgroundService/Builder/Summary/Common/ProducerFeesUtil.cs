@@ -68,16 +68,6 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Summary.Common
             return (r, a, g, total);
         }
 
-        public static SelfManagedConsumerWasteData SumSelfManagedConsumerWasteData(
-            IReadOnlyList<ProducerDetail> producersAndSubsidiaries,
-            MaterialDetail material,
-            SelfManagedConsumerWaste smcw
-        ) =>
-            smcw.ProducerTotals
-                .Where(x => x.Level == 1 && producersAndSubsidiaries.Any(y => x.ProducerId == y.ProducerId))
-                .Select(x => x.SmcwByMaterial[material.Code])
-                .Single();
-
         public static RamTonnageGroup GetPricePerTonne(
             MaterialDetail material,
             CalcResult calcResult
