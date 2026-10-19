@@ -43,5 +43,14 @@
     {
         public required IImmutableList<CalcResultH2ProjectedProducer> H2ProjectedProducers { get; set; }
         public required IImmutableList<CalcResultH1ProjectedProducer> H1ProjectedProducers { get; set; }
+
+        // Producers whose tonnage all has a RAM rating in both halves; the projected producers sections don't show them.
+        public static HashSet<int> CompleteRamProducerIds(IEnumerable<CalcResultH2ProjectedProducer> h2, IEnumerable<CalcResultH1ProjectedProducer> h1) =>
+            h2.Cast<ICalcResultProjectedProducer>()
+                .Concat(h1)
+                .GroupBy(p => p.ProducerId)
+                .Where(g => g.All(p => p.ProjectedTonnageByMaterial.All(m => !m.Value.IsWithoutRamTonnage())))
+                .Select(g => g.Key)
+                .ToHashSet();
     }
 }

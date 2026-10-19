@@ -60,6 +60,11 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
                 ));
             }
 
+            // Only the producers the projected producers sections show are stored.
+            var completeRam = CalcResultProjectedProducers.CompleteRamProducerIds(allH2Rows, allH1Rows);
+            allH2Rows.RemoveAll(p => completeRam.Contains(p.ProducerId));
+            allH1Rows.RemoveAll(p => completeRam.Contains(p.ProducerId));
+
             var result = new CalcResultProjectedProducers
             {
                 H2ProjectedProducers = allH2Rows.OrderBy(p => p.ProducerId).ThenBy(p => p.Level).ThenBy(p => p.SubsidiaryId).ToImmutableList(),
