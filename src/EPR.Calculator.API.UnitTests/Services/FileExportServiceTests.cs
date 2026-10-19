@@ -138,6 +138,7 @@ public class FileExportServiceTests
         (await WrittenBytes(streamed)).ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
+        VerifyCsvOnlyReads(Times.Once());
     }
 
     [TestMethod]
@@ -159,6 +160,43 @@ public class FileExportServiceTests
         exported.Content.ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
+        VerifyCsvOnlyReads(Times.Never());
+    }
+
+    [TestMethod]
+    public async Task Export_BillingJson_LeavesRejectedProducersOutOfCancelledProducers()
+    {
+        AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.Completed, RunName);
+        AddBillingFileMetadata(RunId);
+        AddProducerFeeRow(RunId);
+        calcResultReaderMock
+            .Setup(x => x.ReadCancelledProducers(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new CalcResultCancelledProducer { ProducerId = 201001 }, new CalcResultCancelledProducer { ProducerId = 201007 }]);
+        rejectedProducersBuilderMock
+            .Setup(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new CalcResultRejectedProducer
+            {
+                ProducerId = 201007, ProducerName = "Rejected", TradingName = "", SuggestedBillingInstruction = "REBILL",
+                InstructionConfirmedBy = "user", ReasonForRejection = "reason"
+            }]);
+        CalcResult? written = null;
+        billingJsonWriterMock
+            .Setup(x => x.WriteTo(It.IsAny<Stream>(), It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<CancellationToken>()))
+            .Callback<Stream, BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((_, _, calcResult, _, _) => written = calcResult)
+            .Returns(Task.CompletedTask);
+
+        (await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None)).ShouldBeOfType<FileExportResult.Exported>();
+
+        written.ShouldNotBeNull();
+        written.CalcResultCancelledProducers.Select(p => p.ProducerId).ShouldBe([201001]);
+    }
+
+    private void VerifyCsvOnlyReads(Times times)
+    {
+        calcResultReaderMock.Verify(x => x.ReadH1ProjectedData(RunId, It.IsAny<CancellationToken>()), times);
+        calcResultReaderMock.Verify(x => x.ReadH2ProjectedData(RunId, It.IsAny<CancellationToken>()), times);
+        calcResultReaderMock.Verify(x => x.ReadPartialData(RunId, It.IsAny<CancellationToken>()), times);
+        calcResultReaderMock.Verify(x => x.ReadSmcwByMaterial(RunId, It.IsAny<CancellationToken>()), times);
     }
 
     [TestMethod]
