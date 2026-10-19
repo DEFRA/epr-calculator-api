@@ -71,7 +71,7 @@ public class FileExportService(
         if(runContext is null)
             return new FileExportResult.NotFound();
 
-        var result = await GetResult(runContext, cancellationToken);
+        var result = await GetResult(runContext, forCsv: true, cancellationToken);
 
         if (result is null)
             return new FileExportResult.Legacy();
@@ -89,7 +89,7 @@ public class FileExportService(
         if(runContext is null)
             return new FileExportResult.NotFound();
 
-        var result = await GetResult(runContext, cancellationToken);
+        var result = await GetResult(runContext, forCsv: billingFileType is FileExportType.Csv, cancellationToken);
 
         if (result is null)
             return new FileExportResult.Legacy();
@@ -185,7 +185,7 @@ public class FileExportService(
         };
     }
 
-    private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
+    private async Task<CalcResult?> GetResult(RunContext runContext, bool forCsv, CancellationToken cancellationToken)
     {
         // AsNoTracking() not needed: AnyAsync returns a bool.
         var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
@@ -201,7 +201,7 @@ public class FileExportService(
         result.CalcResultParameterOtherCost = await calcResultReader.ReadParameterOtherCost(runContext.RunId, cancellationToken);
         result.CalcResultOnePlusFourApportionment = await calcResultReader.ReadOnePlusFourApportionment(runContext.RunId, cancellationToken);
 
-        if (runContext.RequiresModulation)
+        if (forCsv && runContext.RequiresModulation)
         {
             result.CalcResultProjectedProducers.H1ProjectedProducers = await calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken);
             result.CalcResultProjectedProducers.H2ProjectedProducers = await  calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken);
@@ -210,12 +210,17 @@ public class FileExportService(
         if (runContext.RequiresScaling)
             result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
-        result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
+        if (forCsv)
+        {
+            result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
+            result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
+        }
+
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
-        result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
         result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);
         result.CalcResultCommsCostReportDetail = await calcResultReader.ReadCommsCost(runContext.RunId, cancellationToken);
 
+        // The billing JSON doesn't show rejected producers, but FilterResult needs them to remove them from its cancelled producers.
         if(runContext.RunType is RunType.Billing)
             result.CalcResultRejectedProducers = await rejectedProducersBuilder.ConstructAsync(runContext, cancellationToken);
 
