@@ -18,13 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
         {
             var allH2 = calcResultProjectedProducers.H2ProjectedProducers ?? ImmutableList<CalcResultH2ProjectedProducer>.Empty;
             var allH1 = calcResultProjectedProducers.H1ProjectedProducers ?? ImmutableList<CalcResultH1ProjectedProducer>.Empty;
-            var completeH1AndH2RamProducers = allH2
-                .Cast<ICalcResultProjectedProducer>()
-                .Concat(allH1)
-                .GroupBy(p => p.ProducerId)
-                .Where(g => g.All(p => p.ProjectedTonnageByMaterial.All(m => !m.Value.IsWithoutRamTonnage())))
-                .Select(g => g.Key)
-                .ToHashSet();
+            var completeH1AndH2RamProducers = CalcResultProjectedProducers.CompleteRamProducerIds(allH2, allH1);
 
             var h2WhereModified = allH2.Where(p => !completeH1AndH2RamProducers.Contains(p.ProducerId)).ToImmutableList();
             var h1WhereModified = allH1.Where(p => !completeH1AndH2RamProducers.Contains(p.ProducerId)).ToImmutableList();

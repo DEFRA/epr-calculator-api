@@ -8858,3 +8858,47 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261019134717_RemoveProjectedProducersNotShown'
+)
+BEGIN
+
+                    DROP TABLE IF EXISTS #complete_ram_producers;
+
+                    SELECT calculator_run_id, producer_id
+                    INTO #complete_ram_producers
+                    FROM (
+                        SELECT calculator_run_id, producer_id, household_tonnage_without_ram, public_bin_tonnage_without_ram, hdc_tonnage_without_ram FROM transform_projected_h1
+                        UNION ALL
+                        SELECT calculator_run_id, producer_id, household_tonnage_without_ram, public_bin_tonnage_without_ram, hdc_tonnage_without_ram FROM transform_projected_h2
+                    ) projected
+                    GROUP BY calculator_run_id, producer_id
+                    HAVING MAX(CASE WHEN household_tonnage_without_ram > 0 OR public_bin_tonnage_without_ram > 0 OR ISNULL(hdc_tonnage_without_ram, 0) > 0 THEN 1 ELSE 0 END) = 0;
+
+                    SELECT h1.* INTO transform_projected_h1_bk FROM transform_projected_h1 h1
+                    JOIN #complete_ram_producers c ON c.calculator_run_id = h1.calculator_run_id AND c.producer_id = h1.producer_id;
+
+                    SELECT h2.* INTO transform_projected_h2_bk FROM transform_projected_h2 h2
+                    JOIN #complete_ram_producers c ON c.calculator_run_id = h2.calculator_run_id AND c.producer_id = h2.producer_id;
+
+                    DELETE h1 FROM transform_projected_h1 h1 JOIN transform_projected_h1_bk bk ON bk.id = h1.id;
+                    DELETE h2 FROM transform_projected_h2 h2 JOIN transform_projected_h2_bk bk ON bk.id = h2.id;
+
+                    DROP TABLE #complete_ram_producers;
+                
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261019134717_RemoveProjectedProducersNotShown'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261019134717_RemoveProjectedProducersNotShown', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
