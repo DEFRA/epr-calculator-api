@@ -21,6 +21,7 @@ internal sealed class LoadPom
     public string? PackagingMaterialSubtype { get; set; }
     public double? PackagingMaterialWeight { get; set; }
     public string? RamRagRating { get; set; }
+    public string? OrganisationSize { get; set; }
     public string? FileName { get; set; }
     public bool IsResubmission { get; set; }
     public DateTime? CreatedDateTime { get; set; }

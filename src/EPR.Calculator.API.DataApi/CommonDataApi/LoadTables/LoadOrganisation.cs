@@ -24,6 +24,7 @@ internal sealed class LoadOrganisation
     public short? NumDaysObligated { get; set; }
     public string? ErrorCode { get; set; }
     public required int SubmissionPeriodYear { get; set; }
+    public required string OrganisationSize { get; set; }
     public bool HasH1 { get; set; }
     public bool HasH2 { get; set; }
     public string? FileName { get; set; }

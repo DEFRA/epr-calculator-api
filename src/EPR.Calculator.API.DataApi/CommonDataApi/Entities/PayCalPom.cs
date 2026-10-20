@@ -22,6 +22,8 @@ internal record PayCalPom
     public double? PackagingMaterialWeight { get; init; }
     public string? RamRagRating { get; init; }
 
+    public string? OrganisationSize { get; init; }
+
     // File-selection inputs only (see IAcceptedFileSelector) - not read past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }

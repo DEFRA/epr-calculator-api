@@ -34,7 +34,8 @@ public class ProducerObligationDeterminerTests
                 StatusCode = r.StatusCode,
                 JoinerDate = r.JoinerDate,
                 RegulatorStatus = "Accepted",
-                SubmissionPeriodYear = r.SubmissionPeriodYear
+                SubmissionPeriodYear = r.SubmissionPeriodYear,
+                OrganisationSize = "L"
             })
             .ToList();
 
@@ -81,7 +82,8 @@ public class ProducerObligationDeterminerTests
                 SubmitterId = "EXT900001",
                 StatusCode = null,
                 RegulatorStatus = "Cancelled",
-                SubmissionPeriodYear = 2024
+                SubmissionPeriodYear = 2024,
+                OrganisationSize = "L"
             }
         };
 
@@ -113,7 +115,8 @@ public class ProducerObligationDeterminerTests
                 SubmitterId = "EXT900002",
                 StatusCode = "01",
                 RegulatorStatus = "Cancelled",
-                SubmissionPeriodYear = 2024
+                SubmissionPeriodYear = 2024,
+                OrganisationSize = "L"
             },
             new()
             {
@@ -123,7 +126,8 @@ public class ProducerObligationDeterminerTests
                 SubmitterId = "EXT900004",
                 StatusCode = "01",
                 RegulatorStatus = "Accepted",
-                SubmissionPeriodYear = 2024
+                SubmissionPeriodYear = 2024,
+                OrganisationSize = "L"
             }
         };
 

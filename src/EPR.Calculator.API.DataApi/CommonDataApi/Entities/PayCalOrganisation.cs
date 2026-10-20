@@ -20,6 +20,8 @@ internal record PayCalOrganisation
     public required string RegulatorStatus { get; init; }
     public required int SubmissionPeriodYear { get; init; }
 
+    public required string OrganisationSize { get; init; }
+
     // File-selection inputs only (see IAcceptedFileSelector) - not read past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }

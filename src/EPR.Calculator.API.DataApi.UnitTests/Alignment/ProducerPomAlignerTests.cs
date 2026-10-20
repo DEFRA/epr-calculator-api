@@ -319,7 +319,8 @@ public class ProducerPomAlignerTests
             RegulatorStatus = "Accepted",
             JoinerDate = "2024-01-01",
             LeaverDate = "2024-12-31",
-            StatusCode = "Active"
+            StatusCode = "Active",
+            OrganisationSize = "L"
         },
         ObligationStatus = "O",
         NumDaysObligated = 200,
