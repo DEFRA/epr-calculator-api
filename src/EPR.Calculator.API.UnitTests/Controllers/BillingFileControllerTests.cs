@@ -76,19 +76,21 @@ public class BillingFileControllerTests
     }
 
     [TestMethod]
-    public async Task DownloadBillingJson_Exported_ReturnsFile()
+    public async Task DownloadBillingJson_Streamed_ReturnsStreamedFile()
     {
         var content = Encoding.UTF8.GetBytes("File");
         fileExportServiceMock
             .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new FileExportResult.Exported(content, JsonFilename));
+            .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), JsonFilename));
 
         var result = await controller.DownloadBillingJson(RunId);
 
-        var fileResult = result.ShouldBeOfType<FileContentResult>();
+        var fileResult = result.ShouldBeOfType<PushStreamFileResult>();
         fileResult.ContentType.ShouldBe("application/json");
         fileResult.FileDownloadName.ShouldBe(JsonFilename);
-        fileResult.FileContents.ShouldBe(content);
+        using var written = new MemoryStream();
+        await fileResult.WriteTo(written, CancellationToken.None);
+        written.ToArray().ShouldBe(content);
     }
 
     [TestMethod]

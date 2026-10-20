@@ -155,9 +155,9 @@ public class FileExportServiceTests
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
 
         // Assert
-        var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId).ToString());
-        exported.Content.ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
+        var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
+        streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId).ToString());
+        (await WrittenBytes(streamed)).ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
         VerifyCsvOnlyReads(Times.Never());
@@ -185,7 +185,8 @@ public class FileExportServiceTests
             .Callback<Stream, BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((_, _, calcResult, _, _) => written = calcResult)
             .Returns(Task.CompletedTask);
 
-        (await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None)).ShouldBeOfType<FileExportResult.Exported>();
+        var streamed = (await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None)).ShouldBeOfType<FileExportResult.Streamed>();
+        await WrittenBytes(streamed);
 
         written.ShouldNotBeNull();
         written.CalcResultCancelledProducers.Select(p => p.ProducerId).ShouldBe([201001]);
