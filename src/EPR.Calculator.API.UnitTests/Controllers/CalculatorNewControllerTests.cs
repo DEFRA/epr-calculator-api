@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             fileExportServiceMock = new Mock<IFileExportService>();
             fileExportServiceMock
                 .Setup(x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Exported([], "billing.json"));
+                .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, "billing.json"));
 
             blobStorageMock = new Mock<IBlobStorageService>();
             storageUploadServiceMock = new Mock<IStorageUploadService>();
@@ -108,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var content = "billing-content"u8.ToArray();
             fileExportServiceMock
                 .Setup(x => x.Export(CalculatorRunId, RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Exported(content, "billing.json"));
+                .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), "billing.json"));
             AddBillingFileMetadata(CalculatorRunId);
 
             // Act
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             storageUploadServiceMock.Verify(
                 x => x.UploadFileContentAsync(
                     It.Is<IStorageUploadService.Request>(r =>
-                        r.Content == content &&
+                        r.Content.SequenceEqual(content) &&
                         r.ContainerName == "fss" &&
                         r.Overwrite),
                     It.IsAny<CancellationToken>()),

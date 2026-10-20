@@ -117,7 +117,7 @@ public class CalculatorNewController(
             {
                 var success = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
                 {
-                    FileExportResult.Exported s => await UploadBillingJson(s.Content, runId, cancellationToken),
+                    FileExportResult.Streamed s => await UploadBillingJson(s, runId, cancellationToken),
                     FileExportResult.NotFound _ => false,
                     FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken), cancellationToken),
                     _ => false
@@ -145,13 +145,16 @@ public class CalculatorNewController(
             .Select(m => m.BillingJsonFileName)
             .SingleAsync(cancellationToken);
 
-    private async Task<bool> UploadBillingJson(byte[] content, int calculatorRunId, CancellationToken cancellationToken)
+    private async Task<bool> UploadBillingJson(FileExportResult.Streamed billingJson, int calculatorRunId, CancellationToken cancellationToken)
     {
+        using var content = new MemoryStream();
+        await billingJson.WriteTo(content, cancellationToken);
+
         await storageUploadService.UploadFileContentAsync(
             new IStorageUploadService.Request
             {
                 FileName = string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse("{0}billing.json"), calculatorRunId),
-                Content = content,
+                Content = content.ToArray(),
                 ContainerName = blobStorageOptions.Value.FssContainer,
                 Overwrite = true
             },

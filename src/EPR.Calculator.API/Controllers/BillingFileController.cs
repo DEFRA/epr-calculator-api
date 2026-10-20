@@ -42,7 +42,7 @@ public class BillingFileController(
     {
         return await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
         {
-            FileExportResult.Exported s => File(s.Content, "application/json", s.FileName),
+            FileExportResult.Streamed s => new PushStreamFileResult("application/json", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadBillingJsonFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")

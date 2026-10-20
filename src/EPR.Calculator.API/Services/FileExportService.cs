@@ -32,7 +32,6 @@ public enum FileExportType { Csv, Json }
 public abstract record FileExportResult
 {
     private FileExportResult() { }
-    public sealed record Exported(byte[] Content, string FileName) : FileExportResult;
     public sealed record Streamed(Func<Stream, CancellationToken, Task> WriteTo, string FileName) : FileExportResult;
     public sealed record NotFound() : FileExportResult;
     public sealed record Legacy() : FileExportResult;
@@ -105,8 +104,8 @@ public class FileExportService(
                 (stream, ct) => WriteCsv(stream, writer => billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails, writer), ct),
                 billingCsvFileName
             ),
-            FileExportType.Json => new FileExportResult.Exported(
-                await WriteBillingJson(runContext, filteredResult, acceptedFeeDetails, cancellationToken),
+            FileExportType.Json => new FileExportResult.Streamed(
+                (stream, ct) => billingJsonWriter.WriteTo(stream, runContext, filteredResult, acceptedFeeDetails, ct),
                 new CalcResultsAndBillingFileName(runContext.RunId)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
@@ -118,13 +117,6 @@ public class FileExportService(
         await using var writer = new StreamWriter(stream, Utf8WithBom, bufferSize: 64 * 1024, leaveOpen: true);
         await export(writer);
         await writer.FlushAsync(cancellationToken);
-    }
-
-    private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
-    {
-        using var stream = new MemoryStream();
-        await billingJsonWriter.WriteTo(stream, runContext, calcResult, producerFeeDetails, cancellationToken);
-        return stream.ToArray();
     }
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
