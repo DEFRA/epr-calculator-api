@@ -1,6 +1,5 @@
 using System.Text;
 using EPR.Calculator.API.BackgroundService;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -60,7 +59,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var content = Encoding.UTF8.GetBytes("File");
             var fileName = "test.csv";
             fileExportServiceMock
-                .Setup(x => x.Export(It.IsAny<int>(), RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(It.IsAny<int>(), FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), fileName));
 
             var result = await controller.DownloadResultCsv(RunId);
@@ -77,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadResultCsv_NotFound()
         {
             fileExportServiceMock
-                .Setup(x => x.Export(It.IsAny<int>(), RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(It.IsAny<int>(), FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.NotFound());
 
             var result = await controller.DownloadResultCsv(RunId);
@@ -89,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadResultCsv_Legacy_ReturnsCsvFile_WhenMetadataAndBlobExist()
         {
             fileExportServiceMock
-                .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(RunId, FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Legacy());
                 
             this.AddResultsFileMetadata();
@@ -109,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadResultCsv_Legacy_ReturnsNotFound_WhenMetadataMissing()
         {
             fileExportServiceMock
-                .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(RunId, FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Legacy());
 
             // Arrange - no CSV file metadata is seeded for the run.
@@ -126,7 +125,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadResultCsv_Legacy_ReturnsNotFound_WhenBlobStreamMissing()
         {
             fileExportServiceMock
-                .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(RunId, FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Legacy());
 
             // Arrange

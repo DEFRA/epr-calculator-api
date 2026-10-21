@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
@@ -115,7 +114,7 @@ public class CalculatorNewController(
 
             if (featureFlags.Value.UploadFssBillingFileToBlobStorage)
             {
-                var success = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
+                var success = await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
                 {
                     FileExportResult.Streamed s => await UploadBillingJson(s, runId, cancellationToken),
                     FileExportResult.NotFound _ => false,

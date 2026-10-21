@@ -111,7 +111,7 @@ public class FileExportServiceTests
             .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
             .Returns<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, _, _, writer) => writer.WriteAsync(CsvContent));
 
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
 
         var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
         streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, createdAt).ToString());
@@ -131,7 +131,7 @@ public class FileExportServiceTests
             .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<TextWriter>()))
             .Returns<BillingRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, _, _, writer) => writer.WriteAsync(CsvContent));
 
-        var result = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
 
         var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
         streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, billingFileCreatedDate, isDraftBillingFile: true).ToString());
@@ -152,7 +152,7 @@ public class FileExportServiceTests
             .Returns<Stream, BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((stream, _, _, _, cancellationToken) =>
                 stream.WriteAsync(Encoding.UTF8.GetBytes(JsonContent), cancellationToken).AsTask());
 
-        var result = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         // Assert
         var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
@@ -185,7 +185,7 @@ public class FileExportServiceTests
             .Callback<Stream, BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((_, _, calcResult, _, _) => written = calcResult)
             .Returns(Task.CompletedTask);
 
-        var streamed = (await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None)).ShouldBeOfType<FileExportResult.Streamed>();
+        var streamed = (await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None)).ShouldBeOfType<FileExportResult.Streamed>();
         await WrittenBytes(streamed);
 
         written.ShouldNotBeNull();
@@ -230,7 +230,7 @@ public class FileExportServiceTests
             .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
             .Returns(Task.CompletedTask);
 
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
 
         await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
@@ -269,7 +269,7 @@ public class FileExportServiceTests
             .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
             .Returns(Task.CompletedTask);
 
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
 
         await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
@@ -295,7 +295,7 @@ public class FileExportServiceTests
             .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>, TextWriter>((_, result, _, _) => capturedResult = result)
             .Returns(Task.CompletedTask);
 
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
 
         await WrittenBytes(result.ShouldBeOfType<FileExportResult.Streamed>());
         capturedResult.ShouldNotBeNull();
@@ -309,9 +309,9 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_ReturnsNotFound_WhenCalculatorRunDoesNotExist()
     {
-        var calcResult = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
-        var billingCsv = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
-        var billingJson = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var calcResult = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
+        var billingCsv = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
+        var billingJson = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         calcResult.ShouldBeOfType<FileExportResult.NotFound>();
         billingCsv.ShouldBeOfType<FileExportResult.NotFound>();
@@ -323,7 +323,7 @@ public class FileExportServiceTests
     {
         AddCalculatorRun(RunId, RunClassification.None, BillingRunStatus.None, RunName, calculationRunStatus: CalculationRunStatus.Started);
 
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
         result.ShouldBeOfType<FileExportResult.NotFound>();
     }
 
@@ -333,8 +333,8 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.None, RunName);
         AddBillingFileMetadata(RunId);
 
-        var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
-        var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var csvResult = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
+        var jsonResult = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         csvResult.ShouldBeOfType<FileExportResult.NotFound>();
         jsonResult.ShouldBeOfType<FileExportResult.NotFound>();
@@ -346,8 +346,8 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassification.Deleted, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
 
-        var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
-        var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var csvResult = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
+        var jsonResult = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         csvResult.ShouldBeOfType<FileExportResult.NotFound>();
         jsonResult.ShouldBeOfType<FileExportResult.NotFound>();
@@ -358,8 +358,8 @@ public class FileExportServiceTests
     {
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.Completed, RunName);
 
-        var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
-        var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var csvResult = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
+        var jsonResult = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         csvResult.ShouldBeOfType<FileExportResult.NotFound>();
         jsonResult.ShouldBeOfType<FileExportResult.NotFound>();
@@ -369,7 +369,7 @@ public class FileExportServiceTests
     public async Task Export_ResultCsv_ReturnsLegacy_WhenCalculatorRunHasNoProducerFeeData()
     {
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.None, RunName);
-        var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
+        var result = await service.Export(RunId, FileExportType.ResultsCsv, CancellationToken.None);
         result.ShouldBeOfType<FileExportResult.Legacy>();
     }
 
@@ -379,8 +379,8 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
 
-        var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
-        var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
+        var csvResult = await service.Export(RunId, FileExportType.BillingCsv, CancellationToken.None);
+        var jsonResult = await service.Export(RunId, FileExportType.BillingJson, CancellationToken.None);
 
         csvResult.ShouldBeOfType<FileExportResult.Legacy>();
         jsonResult.ShouldBeOfType<FileExportResult.Legacy>();
