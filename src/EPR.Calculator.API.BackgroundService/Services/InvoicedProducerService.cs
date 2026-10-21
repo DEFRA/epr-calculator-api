@@ -13,10 +13,10 @@ public interface IInvoicedProducerService
 {
     public Task<ImmutableHashSet<int>> GetProducerIdsForRun(int runId, CancellationToken cancellationToken = default);
     public Task<ImmutableHashSet<int>> GetAcceptedCancelledProducerIdsForRun(int runId, CancellationToken cancellationToken = default);
-    public Task<ImmutableHashSet<int>> GetInvoicedThenCancelledProducerIdsForYear(RelativeYear relativeYear, CancellationToken cancellationToken = default);
-    Task<ImmutableHashSet<int>> GetInvoicedProducerIdsForYear(RelativeYear relativeYear, CancellationToken cancellationToken = default);
-    public Task<ImmutableList<InvoicedProducer>> GetInvoicedProducers(RelativeYear relativeYear, ImmutableHashSet<int>? producerIdFilter = null, CancellationToken cancellationToken = default);
-    public Task<ImmutableList<InvoicedProducer>> GetLatestAcceptedInvoicedProducers(RelativeYear relativeYear, CancellationToken cancellationToken = default);
+    public Task<ImmutableHashSet<int>> GetInvoicedThenCancelledProducerIdsForYear(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default);
+    Task<ImmutableHashSet<int>> GetInvoicedProducerIdsForYear(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default);
+    public Task<ImmutableList<InvoicedProducer>> GetInvoicedProducers(RelativeYear relativeYear, int currentRunId, ImmutableHashSet<int>? producerIdFilter = null, CancellationToken cancellationToken = default);
+    public Task<ImmutableList<InvoicedProducer>> GetLatestAcceptedInvoicedProducers(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default);
 }
 
 public class InvoicedProducerService(
@@ -52,13 +52,15 @@ public class InvoicedProducerService(
         return await query.Distinct().ToImmutableHashSetAsync(cancellationToken);
     }
 
-    public async Task<ImmutableHashSet<int>> GetInvoicedThenCancelledProducerIdsForYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
+    public async Task<ImmutableHashSet<int>> GetInvoicedThenCancelledProducerIdsForYear(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default)
     {
+        var runIds = await GetCompletedRunIdsBefore(relativeYear, currentRunId, cancellationToken);
+
         var query =
             from
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
+                run in dbContext.CalculatorRuns.AsNoTracking().Where(r => runIds.Contains(r.Id))
                 on suggested.CalculatorRunId equals run.Id
             where
                 suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
@@ -69,13 +71,15 @@ public class InvoicedProducerService(
         return await query.Distinct().ToImmutableHashSetAsync(cancellationToken);
     }
 
-    public async Task<ImmutableHashSet<int>> GetInvoicedProducerIdsForYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
+    public async Task<ImmutableHashSet<int>> GetInvoicedProducerIdsForYear(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default)
     {
+        var runIds = await GetCompletedRunIdsBefore(relativeYear, currentRunId, cancellationToken);
+
         var query =
             from
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
+                run in dbContext.CalculatorRuns.AsNoTracking().Where(r => runIds.Contains(r.Id))
                 on suggested.CalculatorRunId equals run.Id
             where
                 suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
@@ -85,7 +89,7 @@ public class InvoicedProducerService(
         return await query.Distinct().ToImmutableHashSetAsync(cancellationToken);
     }
 
-    public async Task<ImmutableList<InvoicedProducer>> GetInvoicedProducers(RelativeYear relativeYear, ImmutableHashSet<int>? producerIdFilter = null, CancellationToken cancellationToken = default)
+    public async Task<ImmutableList<InvoicedProducer>> GetInvoicedProducers(RelativeYear relativeYear, int currentRunId, ImmutableHashSet<int>? producerIdFilter = null, CancellationToken cancellationToken = default)
     {
         if (producerIdFilter is not null)
         {
@@ -101,9 +105,11 @@ public class InvoicedProducerService(
             }
         }
 
+        var runIds = await GetCompletedRunIdsBefore(relativeYear, currentRunId, cancellationToken);
+
         var query =
             from
-                projection in GetInvoicedProducerProjection(relativeYear)
+                projection in GetInvoicedProducerProjection(runIds)
             where
                 projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && (producerIdFilter == null || producerIdFilter.Contains(projection.ProducerId))
@@ -124,11 +130,13 @@ public class InvoicedProducerService(
         return await query.ToImmutableListAsync(cancellationToken);
     }
 
-    public Task<ImmutableList<InvoicedProducer>> GetLatestAcceptedInvoicedProducers(RelativeYear relativeYear, CancellationToken cancellationToken = default)
+    public async Task<ImmutableList<InvoicedProducer>> GetLatestAcceptedInvoicedProducers(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken = default)
     {
+        var runIds = await GetCompletedRunIdsBefore(relativeYear, currentRunId, cancellationToken);
+
         var query =
             from
-                projection in GetInvoicedProducerProjection(relativeYear)
+                projection in GetInvoicedProducerProjection(runIds)
             where
                 projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && projection.SuggestedInstruction.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel
@@ -136,9 +144,11 @@ public class InvoicedProducerService(
                 // Exclude rows that have been superseded by a later valid run for this producer, i.e. either:
                 //  - a later accepted cancel-bill for the producer (any material), or
                 //  - a later accepted non-cancel billing for the same producer + material (i.e. this row isn't the latest).
+                // "Later" is bounded by currentRunId (via runIds) so reprocessing a historical run only ever sees
+                // invoices that genuinely existed as of that run - not billing cycles that happened afterwards.
                 && !(
                     from
-                        laterRun in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
+                        laterRun in dbContext.CalculatorRuns.AsNoTracking().Where(r => runIds.Contains(r.Id))
                     join
                         laterSuggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                         on laterRun.Id equals laterSuggested.CalculatorRunId
@@ -170,13 +180,30 @@ public class InvoicedProducerService(
                     CurrentYearInvoicedTotalAfterThisRun = projection.InvoiceInstruction.CurrentYearInvoicedTotalAfterThisRun
                 };
 
-        return query.ToImmutableListAsync(cancellationToken);
+        return await query.ToImmutableListAsync(cancellationToken);
     }
 
-    private IQueryable<InvoicedProducerProjection> GetInvoicedProducerProjection(RelativeYear relativeYear)
+    /// <summary>
+    ///     The completed Official runs for the year that come before <paramref name="currentRunId" /> - i.e. the runs
+    ///     whose billing had already happened as of the current run.
+    /// </summary>
+    /// <remarks>
+    ///     Resolved up-front (it's only a handful of runs) rather than as an <c>Id &lt; currentRunId</c> range in each
+    ///     query: SQL Server underestimates the rows a range like that matches, and picks a nested-loop plan for the
+    ///     "superseded by a later run" check that's orders of magnitude slower than with an explicit list of ids.
+    /// </remarks>
+    private Task<List<int>> GetCompletedRunIdsBefore(RelativeYear relativeYear, int currentRunId, CancellationToken cancellationToken) =>
+        dbContext.CalculatorRuns
+            .AsNoTracking()
+            .WhereCompletedOfficialForYear(relativeYear)
+            .Where(r => r.Id < currentRunId)
+            .Select(r => r.Id)
+            .ToListAsync(cancellationToken);
+
+    private IQueryable<InvoicedProducerProjection> GetInvoicedProducerProjection(IReadOnlyCollection<int> runIds)
     {
         return from
-                run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(relativeYear).AsNoTracking()
+                run in dbContext.CalculatorRuns.AsNoTracking().Where(r => runIds.Contains(r.Id))
             join
                 suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                 on run.Id equals suggested.CalculatorRunId
