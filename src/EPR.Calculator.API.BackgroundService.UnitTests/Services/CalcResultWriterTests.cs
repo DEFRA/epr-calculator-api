@@ -285,7 +285,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var producerFees = TestDataHelper.GetProducerFees();
             var expectedDetail = producerFees.Details.Single().FeeDetail;
 
-            await _sut.StoreProducerFees(1, producerFees, CancellationToken.None);
+            await _sut.StoreProducerFees(1, producerFees.Total, producerFees.Details.Select(d => d.FeeDetail).ToList(), CancellationToken.None);
 
             var stored = await _dbContext.ProducerDisposalFee
                 .AsNoTracking()

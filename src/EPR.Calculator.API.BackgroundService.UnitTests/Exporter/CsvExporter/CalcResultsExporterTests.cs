@@ -54,13 +54,13 @@ public class CalcResultsExporterTests : TestsFor<CalcResultsExporter>
         var runContext = TestDataHelper.CalculatorRun2025;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var result = await testSubject.Export(runContext, calcResult, TestDataHelper.GetProducerFeeDetails());
 
         // Assert
         Assert.IsNotNull(result);
 
         lateReportingExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLateReportingTonnage>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
-        producerFeesExporter.Verify(x => x.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
+        producerFeesExporter.Verify(x => x.Export(runContext, It.IsAny<FeeDetail>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>(), It.IsAny<IEnumerable<FeeDetail>>()));
         lapcapDataExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLapcapData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         resultDetailExporter.Verify(x => x.Export(It.IsAny<CalcResultDetail>(), It.IsAny<StringBuilder>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
@@ -80,7 +80,7 @@ public class CalcResultsExporterTests : TestsFor<CalcResultsExporter>
         var runContext = TestDataHelper.CalculatorRun2026;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var result = await testSubject.Export(runContext, calcResult, TestDataHelper.GetProducerFeeDetails());
 
         // Assert
         Assert.IsNotNull(result);

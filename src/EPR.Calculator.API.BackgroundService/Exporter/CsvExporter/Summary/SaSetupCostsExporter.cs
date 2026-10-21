@@ -20,7 +20,7 @@ public class SaSetupCostsExporter : IProducerFeesPartExporter
         ];
     }
 
-    public void AppendSectionHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
+    public void AppendSectionHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         int count = GetColumnHeaders(materials, applyModulation).Count();
         csvContent.Append(CsvSanitiser.SanitiseData("5 One-off fee for SA Set Up Costs w/o Bad Debt provision"));
@@ -29,12 +29,12 @@ public class SaSetupCostsExporter : IProducerFeesPartExporter
         csvContent.Append(',', count - 3);
     }
 
-    public void AppendGroupHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
+    public void AppendGroupHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         int count = GetColumnHeaders(materials, applyModulation).Count();
-        csvContent.Append(CsvSanitiser.SanitiseData(producerFees.Total.SaSetupCostsSection5.FeeWithoutBadDebt, DecimalPlaces.Two, null, isCurrency: true));
-        csvContent.Append(CsvSanitiser.SanitiseData(producerFees.Total.SaSetupCostsSection5.BadDebt          , DecimalPlaces.Two, null, isCurrency: true));
-        csvContent.Append(CsvSanitiser.SanitiseData(producerFees.Total.SaSetupCostsSection5.ByCountry.Total, DecimalPlaces.Two, null, isCurrency: true));
+        csvContent.Append(CsvSanitiser.SanitiseData(producerFeesTotal.SaSetupCostsSection5.FeeWithoutBadDebt, DecimalPlaces.Two, null, isCurrency: true));
+        csvContent.Append(CsvSanitiser.SanitiseData(producerFeesTotal.SaSetupCostsSection5.BadDebt          , DecimalPlaces.Two, null, isCurrency: true));
+        csvContent.Append(CsvSanitiser.SanitiseData(producerFeesTotal.SaSetupCostsSection5.ByCountry.Total, DecimalPlaces.Two, null, isCurrency: true));
         csvContent.Append(',', count - 3);
     }
 

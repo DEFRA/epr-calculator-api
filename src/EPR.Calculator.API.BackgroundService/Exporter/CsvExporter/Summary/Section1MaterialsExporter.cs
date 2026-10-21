@@ -122,14 +122,14 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
         return headers;
     }
 
-    public void AppendSectionHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
+    public void AppendSectionHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         int count = GetColumnHeaders(materials, applyModulation).Count();
         csvContent.Append(CsvSanitiser.SanitiseData("1 Producer Disposal Fees with Bad Debt Provision"));
         csvContent.Append(',', count - 1);
     }
 
-    public void AppendGroupHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
+    public void AppendGroupHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         foreach (var material in materials)
         {
