@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +22,7 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadBillingCsv(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Billing, FileExportType.Csv, cancellationToken) switch
+        return await fileExportService.Export(runId, FileExportType.BillingCsv, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
@@ -40,7 +39,7 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadBillingJson(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
+        return await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("application/json", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),

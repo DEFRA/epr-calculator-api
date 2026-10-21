@@ -1,7 +1,6 @@
 using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
@@ -42,7 +41,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             fileExportServiceMock = new Mock<IFileExportService>();
             fileExportServiceMock
-                .Setup(x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, "billing.json"));
 
             blobStorageMock = new Mock<IBlobStorageService>();
@@ -107,7 +106,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Arrange
             var content = "billing-content"u8.ToArray();
             fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), "billing.json"));
             AddBillingFileMetadata(CalculatorRunId);
 
@@ -132,7 +131,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.NotFound());
             AddBillingFileMetadata(CalculatorRunId);
 
@@ -153,7 +152,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Legacy());
             blobStorageMock
                 .Setup(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()))
@@ -177,7 +176,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Legacy());
             blobStorageMock
                 .Setup(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()))
@@ -290,7 +289,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
             run.IsBillingFileShared.ShouldBeTrue();
             fileExportServiceMock.Verify(
-                x => x.Export(It.IsAny<int>(), It.IsAny<RunType>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
+                x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
                 Times.Never);
             storageUploadServiceMock.Verify(
                 x => x.UploadFileContentAsync(It.IsAny<IStorageUploadService.Request>(), It.IsAny<CancellationToken>()),

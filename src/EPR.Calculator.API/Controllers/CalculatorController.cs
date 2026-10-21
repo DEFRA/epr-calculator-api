@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -180,7 +179,7 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadResultCsv(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Calculator, FileExportType.Csv, cancellationToken) switch
+        return await fileExportService.Export(runId, FileExportType.ResultsCsv, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
