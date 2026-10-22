@@ -309,4 +309,7 @@
   <data name="BillingFileAlreadyShared" xml:space="preserve">
     <value>Billing file has already been shared.</value>
   </data>
+  <data name="BillingFileNotShared" xml:space="preserve">
+    <value>Billing file for run {0} has not been shared.</value>
+  </data>
 </root>

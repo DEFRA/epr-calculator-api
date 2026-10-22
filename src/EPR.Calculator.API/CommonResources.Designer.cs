@@ -69,6 +69,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Billing file for run {0} has not been shared..
+        /// </summary>
+        public static string BillingFileNotShared {
+            get {
+                return ResourceManager.GetString("BillingFileNotShared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing file is either missing or outdated..
         /// </summary>
         public static string BillingFileOutdated {
