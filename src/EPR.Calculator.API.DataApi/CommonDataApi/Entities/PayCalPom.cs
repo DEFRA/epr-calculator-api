@@ -27,6 +27,7 @@ internal record PayCalPom
     // File-selection inputs only (see IAcceptedFileSelector) - not read past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }
+    public string? RegulatorStatus { get; init; }
 
     // Empirically always populated (checked 2026-09-23); kept nullable since no DB constraint backs it.
     [JsonPropertyName("CreatedAt")]

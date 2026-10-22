@@ -1,7 +1,10 @@
 using EPR.Calculator.Api.DataApi;
+using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.DataApi.UnitTests;
 
@@ -33,5 +36,31 @@ public class DataApiServiceCollectionExtensionsTests
         var dataSource = provider.GetRequiredService<IPayCalDataSource>();
 
         dataSource.ShouldBeOfType<LoadTableDataSource>();
+    }
+
+    [TestMethod]
+    [DataRow(null, false)]
+    [DataRow("0", false)]
+    [DataRow("13", false)]
+    [DataRow("1", true)]
+    [DataRow("12", true)]
+    public void AddDataApi_ValidatesLateSubmissionsAfterMonth(string? lateSubmissionsAfterMonth, bool expectValid)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["CalculatorDataApi:LateSubmissionsAfterMonth"] = lateSubmissionsAfterMonth })
+            .Build());
+
+        services.AddDataApi(
+            loadTableConnectionString: _ => "Server=(local);Database=Unused;Trusted_Connection=True;TrustServerCertificate=True;",
+            loadTablesEnabled: _ => true);
+
+        var resolve = () => services.BuildServiceProvider().GetRequiredService<IOptions<CalculatorDataApiOptions>>().Value;
+
+        if (expectValid)
+            resolve().LateSubmissionsAfterMonth.ShouldBe(int.Parse(lateSubmissionsAfterMonth!));
+        else
+            Should.Throw<OptionsValidationException>(resolve);
     }
 }

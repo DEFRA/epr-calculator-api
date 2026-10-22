@@ -45,6 +45,12 @@ public static class DataApiServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services
+            .AddOptions<CalculatorDataApiOptions>()
+            .BindConfiguration(CalculatorDataApiOptions.SectionKey)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddHttpClient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>(ConfigureHttpClient);
         services.AddHttpClient<IStreamPomsRequestHandler, StreamPomsRequestHandler>(ConfigureHttpClient);
 

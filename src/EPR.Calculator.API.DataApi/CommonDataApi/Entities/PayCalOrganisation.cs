@@ -17,7 +17,7 @@ internal record PayCalOrganisation
     public string? StatusCode { get; init; }
     public string? LeaverDate { get; init; }
     public string? JoinerDate { get; init; }
-    public required string RegulatorStatus { get; init; }
+    public string? RegulatorStatus { get; init; }
     public required int SubmissionPeriodYear { get; init; }
 
     public required string OrganisationSize { get; init; }

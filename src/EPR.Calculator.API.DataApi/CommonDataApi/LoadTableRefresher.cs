@@ -156,6 +156,7 @@ internal sealed class LoadTableRefresher(
         OrganisationSize = p.OrganisationSize,
         FileName = p.FileName,
         IsResubmission = p.IsResubmission,
+        RegulatorStatus = p.RegulatorStatus,
         CreatedDateTime = p.CreatedDateTime,
         LoadTs = loadTs
     };
