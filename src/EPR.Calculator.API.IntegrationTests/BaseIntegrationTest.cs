@@ -141,6 +141,7 @@ public abstract class BaseIntegrationTest
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddPayCalRequestValidation()
+            .AddPayCalFeatureFlags()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); })
             .RemoveAll<IStreamOrganisationsRequestHandler>()
             .AddSingleton<FakeStreamOrganisationsRequestHandler>()
