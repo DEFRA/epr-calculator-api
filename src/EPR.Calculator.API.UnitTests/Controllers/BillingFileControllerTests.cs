@@ -1,8 +1,11 @@
+using System.Security.Claims;
 using System.Text;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -33,8 +36,23 @@ public class BillingFileControllerTests
             .Options;
         context = new ApplicationDBContext(dbContextOptions);
         context.Database.EnsureCreated();
+        context.CalculatorRuns.Add(new CalculatorRun { Id = RunId, Name = "Run", RelativeYear = new RelativeYear(2025) });
+        context.SaveChanges();
 
         controller = new BillingFileController(blobStorageMock.Object, fileExportServiceMock.Object, context);
+        SignInAs("SASuperUser");
+    }
+
+    private void SignInAs(string role) =>
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, role)], "Test")) }
+        };
+
+    private async Task MarkBillingFileShared()
+    {
+        context.CalculatorRuns.Single(r => r.Id == RunId).IsBillingFileShared = true;
+        await context.SaveChangesAsync();
     }
 
     [TestCleanup]
@@ -90,6 +108,54 @@ public class BillingFileControllerTests
         using var written = new MemoryStream();
         await fileResult.WriteTo(written, CancellationToken.None);
         written.ToArray().ShouldBe(content);
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsNotFound_WhenTheBillingFileHasNotBeenShared()
+    {
+        SignInAs("FssApiPolicy");
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<NotFoundObjectResult>().Value.ShouldBe($"Billing file for run {RunId} has not been shared.");
+        fileExportServiceMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsNotFound_WhenTheRunDoesNotExist()
+    {
+        SignInAs("FssApiPolicy");
+
+        var result = await controller.DownloadBillingJson(RunId + 1);
+
+        result.ShouldBeOfType<NotFoundObjectResult>();
+        fileExportServiceMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsTheFile_OnceTheBillingFileHasBeenShared()
+    {
+        SignInAs("FssApiPolicy");
+        await MarkBillingFileShared();
+        fileExportServiceMock
+            .Setup(x => x.Export(RunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, JsonFilename));
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<PushStreamFileResult>();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForASuperUser_ReturnsTheFile_BeforeTheBillingFileHasBeenShared()
+    {
+        fileExportServiceMock
+            .Setup(x => x.Export(RunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, JsonFilename));
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<PushStreamFileResult>();
     }
 
     [TestMethod]

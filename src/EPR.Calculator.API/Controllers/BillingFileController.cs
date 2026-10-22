@@ -39,6 +39,10 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadBillingJson(int runId, CancellationToken cancellationToken = default)
     {
+        // FSS may only have the billing JSON once the billing file has been sent to it.
+        if (User.IsInRole("FssApiPolicy") && !await IsBillingFileShared(runId, cancellationToken))
+            return NotFound(string.Format(CommonResources.BillingFileNotShared, runId));
+
         return await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("application/json", s.FileName, s.WriteTo),
@@ -47,6 +51,13 @@ public class BillingFileController(
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
         };
     }
+
+    private Task<bool> IsBillingFileShared(int runId, CancellationToken cancellationToken) =>
+        context.CalculatorRuns
+            .AsNoTracking()
+            .Where(r => r.Id == runId)
+            .Select(r => r.IsBillingFileShared)
+            .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<IActionResult> DownloadBillingCsvFromBlobStorage(int runId)
     {
