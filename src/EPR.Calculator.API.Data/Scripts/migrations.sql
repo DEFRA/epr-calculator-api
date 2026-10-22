@@ -9051,3 +9051,32 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+)
+BEGIN
+    ALTER TABLE [data_api_load_organisations] ALTER COLUMN [regulator_status] nvarchar(50) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+)
+BEGIN
+    ALTER TABLE [data_api_load_poms]          ADD [regulator_status] nvarchar(50) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
