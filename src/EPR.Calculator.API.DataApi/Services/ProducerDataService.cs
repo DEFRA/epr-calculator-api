@@ -107,9 +107,8 @@ internal sealed class ProducerDataService(
         // streams have finished.
         //
         // Cancelled registrations are excluded here - the obligation stream has to keep them (they
-        // drive "Not Obligated"), but sp_GetPaycalPomData's registration gate was Granted/Accepted
-        // only. The org stream only ever carries Granted/Accepted/Cancelled, so "not Cancelled" is
-        // equivalent and also tolerates fixtures that leave RegulatorStatus unset.
+        // drive "Not Obligated"), but their POMs don't count. Every other registration that survived
+        // file selection (Accepted, Granted or a late Pending) counts as registered.
         var registeredOrganisationIds = rawOrganisations
             .Where(o => o.Org.RegulatorStatus is not "Cancelled")
             .Select(o => o.Org.OrganisationId)
@@ -256,7 +255,7 @@ internal sealed class ProducerDataService(
         // needs every row for the run up front since it aggregates across rows (per producer/submission
         // period) rather than deciding a row in isolation.
         // The latest file is chosen regardless of size, so an organisation whose latest registration isn't large drops out.
-        var latestLargeOrganisations = pipeline.AcceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate)
+        var latestLargeOrganisations = pipeline.AcceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, relativeYear, cutOffDate)
             .Where(o => o.OrganisationSize == LargeOrganisationSize)
             .ToList();
         return pipeline.ObligationDeterminer.Determine(latestLargeOrganisations).ToList();
@@ -274,9 +273,9 @@ internal sealed class ProducerDataService(
             await foreach (var pom in dataSource.StreamPoms(relativeYear, cancellationToken).WithCancellation(cancellationToken))
                 candidates.TryAdd(
                     (pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName),
-                    new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.CreatedDateTime));
+                    new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.RegulatorStatus, pom.CreatedDateTime));
 
-            return pipeline.AcceptedFileSelector.SelectWinningPomFileNames(candidates.Values, cutOffDate);
+            return pipeline.AcceptedFileSelector.SelectWinningPomFileNames(candidates.Values, relativeYear, cutOffDate);
         });
 
         return await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>

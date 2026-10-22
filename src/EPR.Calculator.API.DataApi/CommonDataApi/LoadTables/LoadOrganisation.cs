@@ -19,7 +19,7 @@ internal sealed class LoadOrganisation
     public string? StatusCode { get; set; }
     public string? LeaverDate { get; set; }
     public string? JoinerDate { get; set; }
-    public required string RegulatorStatus { get; set; }
+    public string? RegulatorStatus { get; set; }
     public string? ObligationStatus { get; set; }
     public short? NumDaysObligated { get; set; }
     public string? ErrorCode { get; set; }
