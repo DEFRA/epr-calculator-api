@@ -135,6 +135,7 @@ public abstract class BaseIntegrationTest
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddPayCalRequestValidation()
+            .AddPayCalFeatureFlags()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); })
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()

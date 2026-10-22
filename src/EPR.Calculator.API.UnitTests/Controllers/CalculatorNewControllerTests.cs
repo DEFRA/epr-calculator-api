@@ -109,6 +109,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), "billing.json"));
             AddBillingFileMetadata(CalculatorRunId);
+            using var uploaded = new MemoryStream();
+            IStorageUploadService.StreamRequest? uploadRequest = null;
+            storageUploadServiceMock
+                .Setup(x => x.UploadFileStreamAsync(It.IsAny<IStorageUploadService.StreamRequest>(), It.IsAny<Func<Stream, CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
+                .Callback((IStorageUploadService.StreamRequest request, Func<Stream, CancellationToken, Task> writeContent, CancellationToken ct) =>
+                {
+                    uploadRequest = request;
+                    writeContent(uploaded, ct).GetAwaiter().GetResult();
+                })
+                .ReturnsAsync("uri");
 
             // Act
             var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as StatusCodeResult;
@@ -116,14 +126,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
-            storageUploadServiceMock.Verify(
-                x => x.UploadFileContentAsync(
-                    It.Is<IStorageUploadService.Request>(r =>
-                        r.Content.SequenceEqual(content) &&
-                        r.ContainerName == "fss" &&
-                        r.Overwrite),
-                    It.IsAny<CancellationToken>()),
-                Times.Once);
+            uploaded.ToArray().ShouldBe(content);
+            uploadRequest.ShouldNotBeNull();
+            uploadRequest.ContainerName.ShouldBe("fss");
+            uploadRequest.Overwrite.ShouldBeTrue();
+            uploadRequest.UseUtf8Bom.ShouldBeFalse();
         }
 
         [TestMethod]
@@ -142,9 +149,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
             result.Value.ShouldBe(string.Format("Unable to export billing file for run {0}", CalculatorRunId));
-            storageUploadServiceMock.Verify(
-                x => x.UploadFileContentAsync(It.IsAny<IStorageUploadService.Request>(), It.IsAny<CancellationToken>()),
-                Times.Never);
+            storageUploadServiceMock.VerifyNoOtherCalls();
+            context.CalculatorRuns.AsNoTracking().Single(r => r.Id == CalculatorRunId).IsBillingFileShared.ShouldBeFalse();
         }
 
         [TestMethod]
@@ -166,9 +172,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
             blobStorageMock.Verify(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()), Times.Once);
-            storageUploadServiceMock.Verify(
-                x => x.UploadFileContentAsync(It.IsAny<IStorageUploadService.Request>(), It.IsAny<CancellationToken>()),
-                Times.Never);
+            storageUploadServiceMock.VerifyNoOtherCalls();
         }
 
         [TestMethod]
@@ -291,9 +295,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             fileExportServiceMock.Verify(
                 x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
                 Times.Never);
-            storageUploadServiceMock.Verify(
-                x => x.UploadFileContentAsync(It.IsAny<IStorageUploadService.Request>(), It.IsAny<CancellationToken>()),
-                Times.Never);
+            storageUploadServiceMock.VerifyNoOtherCalls();
         }
 
         [TestMethod]
