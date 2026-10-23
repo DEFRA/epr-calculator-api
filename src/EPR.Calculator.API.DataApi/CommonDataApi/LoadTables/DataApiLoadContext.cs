@@ -65,6 +65,7 @@ internal sealed class DataApiLoadContext(DbContextOptions<DataApiLoadContext> op
             entity.Property(e => e.OrganisationSize).HasColumnName("organisation_size").HasMaxLength(10);
             entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(400);
             entity.Property(e => e.IsResubmission).HasColumnName("is_resubmission");
+            entity.Property(e => e.RegulatorStatus).HasColumnName("regulator_status").HasMaxLength(50);
             entity.Property(e => e.CreatedDateTime).HasColumnName("created_date_time");
             entity.Property(e => e.LoadTs).HasColumnName("load_ts");
         });

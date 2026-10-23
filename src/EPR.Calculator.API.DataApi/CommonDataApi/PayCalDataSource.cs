@@ -97,6 +97,7 @@ internal sealed class LoadTableDataSource(IDbContextFactory<DataApiLoadContext> 
                 OrganisationSize = p.OrganisationSize,
                 FileName = p.FileName,
                 IsResubmission = p.IsResubmission,
+                RegulatorStatus = p.RegulatorStatus,
                 CreatedDateTime = p.CreatedDateTime
             };
         }

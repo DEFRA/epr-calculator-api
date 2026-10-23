@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using EPR.Calculator.Api.DataApi;
 using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
 using EPR.Calculator.Api.DataApi.Alignment;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
@@ -47,6 +48,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            RegulatorStatus = "Accepted",
             OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
@@ -116,6 +118,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            RegulatorStatus = "Accepted",
             OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
@@ -199,6 +202,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            RegulatorStatus = "Accepted",
             OrganisationSize = "L",
             SubmitterId = submitterId,
             PackagingType = "HH",
@@ -249,12 +253,12 @@ public class ProducerDataServiceTests
 
         var reportablePom = new PayCalPom
         {
-            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, RegulatorStatus = "Accepted", OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
         };
         var nonReportablePom = new PayCalPom
         {
-            OrganisationId = 1, OrganisationSize = "L", SubsidiaryId = "99", SubmitterId = submitterId, PackagingType = "NH",
+            OrganisationId = 1, RegulatorStatus = "Accepted", OrganisationSize = "L", SubsidiaryId = "99", SubmitterId = submitterId, PackagingType = "NH",
             PackagingMaterial = "AL", SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 500
         };
 
@@ -287,7 +291,7 @@ public class ProducerDataServiceTests
         };
         var pom = new PayCalPom
         {
-            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, RegulatorStatus = "Accepted", OrganisationSize = "L", SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000, RamRagRating = "Not-A-Real-Rating"
         };
 
@@ -325,7 +329,7 @@ public class ProducerDataServiceTests
         };
         var pom = new PayCalPom
         {
-            OrganisationId = 1, OrganisationSize = "L", SubmitterId = submitterId, PackagingType = packagingType, PackagingMaterial = material,
+            OrganisationId = 1, RegulatorStatus = "Accepted", OrganisationSize = "L", SubmitterId = submitterId, PackagingType = packagingType, PackagingMaterial = material,
             SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
         };
 
@@ -346,6 +350,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 99,
+            RegulatorStatus = "Accepted",
             OrganisationSize = "L",
             SubsidiaryId = "SUB",
             SubmitterId = Guid.NewGuid().ToString(),
@@ -395,6 +400,7 @@ public class ProducerDataServiceTests
         var pom = new PayCalPom
         {
             OrganisationId = 1,
+            RegulatorStatus = "Accepted",
             OrganisationSize = "L",
             SubsidiaryId = "SUB",
             SubmitterId = Guid.NewGuid().ToString(),
@@ -506,7 +512,7 @@ public class ProducerDataServiceTests
         };
         PayCalPom LineItem(string? size, double weight) => new()
         {
-            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, RegulatorStatus = "Accepted", SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
             PackagingMaterialWeight = weight, FileName = "pom-file", CreatedDateTime = new DateTime(2024, 1, 1), OrganisationSize = size
         };
 
@@ -539,7 +545,7 @@ public class ProducerDataServiceTests
         };
         PayCalPom LineItem(string fileName, int day, string size) => new()
         {
-            OrganisationId = 1, SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
+            OrganisationId = 1, RegulatorStatus = "Accepted", SubmitterId = submitterId, SubmissionPeriod = "2024-P1", PackagingType = "HH", PackagingMaterial = "PL",
             PackagingMaterialWeight = 1000, FileName = fileName, CreatedDateTime = new DateTime(2024, 1, day), OrganisationSize = size
         };
 
@@ -619,7 +625,9 @@ public class ProducerDataServiceTests
 
         // The real selector is a cheap pure component - the fixtures leave file names null, so every
         // group's sole candidate wins and nothing is filtered out, matching the previous pass-through.
-        var selector = new AcceptedFileSelector();
+        var selector = new AcceptedFileSelector(
+            Microsoft.Extensions.Options.Options.Create(new CalculatorDataApiOptions { LateSubmissionsAfterMonth = 12 }),
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<AcceptedFileSelector>.Instance);
 
         IPomEligibilityFilter eligibilityFilterToUse;
         if (eligibilityFilter is not null)
