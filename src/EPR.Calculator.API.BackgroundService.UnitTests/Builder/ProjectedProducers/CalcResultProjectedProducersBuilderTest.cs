@@ -51,17 +51,13 @@ public class CalcResultProjectedProducersBuilderTest : TestsFor<CalcResultProjec
     [TestMethod]
     public void H1H2Projection_untouched_previous()
     {
-        // RAM is complete - no modifications made
+        // RAM is complete - not stored, as the projected producers sections don't show it
         var given = new[]
         {
             new[] { "101", "", "2025-H1", "", "AL", "HH", "100", "20", "40", "40", "0", "", "" },
             new[] { "101", "", "2025-H2", "", "AL", "HH", "100", "20", "40", "40", "0", "", "" }
         };
-        var expected = new []
-        {
-            new[] { "101", "", "2025-H1", "1", "AL", "HH", "100", "20.0", "40.0", "40.0", "0", "0", "0" },
-            new[] { "101", "", "2025-H2", "1", "AL", "HH", "100", "20"  , "40"  , "40"  , "0", "0", "0" }
-        };
+        string[][] expected = [];
         AssertExcepted(expected, FillGapsPrevious(given));
     }
 
@@ -83,15 +79,12 @@ public class CalcResultProjectedProducersBuilderTest : TestsFor<CalcResultProjec
     [TestMethod]
     public void H1H2Projection_untouched_onlyh2_previous()
     {
-        // RAM is complete - only H2 - no modifications made
+        // RAM is complete - only H2 - not stored, as the projected producers sections don't show it
         var given = new[]
         {
             new[] { "101", "", "2025-H2", "", "AL", "HH", "100", "20", "40", "40", "0", "", "" }
         };
-        var expected = new []
-        {
-            new[] { "101", "", "2025-H2", "1", "AL", "HH", "100", "20", "40", "40", "0", "0", "0" }
-        };
+        string[][] expected = [];
         AssertExcepted(expected, FillGapsPrevious(given));
     }
 
@@ -144,7 +137,7 @@ public class CalcResultProjectedProducersBuilderTest : TestsFor<CalcResultProjec
     [TestMethod]
     public void H1H2Projection_untouched_hc_previous()
     {
-        // RAM is complete - no modifications made
+        // RAM is complete - not stored, as the projected producers sections don't show it
         var given = new[]
         {
             new[] { "101", "" , "2025-H1", "", "AL", "HH" , "100", "20", "40", "40", "0", "", "" },
@@ -154,21 +147,7 @@ public class CalcResultProjectedProducersBuilderTest : TestsFor<CalcResultProjec
             new[] { "101", "A", "2025-H2", "", "ST", "PB" , "100", "20", "40", "40", "0", "", "" },
             new[] { "101", "B", "2025-H2", "", "AL", "HH" , "100", "20", "40", "40", "0", "", "" }
         };
-        var expected = new []
-        {
-            new [] { "101", "" , "2025-H1", "1", "AL", "HH" , "100", "20.0", "40.0", "40.0", "0", "0", "0" },
-            new [] { "101", "" , "2025-H1", "1", "AL", "PB" , "100", "20.0", "40.0", "40.0", "0", "0", "0" },
-            new [] { "101", "" , "2025-H1", "1", "GL", "HDC", "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "" , "2025-H1", "2", "AL", "HH" , "100", "20.0", "40.0", "40.0", "0", "0", "0" },
-            new [] { "101", "B", "2025-H1", "2", "AL", "PB" , "100", "20.0", "40.0", "40.0", "0", "0", "0" },
-            new [] { "101", "A", "2025-H1", "2", "GL", "HDC", "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "" , "2025-H2", "1", "AL", "HH" , "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "" , "2025-H2", "1", "PL", "HH" , "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "" , "2025-H2", "1", "ST", "PB" , "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "" , "2025-H2", "2", "PL", "HH" , "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "B", "2025-H2", "2", "AL", "HH" , "100", "20"  , "40"  , "40"  , "0", "0", "0" },
-            new [] { "101", "A", "2025-H2", "2", "ST", "PB" , "100", "20"  , "40"  , "40"  , "0", "0", "0" }
-        };
+        string[][] expected = [];
         AssertExcepted(expected, FillGapsPrevious(given));
     }
 

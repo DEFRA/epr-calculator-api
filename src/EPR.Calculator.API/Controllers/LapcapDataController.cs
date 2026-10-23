@@ -29,6 +29,7 @@ public class LapcapDataController (
         {
             try
             {
+                // Tracked: setting EffectiveTo below is saved with the new master.
                 var oldMasters = await dbContext.LapcapDataMaster
                     .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                     .ToListAsync(cancellationToken);
@@ -47,6 +48,7 @@ public class LapcapDataController (
                 await dbContext.LapcapDataMaster.AddAsync(newMaster, cancellationToken);
 
                 var masterTemplate = await dbContext.LapcapDataTemplateMaster
+                    .AsNoTracking()
                     .ToImmutableDictionaryAsync(LapcapKeyHelper.KeyFor, cancellationToken);
 
                 foreach (var value in request.Values!)
@@ -101,13 +103,14 @@ public class LapcapDataController (
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
         var lapcapDataMaster = await dbContext.LapcapDataMaster
+            .AsNoTracking()
             .Include(m => m.Details)
             .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
 
         if (lapcapDataMaster == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-        var lapcaptemplateDetails = await dbContext.LapcapDataTemplateMaster.ToListAsync();
+        var lapcaptemplateDetails = await dbContext.LapcapDataTemplateMaster.AsNoTracking().ToListAsync();
         var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
         return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
     }

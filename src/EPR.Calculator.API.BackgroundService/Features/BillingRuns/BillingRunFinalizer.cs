@@ -71,6 +71,7 @@ public class BillingRunFinalizer(
 
         if (level1FeesByProducerId.Count == 0) return;
 
+        // Tracked: each instruction is updated and saved below.
         var suggestedInstructions = await dbContext
             .ProducerResultFileSuggestedBillingInstruction
             .Where(p => p.CalculatorRunId == runContext.RunId)

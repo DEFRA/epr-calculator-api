@@ -20,6 +20,7 @@ public class CalculatorRunPomData(
     {
         var now = DateTime.Now;
 
+        // Tracked: EffectiveTo is updated and saved below.
         var oldPomMaster = await dbContext.CalculatorRunPomDataMaster
             .OrderByDescending(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
@@ -56,6 +57,7 @@ public class CalculatorRunPomData(
         );
         #pragma warning restore EF1002, S2077
 
+        // Tracked: the run's POM data master is updated and saved below.
         var calculatorRun = await dbContext.CalculatorRuns
             .FirstAsync(x => x.Id == runContext.RunId, cancellationToken);
 

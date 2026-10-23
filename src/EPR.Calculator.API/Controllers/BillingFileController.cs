@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +22,9 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadBillingCsv(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Billing, FileExportType.Csv, cancellationToken) switch
+        return await fileExportService.Export(runId, FileExportType.BillingCsv, cancellationToken) switch
         {
-            FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
+            FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadBillingCsvFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
@@ -40,18 +39,30 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadBillingJson(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
+        // FSS may only have the billing JSON once the billing file has been sent to it.
+        if (User.IsInRole("FssApiPolicy") && !await IsBillingFileShared(runId, cancellationToken))
+            return NotFound(string.Format(CommonResources.BillingFileNotShared, runId));
+
+        return await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
         {
-            FileExportResult.Exported s => File(s.Content, "application/json", s.FileName),
+            FileExportResult.Streamed s => new PushStreamFileResult("application/json", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadBillingJsonFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
         };
     }
 
+    private Task<bool> IsBillingFileShared(int runId, CancellationToken cancellationToken) =>
+        context.CalculatorRuns
+            .AsNoTracking()
+            .Where(r => r.Id == runId)
+            .Select(r => r.IsBillingFileShared)
+            .SingleOrDefaultAsync(cancellationToken);
+
     private async Task<IActionResult> DownloadBillingCsvFromBlobStorage(int runId)
     {
         var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
             .Where(x => x.CalculatorRunId == runId)
             .OrderByDescending(x => x.BillingFileCreatedDate)
             .FirstOrDefaultAsync();
@@ -63,6 +74,7 @@ public class BillingFileController(
             return NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
 
         var csvFileMetadata = await context.CalculatorRunCsvFileMetadata
+            .AsNoTracking()
             .Where(x =>
                 x.CalculatorRunId == runId
                 && x.FileName == latestBillingFileMetaData.BillingCsvFileName)
@@ -82,6 +94,7 @@ public class BillingFileController(
     private async Task<IActionResult> DownloadBillingJsonFromBlobStorage(int runId)
     {
         var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
             .Where(x => x.CalculatorRunId == runId)
             .OrderByDescending(x => x.BillingFileCreatedDate)
             .FirstOrDefaultAsync();

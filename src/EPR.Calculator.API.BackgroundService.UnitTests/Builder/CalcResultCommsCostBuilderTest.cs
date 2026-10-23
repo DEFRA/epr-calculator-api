@@ -127,16 +127,17 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
 
         // Act
         var result = await testSubject.GetProducerReportedMaterials(runContext);
+        var materialCodes = dbContext.Material.ToDictionary(m => m.Id, m => m.Code);
 
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(6, result.Count);
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "PL" && r.PackagingType == "HH" && r.PackagingTonnage == 50 && r.SubmissionPeriod == "2025-H1"));
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "PL" && r.PackagingType == "HH" && r.PackagingTonnage == 50 && r.SubmissionPeriod == "2025-H2"));
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "ST" && r.PackagingType == "PB" && r.PackagingTonnage == 100 && r.SubmissionPeriod == "2025-H1"));
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "ST" && r.PackagingType == "PB" && r.PackagingTonnage == 100 && r.SubmissionPeriod == "2025-H2"));
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "GL" && r.PackagingType == "HDC" && r.PackagingTonnage == 150 && r.SubmissionPeriod == "2025-H1"));
-        Assert.IsTrue(result.Any(r => r.Material!.Code == "GL" && r.PackagingType == "HDC" && r.PackagingTonnage == 150 && r.SubmissionPeriod == "2025-H2"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "PL" && r.PackagingType == "HH" && r.PackagingTonnage == 50 && r.SubmissionPeriod == "2025-H1"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "PL" && r.PackagingType == "HH" && r.PackagingTonnage == 50 && r.SubmissionPeriod == "2025-H2"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "ST" && r.PackagingType == "PB" && r.PackagingTonnage == 100 && r.SubmissionPeriod == "2025-H1"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "ST" && r.PackagingType == "PB" && r.PackagingTonnage == 100 && r.SubmissionPeriod == "2025-H2"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "GL" && r.PackagingType == "HDC" && r.PackagingTonnage == 150 && r.SubmissionPeriod == "2025-H1"));
+        Assert.IsTrue(result.Any(r => materialCodes[r.MaterialId] == "GL" && r.PackagingType == "HDC" && r.PackagingTonnage == 150 && r.SubmissionPeriod == "2025-H2"));
     }
 
     private static void SeedDatabase(ApplicationDBContext context, RunContext runContext)

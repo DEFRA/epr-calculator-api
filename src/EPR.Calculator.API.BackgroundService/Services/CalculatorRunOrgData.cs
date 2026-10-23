@@ -20,6 +20,7 @@ public class CalculatorRunOrgData(
     {
         var now = DateTime.Now;
 
+        // Tracked: EffectiveTo is updated and saved below.
         var oldOrgMaster = await dbContext.CalculatorRunOrganisationDataMaster.OrderByDescending(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -56,6 +57,7 @@ public class CalculatorRunOrgData(
                 FROM {selectTable.GetTableName()};", cancellationToken);
         #pragma warning restore EF1002, S2077
 
+        // Tracked: the run's organisation data master is updated and saved below.
         var calculatorRun = await dbContext.CalculatorRuns.FirstAsync(x => x.Id == runContext.RunId, cancellationToken);
 
         calculatorRun.CalculatorRunOrganisationDataMasterId = newMaster.Id;

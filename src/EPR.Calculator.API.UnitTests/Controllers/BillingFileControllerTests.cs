@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using System.Text;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -34,8 +36,23 @@ public class BillingFileControllerTests
             .Options;
         context = new ApplicationDBContext(dbContextOptions);
         context.Database.EnsureCreated();
+        context.CalculatorRuns.Add(new CalculatorRun { Id = RunId, Name = "Run", RelativeYear = new RelativeYear(2025) });
+        context.SaveChanges();
 
         controller = new BillingFileController(blobStorageMock.Object, fileExportServiceMock.Object, context);
+        SignInAs("SASuperUser");
+    }
+
+    private void SignInAs(string role) =>
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, role)], "Test")) }
+        };
+
+    private async Task MarkBillingFileShared()
+    {
+        context.CalculatorRuns.Single(r => r.Id == RunId).IsBillingFileShared = true;
+        await context.SaveChangesAsync();
     }
 
     [TestCleanup]
@@ -46,26 +63,28 @@ public class BillingFileControllerTests
     }
 
     [TestMethod]
-    public async Task DownloadBillingCsv_Exported_ReturnsFile()
+    public async Task DownloadBillingCsv_Streamed_ReturnsStreamedFile()
     {
         var content = Encoding.UTF8.GetBytes("File");
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new FileExportResult.Exported(content, CsvFilename));
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), CsvFilename));
 
         var result = await controller.DownloadBillingCsv(RunId);
 
-        var fileResult = result.ShouldBeOfType<FileContentResult>();
+        var fileResult = result.ShouldBeOfType<PushStreamFileResult>();
         fileResult.ContentType.ShouldBe("text/csv");
         fileResult.FileDownloadName.ShouldBe(CsvFilename);
-        fileResult.FileContents.ShouldBe(content);
+        using var written = new MemoryStream();
+        await fileResult.WriteTo(written, CancellationToken.None);
+        written.ToArray().ShouldBe(content);
     }
 
     [TestMethod]
     public async Task DownloadBillingCsv_NotFound()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.NotFound());
 
         var result = await controller.DownloadBillingCsv(RunId);
@@ -74,26 +93,76 @@ public class BillingFileControllerTests
     }
 
     [TestMethod]
-    public async Task DownloadBillingJson_Exported_ReturnsFile()
+    public async Task DownloadBillingJson_Streamed_ReturnsStreamedFile()
     {
         var content = Encoding.UTF8.GetBytes("File");
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new FileExportResult.Exported(content, JsonFilename));
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), JsonFilename));
 
         var result = await controller.DownloadBillingJson(RunId);
 
-        var fileResult = result.ShouldBeOfType<FileContentResult>();
+        var fileResult = result.ShouldBeOfType<PushStreamFileResult>();
         fileResult.ContentType.ShouldBe("application/json");
         fileResult.FileDownloadName.ShouldBe(JsonFilename);
-        fileResult.FileContents.ShouldBe(content);
+        using var written = new MemoryStream();
+        await fileResult.WriteTo(written, CancellationToken.None);
+        written.ToArray().ShouldBe(content);
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsNotFound_WhenTheBillingFileHasNotBeenShared()
+    {
+        SignInAs("FssApiPolicy");
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<NotFoundObjectResult>().Value.ShouldBe($"Billing file for run {RunId} has not been shared.");
+        fileExportServiceMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsNotFound_WhenTheRunDoesNotExist()
+    {
+        SignInAs("FssApiPolicy");
+
+        var result = await controller.DownloadBillingJson(RunId + 1);
+
+        result.ShouldBeOfType<NotFoundObjectResult>();
+        fileExportServiceMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForFss_ReturnsTheFile_OnceTheBillingFileHasBeenShared()
+    {
+        SignInAs("FssApiPolicy");
+        await MarkBillingFileShared();
+        fileExportServiceMock
+            .Setup(x => x.Export(RunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, JsonFilename));
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<PushStreamFileResult>();
+    }
+
+    [TestMethod]
+    public async Task DownloadBillingJson_ForASuperUser_ReturnsTheFile_BeforeTheBillingFileHasBeenShared()
+    {
+        fileExportServiceMock
+            .Setup(x => x.Export(RunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, JsonFilename));
+
+        var result = await controller.DownloadBillingJson(RunId);
+
+        result.ShouldBeOfType<PushStreamFileResult>();
     }
 
     [TestMethod]
     public async Task DownloadBillingJson_NotFound()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.NotFound());
 
         var result = await controller.DownloadBillingJson(RunId);
@@ -105,7 +174,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingCsv_Legacy_ReturnsNotFound_WhenBillingMetadataDoesNotExist()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
 
         var result = await controller.DownloadBillingCsv(RunId);
@@ -117,7 +186,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingCsv_Legacy_ReturnsNotFound_WhenCsvFileMetadataDoesNotExist()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
 
         SeedBillingMetadata(RunId, CsvFilename);
@@ -131,7 +200,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingCsv_Legacy_ReturnsNotFound_WhenBlobStreamIsNull()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
         SeedBillingMetadata(RunId, CsvFilename);
         SeedCsvMetadata(RunId, CsvFilename);
@@ -148,7 +217,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingCsv_Legacy_ReturnsCsvFile_WhenBillingFileExists()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Csv, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingCsv, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
 
         SeedBillingMetadata(RunId, CsvFilename);
@@ -170,7 +239,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingJson_Legacy_ReturnsNotFound_WhenBillingMetadataDoesNotExist()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
 
         var result = await controller.DownloadBillingJson(RunId);
@@ -181,7 +250,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingJson_Legacy_ReturnsNotFound_WhenBillingJsonFileNameIsEmpty()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
             
         SeedBillingMetadata(RunId, CsvFilename, jsonFilename: string.Empty);
@@ -193,7 +262,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingJson_Legacy_ReturnsNotFound_WhenBlobStreamIsNull()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
             
         SeedBillingMetadata(RunId, CsvFilename, jsonFilename: JsonFilename);
@@ -209,7 +278,7 @@ public class BillingFileControllerTests
     public async Task DownloadBillingJson_Legacy_ReturnsJsonFile_WhenBillingFileExists()
     {
         fileExportServiceMock
-            .Setup(x => x.Export(It.IsAny<int>(), RunType.Billing, FileExportType.Json, It.IsAny<CancellationToken>()))
+            .Setup(x => x.Export(It.IsAny<int>(), FileExportType.BillingJson, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FileExportResult.Legacy());
             
         SeedBillingMetadata(RunId, CsvFilename, jsonFilename: JsonFilename);

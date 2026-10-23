@@ -44,6 +44,7 @@ public class BillingFileService(
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
+            .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == runId
                                        && AcceptableRunStatusForBillingInstructions.Contains(x.Classification)
                                        && !x.IsBillingFileShared, cancellationToken)
@@ -58,6 +59,7 @@ public class BillingFileService(
             };
         }
 
+        // Tracked: each row's billing instruction is updated and saved below.
         var rows = await dbContext.ProducerResultFileSuggestedBillingInstruction
             .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
             .ToListAsync(cancellationToken)
@@ -175,6 +177,7 @@ public class BillingFileService(
         int runId,
         CancellationToken cancellationToken)
     {
+        // Tracked: the run's billing status is updated and saved below.
         var calculatorRun = await dbContext.CalculatorRuns
             .AsNoTracking()
             .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
@@ -242,6 +245,7 @@ public class BillingFileService(
 
     private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
         dbContext.CalculatorRuns
+            .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
     /// <summary>
@@ -351,6 +355,7 @@ public class BillingFileService(
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
+        // AsNoTracking() not needed: projects to values.
         var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction =
             await query
                 .Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder)

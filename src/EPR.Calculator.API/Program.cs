@@ -43,4 +43,5 @@ app.MapControllers();
 app.UsePayCalHealthChecks();
 app.UsePayCalApiExplorer();
 
+await app.WarmUpAsync();
 await app.RunAsync();

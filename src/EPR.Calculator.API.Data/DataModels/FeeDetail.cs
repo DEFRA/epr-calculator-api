@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EPR.Calculator.API.Data.DataModels;
 
@@ -47,6 +48,8 @@ public record FeeDetail
 
     public decimal TotalOnePlus2A2B2CWithBadDebtPercentage { get; set; }
 
+    // Needed by CalcResultReader.StreamProducerFeeDetails, which deserialises with System.Text.Json (it skips non-public properties otherwise).
+    [JsonInclude]
     internal ICollection<MaterialFee> MaterialFees { get; set; } = [];
 
     [NotMapped]

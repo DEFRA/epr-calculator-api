@@ -75,6 +75,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
         /// <returns></returns>
         public static CalcResultsAndBillingFileName FromDatabase(ApplicationDBContext context, int runId)
         {
+            // AsNoTracking() not needed: projects to values.
             var runDetails = context.CalculatorRuns
                 .Where(run => run.Id == runId)
                 .Select(run => new { run.Name, run.CreatedAt }).Single();

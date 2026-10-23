@@ -139,6 +139,19 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
+
+        // Send to FSS - uploads the billing JSON, then marks the billing file as shared
+        var sendResult = await CreateController<CalculatorNewController>(services).PrepareBillingFileSendToFSS(runId);
+        sendResult.ShouldBeOfType<StatusCodeResult>($"Controller returned: {JsonSerializer.Serialize((sendResult as ObjectResult)?.Value)}")
+            .StatusCode.ShouldBe(StatusCodes.Status202Accepted);
+
+        await AssertCsv(
+            actualContents: Encoding.UTF8.GetString(Provider.GetRequiredService<FakeBlobStorageUploadService>().Get($"{runId}billing.json")),
+            expectedPath: $"ExpectedData/{relativeYear}-billing.json",
+            ignoreLines: [3, 4, 5, 9, 11, 13, 16],
+            label: "Billing JSON sent to FSS");
+
+        (await db.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId)).IsBillingFileShared.ShouldBeTrue();
     }
 
     private static async Task AssertCsv(string actualContents, string expectedPath, List<int> ignoreLines, string label)
@@ -211,14 +224,14 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         throw new TimeoutException(failureMessage);
     }
 
-    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services, bool expectUtf8Bom)
+    private static async Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services, bool expectUtf8Bom)
     {
-        var fileContents = result.ShouldBeOfType<FileContentResult>().FileContents;
+        var fileContents = await ReadFileResult(result);
 
         if (expectUtf8Bom)
             fileContents.Take(3).ShouldBe([0xEF, 0xBB, 0xBF]);
 
-        return Task.FromResult(Encoding.UTF8.GetString(fileContents));
+        return Encoding.UTF8.GetString(fileContents);
     }
 
     private static CsvReader SlurpCsv(string csvPath) =>
