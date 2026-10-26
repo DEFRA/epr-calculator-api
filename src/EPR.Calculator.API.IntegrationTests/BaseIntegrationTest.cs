@@ -343,9 +343,9 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    // The real SQL source always filters submission_period_year = @relativeYear and regulator_status
-    // IN ('Granted','Accepted','Cancelled'), so neither has its own column in the fixture CSV -
-    // every row here is hardcoded as an accepted year-matching registration. The CSV's
+    // Neither submission_period_year nor regulator_status has a column in the fixture CSV - every row
+    // here is hardcoded as an accepted registration for the relative year, as the real SQL source
+    // filters submission_period_year = @relativeYear. The CSV's
     // obligation_status/error_code/num_days_obligated/has_h1/has_h2 columns are left unread - the real
     // ProducerObligationDeterminer/OrganisationPeriodFlagsCalculator compute those for real from
     // status_code/joiner_date and the POM stream, the same way they would against live data.
@@ -404,6 +404,7 @@ public abstract class BaseIntegrationTest
                 PackagingMaterialSubtype    = Field(csv, "packaging_material_subtype"),
                 RamRagRating                = Field(csv, "ram_rag_rating"),
                 OrganisationSize            = "L",
+                RegulatorStatus             = "Accepted",
                 FileName                    = Field(csv, "file_name"),
                 CreatedDateTime             = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             };

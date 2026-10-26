@@ -24,6 +24,7 @@ internal sealed class LoadPom
     public string? OrganisationSize { get; set; }
     public string? FileName { get; set; }
     public bool IsResubmission { get; set; }
+    public string? RegulatorStatus { get; set; }
     public DateTime? CreatedDateTime { get; set; }
 
     public DateTime LoadTs { get; set; }
