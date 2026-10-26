@@ -8902,3 +8902,104 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    ALTER TABLE [material] ADD [display_order] int NOT NULL DEFAULT 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 1
+    WHERE [code] = N''AL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 2
+    WHERE [code] = N''FC'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 3
+    WHERE [code] = N''GL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 4
+    WHERE [code] = N''PC'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 5
+    WHERE [code] = N''PL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 6
+    WHERE [code] = N''ST'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 7
+    WHERE [code] = N''WD'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 8
+    WHERE [code] = N''OT'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261026125521_AddDisplayOrderToMaterial', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

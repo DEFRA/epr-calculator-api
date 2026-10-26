@@ -26,6 +26,9 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
             .HasColumnName("description")
             .HasMaxLength(2000);
 
+        builder.Property(p => p.DisplayOrder)
+            .HasColumnName("display_order");
+
         builder.HasMany(e => e.ProducerReportedMaterials)
             .WithOne(e => e.Material)
             .HasForeignKey(e => e.MaterialId);
