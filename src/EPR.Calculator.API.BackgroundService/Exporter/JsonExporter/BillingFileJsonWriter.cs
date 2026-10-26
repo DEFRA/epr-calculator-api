@@ -48,7 +48,7 @@ public class BillingFileJsonWriter(IMaterialService materialService)
                 FinancialYear              = calcResult.CalcResultDetail.RelativeYear.ToFinancialYear(),
                 BadDebtProvisionPercentage = $"{calcResult.CalcResultParameterOtherCost.BadDebtValue:0.00}",
                 ModulationResults          = CalcResultModulationResults.From(calcResult.CalcResultModulation!),
-                Materials                  = MaterialPrices.FromAll(materials, calcResult).ToList(),
+                Materials                  = MaterialPrices.FromAll(materials, calcResult, applyModulation: true).ToList(),
                 Producers                  = BuildProducerGroups(calcResult.ProducerFees, materials, applyModulation: true),
             };
             await JsonSerializer.SerializeAsync(stream, content, JsonSerializerOptions, cancellationToken);
@@ -61,7 +61,7 @@ public class BillingFileJsonWriter(IMaterialService materialService)
             RunId                      = calcResult.CalcResultDetail.RunId,
             FinancialYear              = calcResult.CalcResultDetail.RelativeYear.ToFinancialYear(),
             BadDebtProvisionPercentage = $"{calcResult.CalcResultParameterOtherCost.BadDebtValue:0.00}",
-            Materials                  = MaterialPrices.FromAll(materials, calcResult).ToList(),
+            Materials                  = MaterialPrices.FromAll(materials, calcResult, applyModulation: false).ToList(),
             Producers                  = calcResult.ProducerFees.Details
                                              .Select(p => ProducerResult.From(p.FeeDetail, materials, applyModulation: false))
                                              .ToList(),

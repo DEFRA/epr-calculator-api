@@ -139,7 +139,7 @@ The pattern for 2 decimal place values is now `^-?[0-9]+\.[0-9]{2}$`; for 4 deci
 
 **Before:** per-producer material items repeated RAG-split prices in each producer's `materialBreakdown`.
 
-**After:** the run-level `materials[].disposalPricePerTonne` carries the RAG breakdown (`redAndRedMedical`, `amberAndAmberMedical`, `greenAndGreenMedical`) once. Per-producer tonnage items still carry RAG-split tonnage and fee breakdowns where the modulated path is active.
+**After:** the run-level `materials[].disposalPricePerTonne` carries the price once. For modulated runs (2026 onwards) it is the RAG breakdown (`redAndRedMedical`, `amberAndAmberMedical`, `greenAndGreenMedical`); for unmodulated runs (2025) it is a single price per tonne (e.g. `"0.0046"`). Per-producer tonnage items still carry RAG-split tonnage and fee breakdowns where the modulated path is active.
 
 ### 5. Shorter property names
 

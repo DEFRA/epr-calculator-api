@@ -11,36 +11,49 @@ public record MaterialPrices
     public required string MaterialName { get; init; }
 
     [JsonPropertyName("disposalPricePerTonne")]
-    public required RagPricePerTonne DisposalPricePerTonne { get; init; }
+    public required StringOrRagPricePerTonne DisposalPricePerTonne { get; init; }
 
     [JsonPropertyName("commsPricePerTonne")]
     public required string CommsPricePerTonne { get; init; }
 
-    public static IEnumerable<MaterialPrices> FromAll(IImmutableList<MaterialDetail> materials, CalcResult calcResult) =>
-        materials.Select(m =>
+    private static string F4(decimal value) => value.ToString("F4", CultureInfo.InvariantCulture);
+
+    public static IEnumerable<MaterialPrices> FromAll(IImmutableList<MaterialDetail> materials, CalcResult calcResult, bool applyModulation) =>
+        materials.Select(m => new MaterialPrices
         {
-            decimal? red = null, amber = null, green = null;
-            // Match on code rather than MaterialDetail equality, as material names may have been overridden for display
-            var mod = calcResult.CalcResultModulation?.ModulationByMaterial.FirstOrDefault(kv => kv.Key.Code == m.Code).Value;
-            if (mod is not null)
-            {
-                red   = mod.RedMaterialDisposalCost;
-                amber = mod.AmberMaterialDisposalCost;
-                green = mod.GreenMaterialDisposalCost;
-            }
-            var commsDetail = calcResult.CalcResultCommsCostReportDetail.ByMaterial.GetValueOrDefault(m.Code);
-            return new MaterialPrices
-            {
-                MaterialName = m.Name,
-                DisposalPricePerTonne = new RagPricePerTonne
-                {
-                    RedAndRedMedical     = (red   ?? 0).ToString("F4", CultureInfo.InvariantCulture),
-                    AmberAndAmberMedical = (amber ?? 0).ToString("F4", CultureInfo.InvariantCulture),
-                    GreenAndGreenMedical = (green ?? 0).ToString("F4", CultureInfo.InvariantCulture),
-                },
-                CommsPricePerTonne = (commsDetail?.PricePerTonne ?? 0).ToString("F4", CultureInfo.InvariantCulture),
-            };
+            MaterialName          = m.Name,
+            DisposalPricePerTonne = applyModulation ? ModulatedDisposalPrice(m, calcResult) : UnmodulatedDisposalPrice(m, calcResult),
+            CommsPricePerTonne    = F4(calcResult.CalcResultCommsCostReportDetail.ByMaterial.GetValueOrDefault(m.Code)?.PricePerTonne ?? 0),
         });
+
+    private static StringOrRagPricePerTonne UnmodulatedDisposalPrice(MaterialDetail material, CalcResult calcResult) =>
+        F4(calcResult.CalcResultLaDisposalCostData.ByMaterial.GetValueOrDefault(material.Code)?.DisposalCostPricePerTonne ?? 0);
+
+    private static StringOrRagPricePerTonne ModulatedDisposalPrice(MaterialDetail material, CalcResult calcResult)
+    {
+        // Match on code rather than MaterialDetail equality, as material names may have been overridden for display
+        var mod = calcResult.CalcResultModulation?.ModulationByMaterial.FirstOrDefault(kv => kv.Key.Code == material.Code).Value;
+        return new RagPricePerTonne
+        {
+            RedAndRedMedical     = F4(mod?.RedMaterialDisposalCost   ?? 0),
+            AmberAndAmberMedical = F4(mod?.AmberMaterialDisposalCost ?? 0),
+            GreenAndGreenMedical = F4(mod?.GreenMaterialDisposalCost ?? 0),
+        };
+    }
+}
+
+public class StringOrRagPricePerTonneConverter
+    : ValueOrModulatedConverter<StringOrRagPricePerTonne, string, RagPricePerTonne> {}
+
+[JsonConverter(typeof(StringOrRagPricePerTonneConverter))]
+public record StringOrRagPricePerTonne
+    : ValueOrModulated<string, RagPricePerTonne>
+{
+    public static implicit operator StringOrRagPricePerTonne(string value)
+        => FromValue<StringOrRagPricePerTonne>(value);
+
+    public static implicit operator StringOrRagPricePerTonne(RagPricePerTonne value)
+        => FromModulated<StringOrRagPricePerTonne>(value);
 }
 
 public record RagPricePerTonne

@@ -43,16 +43,6 @@
         "scotland":         { "$ref": "#/$defs/cost" },
         "northernIreland":  { "$ref": "#/$defs/cost" }
       }
-    },
-    "ragPricePerTonne": {
-      "type": "object",
-      "description": "Price per tonne split by combined RAG pairs",
-      "required": ["redAndRedMedical", "amberAndAmberMedical", "greenAndGreenMedical"],
-      "properties": {
-        "redAndRedMedical":     { "$ref": "#/$defs/pricePerTonne" },
-        "amberAndAmberMedical": { "$ref": "#/$defs/pricePerTonne" },
-        "greenAndGreenMedical": { "$ref": "#/$defs/pricePerTonne" }
-      }
     }
   },
   "type": "object",
@@ -75,7 +65,7 @@
         "required": ["material", "disposalPricePerTonne", "commsPricePerTonne"],
         "properties": {
           "material":          { "type": "string" },
-          "disposalPricePerTonne": { "$ref": "#/$defs/ragPricePerTonne" },
+          "disposalPricePerTonne": { "$ref": "#/$defs/pricePerTonne" },
           "commsPricePerTonne":    { "$ref": "#/$defs/pricePerTonne" }
         }
       }

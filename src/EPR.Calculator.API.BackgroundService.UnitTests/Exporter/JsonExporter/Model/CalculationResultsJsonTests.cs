@@ -32,6 +32,9 @@ public class ProducerResultsTests
     private static string F2(decimal value) =>
         value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
+    private static string F4(decimal value) =>
+        value.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+
     [TestMethod]
     public void From_ProducerIdentity_IsValid()
     {
@@ -180,10 +183,26 @@ public class ProducerResultsTests
     {
         var calcResult    = TestDataHelper.GetCalcResult();
         var materials     = TestDataHelper.GetMaterialDetails();
-        var materialsList = MaterialPrices.FromAll(materials, calcResult).ToList();
+        var materialsList = MaterialPrices.FromAll(materials, calcResult, applyModulation: false).ToList();
 
         Assert.AreEqual(materials.Count, materialsList.Count);
         Assert.IsTrue(materialsList.All(m => m.DisposalPricePerTonne != null));
         Assert.IsTrue(materialsList.All(m => m.CommsPricePerTonne != null));
+    }
+
+    [TestMethod]
+    public void From_Materials_WithoutModulation_UsesLaDisposalPricePerTonne()
+    {
+        var calcResult    = TestDataHelper.GetCalcResult();
+        var materials     = TestDataHelper.GetMaterialDetails();
+        var materialsList = MaterialPrices.FromAll(materials, calcResult, applyModulation: false).ToList();
+
+        foreach (var (material, prices) in materials.Zip(materialsList))
+        {
+            var expected = calcResult.CalcResultLaDisposalCostData.ByMaterial.GetValueOrDefault(material.Code)?.DisposalCostPricePerTonne ?? 0;
+            Assert.IsNull(prices.DisposalPricePerTonne.Modulated);
+            Assert.AreEqual(F4(expected), prices.DisposalPricePerTonne.Value);
+        }
+        Assert.IsTrue(materialsList.Any(m => m.DisposalPricePerTonne.Value != "0.0000"));
     }
 }
