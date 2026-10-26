@@ -1,0 +1,1032 @@
+{
+  "producerID": "220000",
+  "invoice": {
+    "instruction": "INITIAL",
+    "suggestedAmount": "842809.98",
+    "invoicedToDate": null
+  },
+  "members": [
+    {
+      "subsidiaryID": null,
+      "producerName": "Partial H1 L1 Ltd",
+      "totalBill": "842809.98",
+      "disposalFeesByMaterial": [
+        {
+          "material": "Aluminium",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 97.896,
+            "red": 97.896,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 97.896,
+            "red": 97.896,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 97.896,
+            "redAndRedMedical": 97.896,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.54",
+            "redAndRedMedical": "0.54",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.02",
+          "fee": "0.56",
+          "england": "0.30",
+          "wales": "0.07",
+          "scotland": "0.14",
+          "northernIreland": "0.05"
+        },
+        {
+          "material": "Fibre composite",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Glass",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "householdDrinksContainersTonnageGlass": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Paper or card",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Plastic",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Steel",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Wood",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        },
+        {
+          "material": "Other materials",
+          "previousInvoicedTonnage": "-",
+          "householdPackagingWasteTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "publicBinTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "totalTonnage": {
+            "total": 0,
+            "red": 0,
+            "amber": 0,
+            "green": 0,
+            "redMedical": 0,
+            "amberMedical": 0,
+            "greenMedical": 0
+          },
+          "selfManagedConsumerWasteTonnage": 0,
+          "actionedSelfManagedConsumerWasteTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "netTonnage": {
+            "total": 0,
+            "redAndRedMedical": 0,
+            "amberAndAmberMedical": 0,
+            "greenAndGreenMedical": 0
+          },
+          "residualSelfManagedConsumerWasteTonnage": 0,
+          "feeWithoutBadDebt": {
+            "total": "0.00",
+            "redAndRedMedical": "0.00",
+            "amberAndAmberMedical": "0.00",
+            "greenAndGreenMedical": "0.00"
+          },
+          "tonnageChange": "-",
+          "badDebtProvision": "0.00",
+          "fee": "0.00",
+          "england": "0.00",
+          "wales": "0.00",
+          "scotland": "0.00",
+          "northernIreland": "0.00"
+        }
+      ],
+      "disposalCosts": {
+        "base": "0.54",
+        "badDebtProvision": "0.02",
+        "total": "0.56",
+        "england": "0.30",
+        "wales": "0.07",
+        "scotland": "0.14",
+        "northernIreland": "0.05"
+      },
+      "commsCostsByMaterial": {
+        "base": "0.13",
+        "badDebtProvision": "0.01"
+      },
+      "commsCostsUKWide": {
+        "base": "684.64",
+        "badDebtProvision": "27.39"
+      },
+      "commsCostsByCountry": {
+        "base": "796.17",
+        "badDebtProvision": "31.85"
+      },
+      "saOperatingCosts": {
+        "base": "404456.37",
+        "badDebtProvision": "16178.25"
+      },
+      "laDataPrepCosts": {
+        "base": "0.00",
+        "badDebtProvision": "0.00"
+      },
+      "saSetUpCosts": {
+        "base": "404456.37",
+        "badDebtProvision": "16178.25"
+      }
+    }
+  ],
+  "totalBill": "842809.98",
+  "disposalFeesByMaterial": [
+    {
+      "material": "Aluminium",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 97.896,
+        "red": 97.896,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 97.896,
+        "red": 97.896,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 97.896,
+        "redAndRedMedical": 97.896,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.54",
+        "redAndRedMedical": "0.54",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.02",
+      "fee": "0.56",
+      "england": "0.30",
+      "wales": "0.07",
+      "scotland": "0.14",
+      "northernIreland": "0.05"
+    },
+    {
+      "material": "Fibre composite",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Glass",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "householdDrinksContainersTonnageGlass": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Paper or card",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Plastic",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Steel",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Wood",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    },
+    {
+      "material": "Other materials",
+      "previousInvoicedTonnage": "-",
+      "householdPackagingWasteTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "publicBinTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "totalTonnage": {
+        "total": 0,
+        "red": 0,
+        "amber": 0,
+        "green": 0,
+        "redMedical": 0,
+        "amberMedical": 0,
+        "greenMedical": 0
+      },
+      "selfManagedConsumerWasteTonnage": 0,
+      "actionedSelfManagedConsumerWasteTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "netTonnage": {
+        "total": 0,
+        "redAndRedMedical": 0,
+        "amberAndAmberMedical": 0,
+        "greenAndGreenMedical": 0
+      },
+      "residualSelfManagedConsumerWasteTonnage": 0,
+      "feeWithoutBadDebt": {
+        "total": "0.00",
+        "redAndRedMedical": "0.00",
+        "amberAndAmberMedical": "0.00",
+        "greenAndGreenMedical": "0.00"
+      },
+      "tonnageChange": "-",
+      "badDebtProvision": "0.00",
+      "fee": "0.00",
+      "england": "0.00",
+      "wales": "0.00",
+      "scotland": "0.00",
+      "northernIreland": "0.00"
+    }
+  ],
+  "disposalCosts": {
+    "base": "0.54",
+    "badDebtProvision": "0.02",
+    "total": "0.56",
+    "england": "0.30",
+    "wales": "0.07",
+    "scotland": "0.14",
+    "northernIreland": "0.05"
+  },
+  "commsCostsByMaterial": {
+    "base": "0.13",
+    "badDebtProvision": "0.01"
+  },
+  "commsCostsUKWide": {
+    "base": "684.64",
+    "badDebtProvision": "27.39"
+  },
+  "commsCostsByCountry": {
+    "base": "796.17",
+    "badDebtProvision": "31.85"
+  },
+  "saOperatingCosts": {
+    "base": "404456.37",
+    "badDebtProvision": "16178.25"
+  },
+  "laDataPrepCosts": {
+    "base": "0.00",
+    "badDebtProvision": "0.00"
+  },
+  "saSetUpCosts": {
+    "base": "404456.37",
+    "badDebtProvision": "16178.25"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://epr.gov.uk/schemas/billing-api/v1",
+  "description": "Response bodies for the billing runs API. Run-level and producer-level shapes are shared with the 2026 billing document schema.",
+  "$defs": {
+    "runId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "financialYear": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$",
+      "description": "Financial year in YYYY-YY format (e.g. \"2026-27\")"
+    },
+
+    "billingRunSummary": {
+      "type": "object",
+      "description": "Identifying metadata for a billing run whose billing file has been shared",
+      "required": ["runId", "runName", "financialYear", "classification", "sharedAt", "producerCount"],
+      "properties": {
+        "runId":          { "$ref": "#/$defs/runId" },
+        "runName":        { "type": "string" },
+        "financialYear":  { "$ref": "#/$defs/financialYear" },
+        "classification": {
+          "type": "string",
+          "enum": ["INITIAL", "RECALCULATION"],
+          "description": "Only Initial and Recalculation runs can have their billing file shared"
+        },
+        "sharedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UTC timestamp at which the billing file was shared"
+        },
+        "producerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of producer groups in the run - the totalItems of GET /billing-runs/{runId}/producers"
+        }
+      }
+    },
+
+    "billingRunList": {
+      "type": "object",
+      "description": "GET /billing-runs - shared billing runs, most recently shared first. Wrapped in items so pagination can be added later without a breaking change.",
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/billingRunSummary" }
+        }
+      }
+    },
+
+    "billingRun": {
+      "type": "object",
+      "description": "GET /billing-runs/{runId} - run metadata plus run-level data shared by every producer. Immutable once shared.",
+      "allOf": [{ "$ref": "#/$defs/billingRunSummary" }],
+      "required": ["badDebtProvisionPercentage", "modulationResults", "materials"],
+      "properties": {
+        "badDebtProvisionPercentage": { "$ref": "https://epr.gov.uk/schemas/billing/2026/v1#/$defs/badDebtPercent" },
+        "modulationResults":          { "$ref": "https://epr.gov.uk/schemas/billing/2026/v1#/$defs/modulationResults" },
+        "materials": {
+          "type": "array",
+          "description": "Run-level per-material price data; join producers' disposalFeesByMaterial[].material against material",
+          "items": { "$ref": "https://epr.gov.uk/schemas/billing/2026/v1#/$defs/material" }
+        }
+      }
+    },
+
+    "producer": {
+      "description": "GET /billing-runs/{runId}/producers/{producerId} - one producer group, self-contained",
+      "$ref": "https://epr.gov.uk/schemas/billing/2026/v1#/$defs/producer"
+    },
+
+    "producerPage": {
+      "type": "object",
+      "description": "GET /billing-runs/{runId}/producers?page={page}&pageSize={pageSize} - one page of producer groups, ordered by producerID",
+      "required": ["runId", "page", "pageSize", "totalItems", "totalPages", "items"],
+      "properties": {
+        "runId":      { "$ref": "#/$defs/runId" },
+        "page":       { "type": "integer", "minimum": 1, "description": "1-based page number" },
+        "pageSize":   { "type": "integer", "minimum": 1, "maximum": 500 },
+        "totalItems": { "type": "integer", "minimum": 0 },
+        "totalPages": { "type": "integer", "minimum": 0 },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/producer" }
+        }
+      }
+    },
+
+    "problemDetails": {
+      "type": "object",
+      "description": "RFC 9457 problem details, returned as application/problem+json for 400 and 404 responses",
+      "required": ["title", "status"],
+      "properties": {
+        "type":     { "type": "string" },
+        "title":    { "type": "string" },
+        "status":   { "type": "integer" },
+        "detail":   { "type": "string" },
+        "instance": { "type": "string" },
+        "errors": {
+          "type": "object",
+          "description": "Validation errors keyed by query parameter name (400 only)",
+          "additionalProperties": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

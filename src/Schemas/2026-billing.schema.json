@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://epr.gov.uk/schemas/billing/2026/v1",
   "$defs": {
     "badDebtPercent": {
       "type": "string",
@@ -158,6 +159,64 @@
         "laDataPrepCosts":      { "$ref": "#/$defs/fee" },
         "saSetUpCosts":         { "$ref": "#/$defs/fee" }
       }
+    },
+    "modulationResults": {
+      "type": "object",
+      "description": "Run-level RAG modulation factors",
+      "required": ["redFactor", "greenDiscountFactor"],
+      "properties": {
+        "redFactor":           { "type": "number" },
+        "greenDiscountFactor": { "type": "number" }
+      }
+    },
+    "material": {
+      "type": "object",
+      "description": "Run-level price data for one material; same for all producers - join by material",
+      "required": ["material", "disposalPricePerTonne", "commsPricePerTonne"],
+      "properties": {
+        "material":              { "type": "string" },
+        "disposalPricePerTonne": { "$ref": "#/$defs/ragPricePerTonne" },
+        "commsPricePerTonne":    { "$ref": "#/$defs/pricePerTonne" }
+      }
+    },
+    "invoice": {
+      "type": "object",
+      "description": "Billing instruction and invoice amounts, decided at group level - not meaningful per member",
+      "required": ["instruction", "suggestedAmount", "invoicedToDate"],
+      "properties": {
+        "instruction":     { "type": "string", "enum": ["", "-", "INITIAL", "DELTA", "REBILL"] },
+        "suggestedAmount": { "$ref": "#/$defs/costOrNull" },
+        "invoicedToDate":  { "$ref": "#/$defs/costOrNull" }
+      }
+    },
+    "member": {
+      "type": "object",
+      "description": "One constituent organisation of a producer group: the producer itself or one of its subsidiaries",
+      "allOf": [{ "$ref": "#/$defs/producerFinancials" }],
+      "required": ["subsidiaryID", "producerName"],
+      "properties": {
+        "subsidiaryID": {
+          "type": ["string", "null"],
+          "description": "The reporting subsidiary's own ID, or null when this member is the parent organisation reporting for itself rather than a subsidiary"
+        },
+        "producerName": { "type": "string" }
+      }
+    },
+    "producer": {
+      "type": "object",
+      "description": "One producer group (identified by producerID). Group-level fields are the aggregate across all members - for a single-organisation producer, members contains exactly one entry and the aggregate equals that entry.",
+      "allOf": [{ "$ref": "#/$defs/producerFinancials" }],
+      "required": ["producerID", "invoice", "members"],
+      "properties": {
+        "producerID": { "type": "string" },
+        "invoice":    { "$ref": "#/$defs/invoice" },
+        "members": {
+          "type": "array",
+          "description": "One entry per constituent organisation: the producer itself plus any subsidiaries billed as part of this group",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/member" }
+        }
+      }
     }
   },
   "type": "object",
@@ -171,68 +230,16 @@
       "description": "Financial year in YYYY-YY format (e.g. \"2026-27\")"
     },
     "badDebtProvisionPercentage": { "$ref": "#/$defs/badDebtPercent" },
-
-    "modulationResults": {
-      "type": "object",
-      "required": ["redFactor", "greenDiscountFactor"],
-      "properties": {
-        "redFactor": { "type": "number" },
-        "greenDiscountFactor": { "type": "number" }
-      }
-    },
+    "modulationResults": { "$ref": "#/$defs/modulationResults" },
     "materials": {
       "type": "array",
-      "description": "Run-level per-material price data; same for all producers — join by materialName",
-      "items": {
-        "type": "object",
-        "required": ["material", "disposalPricePerTonne", "commsPricePerTonne"],
-        "properties": {
-          "material":          { "type": "string" },
-          "disposalPricePerTonne": { "$ref": "#/$defs/ragPricePerTonne" },
-          "commsPricePerTonne":    { "$ref": "#/$defs/pricePerTonne" }
-        }
-      }
+      "description": "Run-level per-material price data; same for all producers - join by material",
+      "items": { "$ref": "#/$defs/material" }
     },
     "producers": {
       "type": "array",
-      "description": "One entry per producer group (identified by producerID). Group-level fields are the aggregate across all members - for a single-organisation producer, members contains exactly one entry and the aggregate equals that entry.",
-      "items": {
-        "type": "object",
-        "allOf": [{ "$ref": "#/$defs/producerFinancials" }],
-        "required": ["producerID", "invoice", "members"],
-        "properties": {
-          "producerID": { "type": "string" },
-
-          "invoice": {
-            "type": "object",
-            "description": "Billing instruction and invoice amounts, decided at group level - not meaningful per member",
-            "required": ["instruction", "suggestedAmount", "invoicedToDate"],
-            "properties": {
-              "instruction":     { "type": "string", "enum": ["", "-", "INITIAL", "DELTA", "REBILL"] },
-              "suggestedAmount": { "$ref": "#/$defs/costOrNull" },
-              "invoicedToDate":  { "$ref": "#/$defs/costOrNull" }
-            }
-          },
-
-          "members": {
-            "type": "array",
-            "description": "One entry per constituent organisation: the producer itself plus any subsidiaries billed as part of this group",
-            "minItems": 1,
-            "items": {
-              "type": "object",
-              "allOf": [{ "$ref": "#/$defs/producerFinancials" }],
-              "required": ["subsidiaryID", "producerName"],
-              "properties": {
-                "subsidiaryID": {
-                  "type": ["string", "null"],
-                  "description": "The reporting subsidiary's own ID, or null when this member is the parent organisation reporting for itself rather than a subsidiary"
-                },
-                "producerName": { "type": "string" }
-              }
-            }
-          }
-        }
-      }
+      "description": "One entry per producer group (identified by producerID)",
+      "items": { "$ref": "#/$defs/producer" }
     }
   }
 }

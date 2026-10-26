@@ -1,0 +1,87 @@
+{
+  "runId": 2,
+  "runName": "2026-27 Initial run",
+  "financialYear": "2026-27",
+  "classification": "INITIAL",
+  "sharedAt": "2026-10-20T14:32:11Z",
+  "producerCount": 9,
+  "badDebtProvisionPercentage": "4.00",
+  "modulationResults": {
+    "redFactor": 1.2,
+    "greenDiscountFactor": 0.843917
+  },
+  "materials": [
+    {
+      "material": "Aluminium",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0055",
+        "amberAndAmberMedical": "0.0046",
+        "greenAndGreenMedical": "0.0039"
+      },
+      "commsPricePerTonne": "0.0013"
+    },
+    {
+      "material": "Fibre composite",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0008",
+        "amberAndAmberMedical": "0.0007",
+        "greenAndGreenMedical": "0.0006"
+      },
+      "commsPricePerTonne": "0.0004"
+    },
+    {
+      "material": "Glass",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0064",
+        "amberAndAmberMedical": "0.0053",
+        "greenAndGreenMedical": "0.0045"
+      },
+      "commsPricePerTonne": "0.0004"
+    },
+    {
+      "material": "Paper or card",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0158",
+        "amberAndAmberMedical": "0.0132",
+        "greenAndGreenMedical": "0.0111"
+      },
+      "commsPricePerTonne": "0.0060"
+    },
+    {
+      "material": "Plastic",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0059",
+        "amberAndAmberMedical": "0.0049",
+        "greenAndGreenMedical": "0.0041"
+      },
+      "commsPricePerTonne": "0.0012"
+    },
+    {
+      "material": "Steel",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0151",
+        "amberAndAmberMedical": "0.0126",
+        "greenAndGreenMedical": "0.0106"
+      },
+      "commsPricePerTonne": "0.0057"
+    },
+    {
+      "material": "Wood",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0097",
+        "amberAndAmberMedical": "0.0081",
+        "greenAndGreenMedical": "0.0068"
+      },
+      "commsPricePerTonne": "0.0006"
+    },
+    {
+      "material": "Other materials",
+      "disposalPricePerTonne": {
+        "redAndRedMedical": "0.0010",
+        "amberAndAmberMedical": "0.0008",
+        "greenAndGreenMedical": "0.0007"
+      },
+      "commsPricePerTonne": "0.0007"
+    }
+  ]
+}

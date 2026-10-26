@@ -274,6 +274,7 @@ In a real export sample, `producers` (and its nested `members`) accounts for ~99
 
 ### Proposed shape
 
+- `GET /billing-runs` - list shared billing data - metadata only
 - `GET /billing-runs/{runId}` - run metadata only: `financialYear`, `badDebtProvisionPercentage`, `modulationResults`, `materials`. Small and immutable once a run is calculated, so cheap to fetch once and cache.
 - `GET /billing-runs/{runId}/producers` - the bulk data, paginated. Each entry is fully self-contained (aggregate totals and `members` are already computed), so no cross-producer merging is needed at read time.
 - `GET /billing-runs/{runId}/producers/{producerId}` - single-producer lookup, for callers (e.g. a producer-facing view) that only need one producer's bill.
@@ -286,6 +287,71 @@ A run is immutable once written, so the usual argument for cursor-based paginati
 
 A streaming/NDJSON bulk-export variant (e.g. `GET /billing-runs/{runId}/producers/export`) may still be worth adding later as a secondary mode for downstream ETL consumers that want the whole run in one connection, but paginated collection access should be the default.
 
+### Response schemas and examples
+
+Response bodies are defined in `billing-api.schema.json`, one `$defs` entry per response. Run-level and producer-level shapes are `$ref`'d from `2026-billing.schema.json` rather than copied, so the API and the billing document cannot drift apart. To make that possible, `2026-billing.schema.json` gained an `$id` and had its inline `modulationResults`, `materials[]` item, `invoice`, `members[]` item and `producers[]` item lifted into `$defs` (`modulationResults`, `material`, `invoice`, `member`, `producer`). The document shape is unchanged - the integration test expected output still validates.
+
+| Endpoint | Response `$def` | Example |
+|---|---|---|
+| `GET /billing-runs` | `billingRunList` | `examples/get-billing-runs.json` |
+| `GET /billing-runs/{runId}` | `billingRun` | `examples/get-billing-run.json` |
+| `GET /billing-runs/{runId}/producers?page=1&pageSize=2` | `producerPage` | `examples/get-billing-run-producers.json` |
+| `GET /billing-runs/{runId}/producers/{producerId}` | `producer` | `examples/get-billing-run-producer.json` |
+| 400 / 404 (any endpoint) | `problemDetails` | `examples/error-400-invalid-paging.json`, `examples/error-404-run-not-found.json` |
+
+Examples are taken from `EPR.Calculator.API.IntegrationTests/ExpectedData/2026-billing.json` (run 2, 9 producers), so the figures are real calculator output. The page example contains the first two (composite) producers; the single-producer example is `220000`, a single-organisation producer whose one member has `subsidiaryID: null`.
+
+#### Run summary (`billingRunSummary`)
+
+Every run response starts with the same identifying fields, so `GET /billing-runs/{runId}` is a superset of a list entry:
+
+```json
+{
+  "runId": 2,
+  "runName": "2026-27 Initial run",
+  "financialYear": "2026-27",
+  "classification": "INITIAL",
+  "sharedAt": "2026-10-20T14:32:11Z",
+  "producerCount": 9
+}
+```
+
+- Only runs whose billing file has been shared (`CalculatorRun.IsBillingFileShared`) are visible. An unshared, test or deleted run returns 404, the same as one that doesn't exist, so the API never exposes a billing result that hasn't been signed off.
+- `classification` is limited to `INITIAL` / `RECALCULATION`, because `prepareBillingFileSendToFSS` only allows those two to be shared.
+- `sharedAt` comes from `CalculatorRun.BillingFileSharedAt`. `BillingFileSharedBy` is deliberately left out: it's a user's name and consumers don't need it.
+- `producerCount` lets a consumer size the paging without first requesting page 1.
+- `runId` replaces the old `$schema` property. The API is versioned by its route prefix (`/v1/...`), so the body doesn't need to identify its own schema.
+
+`GET /billing-runs` returns `{ "items": [...] }`, most recently shared first, with an optional `?financialYear=2026-27` filter. It isn't paginated (there are only a few shared runs per year), but the `items` wrapper means pagination can be added later without a breaking change.
+
+#### Producer page (`producerPage`)
+
+```json
+{
+  "runId": 2,
+  "page": 1,
+  "pageSize": 2,
+  "totalItems": 9,
+  "totalPages": 5,
+  "items": [ { "producerID": "110000", "invoice": { ... }, "totalBill": "...", "members": [ ... ] }, ... ]
+}
+```
+
+- Query parameters: `page` (1-based, default 1) and `pageSize` (default 100, maximum 500). A value out of range returns 400 rather than being silently clamped.
+- Items are ordered by `producerID`. A `page` past the last page returns 200 with an empty `items` array, not 404.
+- `runId` is repeated on the page so that a saved page still says which run it came from.
+
+Each item, and the body of `GET /billing-runs/{runId}/producers/{producerId}`, is exactly the `producer` def from the billing document: group totals, `invoice` and `members` are all included, with no extra wrapper.
+
+#### Errors (`problemDetails`)
+
+400 and 404 responses are `application/problem+json` (RFC 9457), which is what ASP.NET Core's `Results.Problem` / `ValidationProblem` produce by default, so no custom error type is needed.
+
+#### Open questions
+
+- **2025-26 runs.** These schemas cover the 2026 (modulated, grouped `members`) shape only. 2025-26 producers use the flat `level`/`subsidiaryID` shape and a single `disposalPricePerTonne`. The recommendation is to keep 2025-26 on the existing file download and serve only 2026-27 onwards from this API, rather than making every def a `oneOf` across both years.
+- **Superseded runs.** If a recalculation is shared, should the earlier run in the same year still be listed? The current proposal lists every shared run and leaves it to the consumer to choose, using `classification` and `sharedAt`.
+
 ### Status
 
-Proposal only - not yet implemented or agreed. No endpoints described here exist yet.
+Proposal only - not yet implemented or agreed. No endpoints described here exist yet. The response schemas and examples above are drafts for review.

@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "runId": 7,
+      "runName": "2026-27 Recalculation 1",
+      "financialYear": "2026-27",
+      "classification": "RECALCULATION",
+      "sharedAt": "2026-10-24T09:05:47Z",
+      "producerCount": 9
+    },
+    {
+      "runId": 2,
+      "runName": "2026-27 Initial run",
+      "financialYear": "2026-27",
+      "classification": "INITIAL",
+      "sharedAt": "2026-10-20T14:32:11Z",
+      "producerCount": 9
+    }
+  ]
+}

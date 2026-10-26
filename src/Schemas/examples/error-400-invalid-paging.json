@@ -1,0 +1,11 @@
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "instance": "/v1/billing-runs/2/producers",
+  "errors": {
+    "pageSize": [
+      "pageSize must be between 1 and 500."
+    ]
+  }
+}
