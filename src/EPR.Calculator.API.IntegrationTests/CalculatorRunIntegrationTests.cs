@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using CsvHelper;
 using CsvHelper.Configuration;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
@@ -28,7 +30,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
     [TestMethod]
     public async Task IntegrationTest_2026() => await RunTest("test2026", new RelativeYear(2026), "some-user");
 
-    private async static Task RunTest(string name, RelativeYear relativeYear, String rundBy)
+    private async static Task RunTest(string name, RelativeYear relativeYear, String runBy)
     {
         await using var db = await Provider
             .CreateScope()
@@ -44,7 +46,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
-        var calculatorRunResult = await PerformCalculatorRun(db, calculatorRunId, rundBy);
+        var calculatorRunResult = await PerformCalculatorRun(db, calculatorRunId, runBy);
         {
             var contents      = fakeBlobStorageUploadService.Get(calculatorRunResult.ExportResult.CsvMetadata.FileName);
             var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                   )).Trim().Split(Environment.NewLine);
@@ -56,9 +58,9 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             AssertLines(actualLines, expectedLines, ignoreLines, "Results CSV", contents);
         }
 
-        await SeedAcceptOrRejectProducers(db, calculatorRunId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
+        await SeedAcceptOrRejectProducers(db, calculatorRunId, runBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
 
-        var billingRunResult = await PerformBillingRun(db, calculatorRunId, rundBy);
+        var billingRunResult = await PerformBillingRun(db, calculatorRunId, runBy);
         {
             var contents      = fakeBlobStorageUploadService.Get(billingRunResult.ExportResult.CsvMetadata.FileName);
             var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                     )).Trim().Split(Environment.NewLine);
@@ -69,16 +71,45 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             var ignoreLines = new List<int> {2, 3, 7, 8, 9}; // Ignore run id and date fields
             AssertLines(actualLines, expectedLines, ignoreLines, "Billing CSV", contents);
         }
-        {   // TODO sort json fields before comparison?
-            var contents      = fakeBlobStorageUploadService.Get(billingRunResult.ExportResult.JsonMetadata.BillingJsonFileName!);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                    )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"ExpectedData/{relativeYear}-billing.json")).Trim().Split(Environment.NewLine);
-
-            actualLines.Length.ShouldBe(expectedLines.Length, $"Billing JSON mismatch: {DisplayFullContents(contents)}");
-
-            var ignoreLines = new List<int> {4, 5, 9, 11, 13, 16}; // Ignore run id and date fields
-            AssertLines(actualLines, expectedLines, ignoreLines, "Billing JSON", contents);
+        {
+            var contents    = fakeBlobStorageUploadService.Get(billingRunResult.ExportResult.JsonMetadata.BillingJsonFileName!);
+            var expected    = await File.ReadAllTextAsync($"ExpectedData/{relativeYear}-billing.json");
+            var ignorePaths = new List<string> { "runId" };
+            AssertJson(contents, expected, ignorePaths, "Billing JSON", contents);
         }
+    }
+
+    private static void AssertJson(string actualJson, string expectedJson, List<string> ignorePaths, string label, string contents)
+    {
+        var actual   = JsonNode.Parse(actualJson)!;
+        var expected = JsonNode.Parse(expectedJson)!;
+        foreach (var path in ignorePaths)
+        {
+            MaskPath(actual,   path);
+            MaskPath(expected, path);
+        }
+        var opts = new JsonSerializerOptions { WriteIndented = true };
+        try
+        {
+            JsonSerializer.Serialize(actual, opts).ShouldBe(JsonSerializer.Serialize(expected, opts), $"{label} mismatch");
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"{ex.Message}; {DisplayFullContents(contents)}", ex);
+        }
+    }
+
+    private static void MaskPath(JsonNode node, string dotPath)
+    {
+        var parts   = dotPath.Split('.');
+        JsonNode? current = node;
+        for (var i = 0; i < parts.Length - 1; i++)
+        {
+            current = current?[parts[i]];
+            if (current is null) return;
+        }
+        if (current is JsonObject obj && obj.ContainsKey(parts[^1]))
+            obj[parts[^1]] = null;
     }
 
     private static void AssertLines(string[] actualLines, string[] expectedLines, List<int> ignoreLines, string label, string contents)

@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Converter;
-using EPR.Calculator.API.BackgroundService.Utils;
 using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
@@ -184,34 +184,9 @@ public record CombinedModulatedCostBreakdown
     public string GreenAndGreenMedical { get; init; } = default!;
 }
 
-public class StringOrCombinedModulatedPriceBreakdownConverter
-    : ValueOrModulatedConverter<StringOrCombinedModulatedPriceBreakdown, string , CombinedModulatedPriceBreakdown> {}
-[JsonConverter(typeof(StringOrCombinedModulatedPriceBreakdownConverter))]
-public record StringOrCombinedModulatedPriceBreakdown
-    : ValueOrModulated<string, CombinedModulatedPriceBreakdown>
-{
-    public static implicit operator StringOrCombinedModulatedPriceBreakdown(string value)
-        => FromValue<StringOrCombinedModulatedPriceBreakdown>(value);
-
-    public static implicit operator StringOrCombinedModulatedPriceBreakdown(CombinedModulatedPriceBreakdown value)
-        => FromModulated<StringOrCombinedModulatedPriceBreakdown>(value);
-}
-
-public record CombinedModulatedPriceBreakdown
-{
-    [JsonPropertyName("redAndRedMedical")]
-    public string RedAndRedMedical { get; init; } = default!;
-
-    [JsonPropertyName("amberAndAmberMedical")]
-    public string AmberAndAmberMedical { get; init; } = default!;
-
-    [JsonPropertyName("greenAndGreenMedical")]
-    public string GreenAndGreenMedical { get; init; } = default!;
-}
-
 public record ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
 {
-    [JsonPropertyName("materialName")]
+    [JsonPropertyName("material")]
     public required string MaterialName { get; init; }
 
     [JsonPropertyName("previousInvoicedTonnage")]
@@ -246,11 +221,8 @@ public record ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
     [JsonConverter(typeof(DecimalPrecision3Converter))]
     public decimal? ResidualSelfManagedConsumerWasteTonnage { get; init; }
 
-    [JsonPropertyName("pricePerTonne")]
-    public required StringOrCombinedModulatedPriceBreakdown PricePerTonne { get; init; }
-
-    [JsonPropertyName("producerDisposalFeeWithoutBadDebtProvision")]
-    public required StringOrCombinedModulatedCostBreakdown ProducerDisposalFeeWithoutBadDebtProvision { get; init; }
+    [JsonPropertyName("feeWithoutBadDebt")]
+    public required StringOrCombinedModulatedCostBreakdown FeeWithoutBadDebt { get; init; }
 
     [JsonPropertyName("tonnageChange")]
     public required string TonnageChange { get; init; }
@@ -258,20 +230,22 @@ public record ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
     [JsonPropertyName("badDebtProvision")]
     public required string BadDebtProvision { get; init; }
 
-    [JsonPropertyName("producerDisposalFeeWithBadDebtProvision")]
-    public required string ProducerDisposalFeeWithBadDebtProvision { get; init; }
+    [JsonPropertyName("fee")]
+    public required string Fee { get; init; }
 
-    [JsonPropertyName("englandWithBadDebtProvision")]
-    public required string EnglandWithBadDebtProvision { get; init; }
+    [JsonPropertyName("england")]
+    public required string England { get; init; }
 
-    [JsonPropertyName("walesWithBadDebtProvision")]
-    public required string WalesWithBadDebtProvision { get; init; }
+    [JsonPropertyName("wales")]
+    public required string Wales { get; init; }
 
-    [JsonPropertyName("scotlandWithBadDebtProvision")]
-    public required string ScotlandWithBadDebtProvision { get; init; }
+    [JsonPropertyName("scotland")]
+    public required string Scotland { get; init; }
 
-    [JsonPropertyName("northernIrelandWithBadDebtProvision")]
-    public required string NorthernIrelandWithBadDebtProvision { get; init; }
+    [JsonPropertyName("northernIreland")]
+    public required string NorthernIreland { get; init; }
+
+    private static string F2(decimal value) => value.ToString("F2", CultureInfo.InvariantCulture);
 
     public static ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown From(
         DisposalFee producerTonnage,
@@ -283,71 +257,64 @@ public record ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
         {
             return new ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
             {
-                MaterialName                               = material.Name,
-                PreviousInvoicedTonnage                    = level == "1" ? producerTonnage.PreviousInvoicedTonnage?.ToString() ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
-                TonnageChange                              = level == "1" ? producerTonnage.TonnageChange?.ToString()           ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
-                BadDebtProvision                           = FormatUtils.FormatCurrency(producerTonnage.BadDebt),
-                ProducerDisposalFeeWithBadDebtProvision    = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Total),
-                EnglandWithBadDebtProvision                = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.England),
-                WalesWithBadDebtProvision                  = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Wales),
-                ScotlandWithBadDebtProvision               = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Scotland),
-                NorthernIrelandWithBadDebtProvision        = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.NorthernIreland),
-                HouseholdPackagingWasteTonnage             = producerTonnage.HhTonnage.TotalRamTonnage(),
-                PublicBinTonnage                           = producerTonnage.PbTonnage.TotalRamTonnage(),
-                HouseholdDrinksContainersTonnageGlass      = material.Code == MaterialCodes.Glass ? producerTonnage.HdcTonnage.TotalRamTonnage(): null,
-                TotalTonnage                               = producerTonnage.TotalTonnage.TotalRamTonnage(),
-                SelfManagedConsumerWasteTonnage            = producerTonnage.SmcwTonnage,
-                NetTonnage                                 = producerTonnage.NetTonnage.Total ?? 0,
-                PricePerTonne                              = FormatUtils.FormatCurrency(producerTonnage.PricePerTonne.Total       ?? 0, 4),
-                ProducerDisposalFeeWithoutBadDebtProvision = FormatUtils.FormatCurrency(producerTonnage.Fee.Total ?? 0, 2)
+                MaterialName                          = material.Name,
+                PreviousInvoicedTonnage               = level == "1" ? producerTonnage.PreviousInvoicedTonnage?.ToString() ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
+                TonnageChange                         = level == "1" ? producerTonnage.TonnageChange?.ToString()           ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
+                BadDebtProvision                      = F2(producerTonnage.BadDebt),
+                Fee                                   = F2(producerTonnage.FeeWithBadDebtByCountry.Total),
+                England                               = F2(producerTonnage.FeeWithBadDebtByCountry.England),
+                Wales                                 = F2(producerTonnage.FeeWithBadDebtByCountry.Wales),
+                Scotland                              = F2(producerTonnage.FeeWithBadDebtByCountry.Scotland),
+                NorthernIreland                       = F2(producerTonnage.FeeWithBadDebtByCountry.NorthernIreland),
+                HouseholdPackagingWasteTonnage        = producerTonnage.HhTonnage.TotalRamTonnage(),
+                PublicBinTonnage                      = producerTonnage.PbTonnage.TotalRamTonnage(),
+                HouseholdDrinksContainersTonnageGlass = material.Code == MaterialCodes.Glass ? producerTonnage.HdcTonnage.TotalRamTonnage() : null,
+                TotalTonnage                          = producerTonnage.TotalTonnage.TotalRamTonnage(),
+                SelfManagedConsumerWasteTonnage       = producerTonnage.SmcwTonnage,
+                NetTonnage                            = producerTonnage.NetTonnage.Total ?? 0,
+                FeeWithoutBadDebt                     = F2(producerTonnage.Fee.Total ?? 0)
             };
         }
 
         return new ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
         {
-            MaterialName                               = material.Name,
-            PreviousInvoicedTonnage                    = level == "1" ? producerTonnage.PreviousInvoicedTonnage?.ToString() ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
-            TonnageChange                              = level == "1" ? producerTonnage.TonnageChange?.ToString()           ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
-            BadDebtProvision                           = FormatUtils.FormatCurrency(producerTonnage.BadDebt),
-            ProducerDisposalFeeWithBadDebtProvision    = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Total),
-            EnglandWithBadDebtProvision                = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.England),
-            WalesWithBadDebtProvision                  = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Wales),
-            ScotlandWithBadDebtProvision               = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Scotland),
-            NorthernIrelandWithBadDebtProvision        = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.NorthernIreland),
-            HouseholdPackagingWasteTonnage             = ModulatedTonnageBreakdown.From(producerTonnage.HhTonnage),
-            PublicBinTonnage                           = ModulatedTonnageBreakdown.From(producerTonnage.PbTonnage),
-            HouseholdDrinksContainersTonnageGlass      = material.Code == MaterialCodes.Glass
-                                                            ? (DecimalOrModulatedTonnageBreakdown)ModulatedTonnageBreakdown.From(producerTonnage.HdcTonnage)
-                                                            : null,
-            TotalTonnage                               = ModulatedTonnageBreakdown.From(producerTonnage.TotalTonnage),
-            SelfManagedConsumerWasteTonnage            = producerTonnage.SmcwTonnage,
-            ActionedSelfManagedConsumerWasteTonnage    = new CombinedModulatedTonnageBreakdown
+            MaterialName                            = material.Name,
+            PreviousInvoicedTonnage                 = level == "1" ? producerTonnage.PreviousInvoicedTonnage?.ToString() ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
+            TonnageChange                           = level == "1" ? producerTonnage.TonnageChange?.ToString()           ?? CommonConstants.Hyphen : CommonConstants.Hyphen,
+            BadDebtProvision                        = F2(producerTonnage.BadDebt),
+            Fee                                     = F2(producerTonnage.FeeWithBadDebtByCountry.Total),
+            England                                 = F2(producerTonnage.FeeWithBadDebtByCountry.England),
+            Wales                                   = F2(producerTonnage.FeeWithBadDebtByCountry.Wales),
+            Scotland                                = F2(producerTonnage.FeeWithBadDebtByCountry.Scotland),
+            NorthernIreland                         = F2(producerTonnage.FeeWithBadDebtByCountry.NorthernIreland),
+            HouseholdPackagingWasteTonnage          = ModulatedTonnageBreakdown.From(producerTonnage.HhTonnage),
+            PublicBinTonnage                        = ModulatedTonnageBreakdown.From(producerTonnage.PbTonnage),
+            HouseholdDrinksContainersTonnageGlass   = material.Code == MaterialCodes.Glass
+                                                          ? (DecimalOrModulatedTonnageBreakdown)ModulatedTonnageBreakdown.From(producerTonnage.HdcTonnage)
+                                                          : null,
+            TotalTonnage                            = ModulatedTonnageBreakdown.From(producerTonnage.TotalTonnage),
+            SelfManagedConsumerWasteTonnage         = producerTonnage.SmcwTonnage,
+            ActionedSelfManagedConsumerWasteTonnage = new CombinedModulatedTonnageBreakdown
             {
                 Total                = producerTonnage.ActionedSmcwTonnage.Total ?? 0,
                 RedAndRedMedical     = producerTonnage.ActionedSmcwTonnage.Red   ?? 0,
                 AmberAndAmberMedical = producerTonnage.ActionedSmcwTonnage.Amber ?? 0,
                 GreenAndGreenMedical = producerTonnage.ActionedSmcwTonnage.Green ?? 0
             },
-            NetTonnage                                 = new CombinedModulatedTonnageBreakdown
+            NetTonnage = new CombinedModulatedTonnageBreakdown
             {
                 Total                = producerTonnage.NetTonnage.Total ?? 0,
                 RedAndRedMedical     = producerTonnage.NetTonnage.Red   ?? 0,
                 AmberAndAmberMedical = producerTonnage.NetTonnage.Amber ?? 0,
                 GreenAndGreenMedical = producerTonnage.NetTonnage.Green ?? 0
             },
-            ResidualSelfManagedConsumerWasteTonnage    = producerTonnage.ResidualSmcwTonnage,
-            PricePerTonne                              = new CombinedModulatedPriceBreakdown
+            ResidualSelfManagedConsumerWasteTonnage = producerTonnage.ResidualSmcwTonnage,
+            FeeWithoutBadDebt = new CombinedModulatedCostBreakdown
             {
-                RedAndRedMedical     = FormatUtils.FormatCurrency(producerTonnage.PricePerTonne.Red   ?? 0, 4),
-                AmberAndAmberMedical = FormatUtils.FormatCurrency(producerTonnage.PricePerTonne.Amber ?? 0, 4),
-                GreenAndGreenMedical = FormatUtils.FormatCurrency(producerTonnage.PricePerTonne.Green ?? 0, 4)
-            },
-            ProducerDisposalFeeWithoutBadDebtProvision = new CombinedModulatedCostBreakdown
-            {
-                Total                = FormatUtils.FormatCurrency(producerTonnage.Fee.Total ?? 0, 2),
-                RedAndRedMedical     = FormatUtils.FormatCurrency(producerTonnage.Fee.Red   ?? 0, 2),
-                AmberAndAmberMedical = FormatUtils.FormatCurrency(producerTonnage.Fee.Amber ?? 0, 2),
-                GreenAndGreenMedical = FormatUtils.FormatCurrency(producerTonnage.Fee.Green ?? 0, 2)
+                Total                = F2(producerTonnage.Fee.Total ?? 0),
+                RedAndRedMedical     = F2(producerTonnage.Fee.Red   ?? 0),
+                AmberAndAmberMedical = F2(producerTonnage.Fee.Amber ?? 0),
+                GreenAndGreenMedical = F2(producerTonnage.Fee.Green ?? 0)
             }
         };
     }
