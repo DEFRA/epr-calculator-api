@@ -39,7 +39,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
             // Add H2 data
             if (h2WhereModified.Any())
             {
-                H2ProjectedProducersExporterUtils.AppendProjectedProducers(h2WhereModified, stringBuilder);
+                H2ProjectedProducersExporterUtils.AppendProjectedProducers(h2WhereModified, materials, stringBuilder);
             }
             else
             {
@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
             // Add H1 data
             if (h1WhereModified.Any())
             {
-                H1ProjectedProducersExporterUtils.AppendProjectedProducers(h1WhereModified, stringBuilder);
+                H1ProjectedProducersExporterUtils.AppendProjectedProducers(h1WhereModified, materials, stringBuilder);
             }
             else
             {
