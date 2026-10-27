@@ -1,12 +1,10 @@
 using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -25,9 +23,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         private ApplicationDBContext context = null!;
         private CalculatorNewController controller = null!;
-        private Mock<IFileExportService> fileExportServiceMock = null!;
         private Mock<IBlobStorageService> blobStorageMock = null!;
-        private Mock<IStorageUploadService> storageUploadServiceMock = null!;
 
         [TestInitialize]
         public void Setup()
@@ -39,33 +35,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            fileExportServiceMock = new Mock<IFileExportService>();
-            fileExportServiceMock
-                .Setup(x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, "billing.json"));
-
             blobStorageMock = new Mock<IBlobStorageService>();
-            storageUploadServiceMock = new Mock<IStorageUploadService>();
+            blobStorageMock
+                .Setup(x => x.MoveBillingJsonToFss(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             controller = new CalculatorNewController(
                 context,
                 Mock.Of<IRunClassificationValidator>(),
                 Mock.Of<IInvoiceDetailsService>(),
                 Mock.Of<ILogger<CalculatorNewController>>(),
-                fileExportServiceMock.Object,
-                blobStorageMock.Object,
-                storageUploadServiceMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
-                {
-                    ConnectionString = "UseDevelopmentStorage=true",
-                    ResultFileCsvContainer = "result-csv",
-                    BillingFileCsvContainer = "billing-csv",
-                    FssContainer = "fss",
-                }),
-                Microsoft.Extensions.Options.Options.Create(new FeatureFlagOptions
-                {
-                    UploadFssBillingFileToBlobStorage = true,
-                }))
+                blobStorageMock.Object)
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };
@@ -101,68 +81,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_UploadsExportedContent_ToFssContainer()
+        public async Task PrepareBillingFileSendToFSS_MovesTheBillingJson_ToFss()
         {
             // Arrange
-            var content = "billing-content"u8.ToArray();
-            fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Streamed((stream, ct) => stream.WriteAsync(content, ct).AsTask(), "billing.json"));
-            AddBillingFileMetadata(CalculatorRunId);
-            using var uploaded = new MemoryStream();
-            IStorageUploadService.StreamRequest? uploadRequest = null;
-            storageUploadServiceMock
-                .Setup(x => x.UploadFileStreamAsync(It.IsAny<IStorageUploadService.StreamRequest>(), It.IsAny<Func<Stream, CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
-                .Callback((IStorageUploadService.StreamRequest request, Func<Stream, CancellationToken, Task> writeContent, CancellationToken ct) =>
-                {
-                    uploadRequest = request;
-                    writeContent(uploaded, ct).GetAwaiter().GetResult();
-                })
-                .ReturnsAsync("uri");
-
-            // Act
-            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as StatusCodeResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
-            uploaded.ToArray().ShouldBe(content);
-            uploadRequest.ShouldNotBeNull();
-            uploadRequest.ContainerName.ShouldBe("fss");
-            uploadRequest.Overwrite.ShouldBeTrue();
-            uploadRequest.UseUtf8Bom.ShouldBeFalse();
-        }
-
-        [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_ReturnsUnprocessableEntity_WhenExportNotFound()
-        {
-            // Arrange
-            fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.NotFound());
-            AddBillingFileMetadata(CalculatorRunId);
-
-            // Act
-            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
-            result.Value.ShouldBe(string.Format("Unable to export billing file for run {0}", CalculatorRunId));
-            storageUploadServiceMock.VerifyNoOtherCalls();
-            context.CalculatorRuns.AsNoTracking().Single(r => r.Id == CalculatorRunId).IsBillingFileShared.ShouldBeFalse();
-        }
-
-        [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_Legacy_ReturnsAccepted_WhenMoveSucceeds()
-        {
-            // Arrange
-            fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Legacy());
-            blobStorageMock
-                .Setup(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
             AddBillingFileMetadata(CalculatorRunId);
 
             // Act
@@ -172,16 +93,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
             blobStorageMock.Verify(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()), Times.Once);
-            storageUploadServiceMock.VerifyNoOtherCalls();
         }
 
         [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_Legacy_ReturnsUnprocessableEntity_WhenMoveFails()
+        public async Task PrepareBillingFileSendToFSS_ReturnsUnprocessableEntity_WhenTheMoveFails()
         {
             // Arrange
-            fileExportServiceMock
-                .Setup(x => x.Export(CalculatorRunId, FileExportType.BillingJson, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.Legacy());
             blobStorageMock
                 .Setup(x => x.MoveBillingJsonToFss("test.json", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
@@ -193,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
-            result.Value.ShouldBe(string.Format("Unable to export billing file for run {0}", CalculatorRunId));
+            result.Value.ShouldBe(string.Format(CommonResources.UnableToMoveBillingFile, CalculatorRunId));
         }
 
         [TestMethod]
@@ -248,54 +165,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
             newIsShared.ShouldBe(true);
-        }
-
-        [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_SkipsExportAndUpload_WhenFeatureFlagDisabled()
-        {
-            // Arrange
-            var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-            calculatorRun.Classification = RunClassification.Initial;
-
-            AddBillingFileMetadata(CalculatorRunId);
-
-            var fileExportServiceMock = new Mock<IFileExportService>();
-            var storageUploadServiceMock = new Mock<IStorageUploadService>();
-
-            var controllerWithFlagDisabled = new CalculatorNewController(
-                context,
-                Mock.Of<IRunClassificationValidator>(),
-                Mock.Of<IInvoiceDetailsService>(),
-                Mock.Of<ILogger<CalculatorNewController>>(),
-                fileExportServiceMock.Object,
-                Mock.Of<IBlobStorageService>(),
-                storageUploadServiceMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
-                {
-                    ConnectionString = "UseDevelopmentStorage=true",
-                    ResultFileCsvContainer = "result-csv",
-                    BillingFileCsvContainer = "billing-csv",
-                    FssContainer = "fss",
-                }),
-                Microsoft.Extensions.Options.Options.Create(new FeatureFlagOptions
-                {
-                    UploadFssBillingFileToBlobStorage = false,
-                }))
-            {
-                ControllerContext = CreateAuthenticatedControllerContext(),
-            };
-
-            // Act
-            var result = (IStatusCodeActionResult)await controllerWithFlagDisabled.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
-            var run = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
-
-            // Assert
-            result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
-            run.IsBillingFileShared.ShouldBeTrue();
-            fileExportServiceMock.Verify(
-                x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            storageUploadServiceMock.VerifyNoOtherCalls();
         }
 
         [TestMethod]

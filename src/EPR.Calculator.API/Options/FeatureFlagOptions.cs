@@ -5,5 +5,9 @@ public record FeatureFlagOptions
 {
     public const string SectionKey = "FeatureFlags";
 
-    public bool UploadFssBillingFileToBlobStorage { get; init; }
+    /// <summary>
+    ///     Whether the results/billing file download endpoints serve the files the runs wrote to blob storage, rather than
+    ///     building them from the database.
+    /// </summary>
+    public bool DownloadFromBlobStorage { get; init; }
 }

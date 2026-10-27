@@ -1,35 +1,24 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text;
-using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.Controllers;
 
 [ApiController]
 [Produces("application/json")]
 [Route("V2")]
-[SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
 public class CalculatorNewController(
     ApplicationDBContext dbContext,
     IRunClassificationValidator runClassificationValidator,
     IInvoiceDetailsService invoiceDetailsService,
     ILogger<CalculatorNewController> logger,
-    IFileExportService fileExportService,
-    IBlobStorageService blobStorage,
-    IStorageUploadService storageUploadService,
-    IOptions<BlobStorageOptions> blobStorageOptions,
-    IOptions<FeatureFlagOptions> featureFlags
+    IBlobStorageService blobStorage
 ) : ControllerBase
 {
     [HttpPut]
@@ -92,21 +81,6 @@ public class CalculatorNewController(
         if (runDto.RunClassification is not (RunClassification.Initial or RunClassification.Recalculation))
             return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToChangeStatusToCompleted, runDto.RunClassification));
 
-        // The file goes to FSS before the run is marked as shared: a failure here leaves nothing to undo, and a retry overwrites it.
-        if (featureFlags.Value.UploadFssBillingFileToBlobStorage)
-        {
-            var success = await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
-            {
-                FileExportResult.Streamed s => await UploadBillingJson(s, runId, cancellationToken),
-                FileExportResult.NotFound _ => false,
-                FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken), cancellationToken),
-                _ => false
-            };
-
-            if (!success)
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", runId));
-        }
-
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
@@ -127,6 +101,11 @@ public class CalculatorNewController(
             dbContext.CalculatorRuns.Update(run);
             await dbContext.SaveChangesAsync(cancellationToken);
 
+            var billingJsonFileName = await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken);
+
+            if (!await blobStorage.MoveBillingJsonToFss(billingJsonFileName, cancellationToken))
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
+
             await transaction.CommitAsync(cancellationToken);
 
             return StatusCode(StatusCodes.Status202Accepted);
@@ -144,20 +123,4 @@ public class CalculatorNewController(
             .Where(m => m.Id == billingFileId)
             .Select(m => m.BillingJsonFileName)
             .SingleAsync(cancellationToken);
-
-    private async Task<bool> UploadBillingJson(FileExportResult.Streamed billingJson, int calculatorRunId, CancellationToken cancellationToken)
-    {
-        await storageUploadService.UploadFileStreamAsync(
-            new IStorageUploadService.StreamRequest
-            {
-                FileName = string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse("{0}billing.json"), calculatorRunId),
-                ContainerName = blobStorageOptions.Value.FssContainer,
-                Overwrite = true,
-                UseUtf8Bom = false
-            },
-            billingJson.WriteTo,
-            cancellationToken);
-
-        return true;
-    }
 }
