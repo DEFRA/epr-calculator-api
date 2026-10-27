@@ -327,8 +327,12 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
     private static async Task DownloadAndSave<T>(IServiceProvider services, Func<T, Task<IActionResult>> download, string path)
         where T : ControllerBase
     {
-        var result = await CallController<T, IActionResult>(services, download);
-        await File.WriteAllBytesAsync(path, result.ShouldBeOfType<FileContentResult>().FileContents);
+        // A streamed result is generated as it's written, so write it while the controller's scope is still alive.
+        await CallController<T, bool>(services, async controller =>
+        {
+            await File.WriteAllBytesAsync(path, await ReadFileResult(await download(controller)));
+            return true;
+        });
     }
 
     private static OrganisationScenario GetOrganisationScenario(int index)

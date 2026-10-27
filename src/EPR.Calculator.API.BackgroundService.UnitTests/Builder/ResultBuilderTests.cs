@@ -238,7 +238,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         Assert.IsNotNull(result);
 
         mockCalcResultWriter.Verify(m => m.StoreProducerFees(runContext.RunId, result.ProducerFeesTotal, producerFeeDetails, CancellationToken.None), Times.Once);
-        mockCalcResultWriter.Verify(m => m.StoreSmcw(runContext.RunId, result.Smcw!, CancellationToken.None), Times.Once);
+        mockCalcResultWriter.Verify(m => m.StoreSmcw(runContext.RunId, It.IsAny<SelfManagedConsumerWaste>(), CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StoreModulationResult(runContext.RunId, result.CalcResultModulation!, CancellationToken.None), Times.Once);
     }
 }

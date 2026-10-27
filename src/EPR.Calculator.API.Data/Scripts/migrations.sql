@@ -8689,3 +8689,317 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_producer_fees] ADD [total_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_producer_fees] SET [total_converted] = CONVERT(nvarchar(max), [total]);');
+                    ALTER TABLE [calc_result_producer_fees] DROP COLUMN [total];
+                    EXEC sp_rename N'[calc_result_producer_fees].[total_converted]', N'total', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_producer_fees] ALTER COLUMN [total] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_producer_fee_detail] ADD [detail_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_producer_fee_detail] SET [detail_converted] = CONVERT(nvarchar(max), [detail]);');
+                    ALTER TABLE [calc_result_producer_fee_detail] DROP COLUMN [detail];
+                    EXEC sp_rename N'[calc_result_producer_fee_detail].[detail_converted]', N'detail', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_producer_fee_detail] ALTER COLUMN [detail] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_modulation] ADD [material_modulations_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_modulation] SET [material_modulations_converted] = CONVERT(nvarchar(max), [material_modulations]);');
+                    ALTER TABLE [calc_result_modulation] DROP COLUMN [material_modulations];
+                    EXEC sp_rename N'[calc_result_modulation].[material_modulations_converted]', N'material_modulations', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_modulation] ALTER COLUMN [material_modulations] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_smcw] ADD [material_totals_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_smcw] SET [material_totals_converted] = CONVERT(nvarchar(max), [material_totals]);');
+                    ALTER TABLE [calc_result_smcw] DROP COLUMN [material_totals];
+                    EXEC sp_rename N'[calc_result_smcw].[material_totals_converted]', N'material_totals', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_smcw] ALTER COLUMN [material_totals] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_smcw_producer] ADD [material_totals_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_smcw_producer] SET [material_totals_converted] = CONVERT(nvarchar(max), [material_totals]);');
+                    ALTER TABLE [calc_result_smcw_producer] DROP COLUMN [material_totals];
+                    EXEC sp_rename N'[calc_result_smcw_producer].[material_totals_converted]', N'material_totals', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_smcw_producer] ALTER COLUMN [material_totals] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_cancelled_producer] ADD [cancelled_producer_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_cancelled_producer] SET [cancelled_producer_converted] = CONVERT(nvarchar(max), [cancelled_producer]);');
+                    ALTER TABLE [calc_result_cancelled_producer] DROP COLUMN [cancelled_producer];
+                    EXEC sp_rename N'[calc_result_cancelled_producer].[cancelled_producer_converted]', N'cancelled_producer', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_cancelled_producer] ALTER COLUMN [cancelled_producer] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_comms_cost] ADD [comms_cost_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_comms_cost] SET [comms_cost_converted] = CONVERT(nvarchar(max), [comms_cost]);');
+                    ALTER TABLE [calc_result_comms_cost] DROP COLUMN [comms_cost];
+                    EXEC sp_rename N'[calc_result_comms_cost].[comms_cost_converted]', N'comms_cost', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_comms_cost] ALTER COLUMN [comms_cost] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_la_disposal_cost] ADD [la_disposal_cost_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_la_disposal_cost] SET [la_disposal_cost_converted] = CONVERT(nvarchar(max), [la_disposal_cost]);');
+                    ALTER TABLE [calc_result_la_disposal_cost] DROP COLUMN [la_disposal_cost];
+                    EXEC sp_rename N'[calc_result_la_disposal_cost].[la_disposal_cost_converted]', N'la_disposal_cost', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_la_disposal_cost] ALTER COLUMN [la_disposal_cost] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_lapcap_data] ADD [lapcap_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_lapcap_data] SET [lapcap_converted] = CONVERT(nvarchar(max), [lapcap]);');
+                    ALTER TABLE [calc_result_lapcap_data] DROP COLUMN [lapcap];
+                    EXEC sp_rename N'[calc_result_lapcap_data].[lapcap_converted]', N'lapcap', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_lapcap_data] ALTER COLUMN [lapcap] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_late_reporting_tonnage] ADD [late_reporting_tonnage_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_late_reporting_tonnage] SET [late_reporting_tonnage_converted] = CONVERT(nvarchar(max), [late_reporting_tonnage]);');
+                    ALTER TABLE [calc_result_late_reporting_tonnage] DROP COLUMN [late_reporting_tonnage];
+                    EXEC sp_rename N'[calc_result_late_reporting_tonnage].[late_reporting_tonnage_converted]', N'late_reporting_tonnage', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_late_reporting_tonnage] ALTER COLUMN [late_reporting_tonnage] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_one_plus_four_apportionment] ADD [one_plus_four_apppointment_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_one_plus_four_apportionment] SET [one_plus_four_apppointment_converted] = CONVERT(nvarchar(max), [one_plus_four_apppointment]);');
+                    ALTER TABLE [calc_result_one_plus_four_apportionment] DROP COLUMN [one_plus_four_apppointment];
+                    EXEC sp_rename N'[calc_result_one_plus_four_apportionment].[one_plus_four_apppointment_converted]', N'one_plus_four_apppointment', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_one_plus_four_apportionment] ALTER COLUMN [one_plus_four_apppointment] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+
+                    ALTER TABLE [calc_result_parameter_other_cost] ADD [parameter_other_cost_converted] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+                    EXEC(N'UPDATE [calc_result_parameter_other_cost] SET [parameter_other_cost_converted] = CONVERT(nvarchar(max), [parameter_other_cost]);');
+                    ALTER TABLE [calc_result_parameter_other_cost] DROP COLUMN [parameter_other_cost];
+                    EXEC sp_rename N'[calc_result_parameter_other_cost].[parameter_other_cost_converted]', N'parameter_other_cost', N'COLUMN';
+                    EXEC(N'ALTER TABLE [calc_result_parameter_other_cost] ALTER COLUMN [parameter_other_cost] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL;');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261014134859_StoreJsonColumnsAsUtf8Varchar'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261014134859_StoreJsonColumnsAsUtf8Varchar', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261019134717_RemoveProjectedProducersNotShown'
+)
+BEGIN
+
+                    DROP TABLE IF EXISTS #complete_ram_producers;
+
+                    SELECT calculator_run_id, producer_id
+                    INTO #complete_ram_producers
+                    FROM (
+                        SELECT calculator_run_id, producer_id, household_tonnage_without_ram, public_bin_tonnage_without_ram, hdc_tonnage_without_ram FROM transform_projected_h1
+                        UNION ALL
+                        SELECT calculator_run_id, producer_id, household_tonnage_without_ram, public_bin_tonnage_without_ram, hdc_tonnage_without_ram FROM transform_projected_h2
+                    ) projected
+                    GROUP BY calculator_run_id, producer_id
+                    HAVING MAX(CASE WHEN household_tonnage_without_ram > 0 OR public_bin_tonnage_without_ram > 0 OR ISNULL(hdc_tonnage_without_ram, 0) > 0 THEN 1 ELSE 0 END) = 0;
+
+                    SELECT h1.* INTO transform_projected_h1_bk FROM transform_projected_h1 h1
+                    JOIN #complete_ram_producers c ON c.calculator_run_id = h1.calculator_run_id AND c.producer_id = h1.producer_id;
+
+                    SELECT h2.* INTO transform_projected_h2_bk FROM transform_projected_h2 h2
+                    JOIN #complete_ram_producers c ON c.calculator_run_id = h2.calculator_run_id AND c.producer_id = h2.producer_id;
+
+                    DELETE h1 FROM transform_projected_h1 h1 JOIN transform_projected_h1_bk bk ON bk.id = h1.id;
+                    DELETE h2 FROM transform_projected_h2 h2 JOIN transform_projected_h2_bk bk ON bk.id = h2.id;
+
+                    DROP TABLE #complete_ram_producers;
+                
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261019134717_RemoveProjectedProducersNotShown'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261019134717_RemoveProjectedProducersNotShown', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    ALTER TABLE [material] ADD [display_order] int NOT NULL DEFAULT 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 1
+    WHERE [code] = N''AL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 2
+    WHERE [code] = N''FC'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 3
+    WHERE [code] = N''GL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 4
+    WHERE [code] = N''PC'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 5
+    WHERE [code] = N''PL'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 6
+    WHERE [code] = N''ST'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 7
+    WHERE [code] = N''WD'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [display_order] = 8
+    WHERE [code] = N''OT'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261026125521_AddDisplayOrderToMaterial'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261026125521_AddDisplayOrderToMaterial', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
