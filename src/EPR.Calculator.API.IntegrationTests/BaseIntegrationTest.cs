@@ -194,6 +194,14 @@ public abstract class BaseIntegrationTest
             return stream.ToArray();
         }
 
+        if (result is FileStreamResult fileStream)
+        {
+            await using var source = fileStream.FileStream;
+            using var stream = new MemoryStream();
+            await source.CopyToAsync(stream);
+            return stream.ToArray();
+        }
+
         return result.ShouldBeOfType<FileContentResult>().FileContents;
     }
 
