@@ -137,6 +137,55 @@ public class BlobStorageServiceTests
     }
 
     [TestMethod]
+    public async Task UploadFileStreamAsync_OverwritesUnconditionally_WhenOverwriteIsTrue()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.json",
+            ContainerName = fixture.Create<string>(),
+            Overwrite = true
+        };
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NonDisposingMemoryStream());
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.json"));
+
+        // Act
+        await sut.UploadFileStreamAsync(request, (_, _) => Task.CompletedTask, CancellationToken.None);
+
+        // Assert
+        mockBlobClient.Verify(x => x.OpenWriteAsync(true, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task UploadFileStreamAsync_OnlyWritesIfTheBlobDoesNotExist_WhenOverwriteIsFalse()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.json",
+            ContainerName = fixture.Create<string>(),
+            Overwrite = false
+        };
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NonDisposingMemoryStream());
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.json"));
+
+        // Act
+        await sut.UploadFileStreamAsync(request, (_, _) => Task.CompletedTask, CancellationToken.None);
+
+        // Assert - OpenWrite only supports overwriting, so it's made conditional on the blob not existing
+        mockBlobClient.Verify(x => x.OpenWriteAsync(
+            true,
+            It.Is<BlobOpenWriteOptions>(o => o.OpenConditions.IfNoneMatch == ETag.All),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
     public async Task UploadFileStreamAsync_WritesUtf8Bom_WhenUseUtf8BomIsTrue()
     {
         // Arrange
