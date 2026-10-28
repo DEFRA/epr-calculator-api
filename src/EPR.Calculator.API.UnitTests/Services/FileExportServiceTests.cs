@@ -2,6 +2,7 @@ using System.Text;
 using EPR.Calculator.API.BackgroundService.Builder.Detail;
 using EPR.Calculator.API.BackgroundService.Builder.ErrorReport;
 using EPR.Calculator.API.BackgroundService.Builder.RejectedProducers;
+using EPR.Calculator.API.BackgroundService.Exporter;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
@@ -75,16 +76,28 @@ public class FileExportServiceTests
             .Setup(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<CalcResultRejectedProducer>());
 
-        service = new FileExportService(
+        // As the real builder: the run's details (for downloads, the run context's start is the run's creation date)
+        calcResultDetailBuilderMock
+            .Setup(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RunContext ctx, CancellationToken _) => new CalcResultDetail
+            {
+                RunId = ctx.RunId,
+                RunName = ctx.RunName,
+                RunDate = ctx.ProcessingStartedAt.UtcDateTime,
+                RelativeYear = ctx.RelativeYear
+            });
+
+        var runFileExporter = new RunFileExporter(
             calcResultDetailBuilderMock.Object,
             errorReportBuilderMock.Object,
             rejectedProducersBuilderMock.Object,
             calcResultReaderMock.Object,
             dbContext,
-            parameterServiceMock.Object,
             resultsFileExporterMock.Object,
             billingFileExporterMock.Object,
             billingJsonWriterMock.Object);
+
+        service = new FileExportService(runFileExporter, dbContext, parameterServiceMock.Object);
     }
 
     private static async Task<byte[]> WrittenBytes(FileExportResult.Streamed streamed)
@@ -206,7 +219,7 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassification.Initial, BillingRunStatus.None, RunName, relativeYear: 2024);
         AddProducerFeeRow(RunId);
 
-        var calcResultDetail = new Mock<CalcResultDetail>().Object;
+        var calcResultDetail = new CalcResultDetail { RunId = RunId, RunName = RunName, RunDate = DateTime.UtcNow, RelativeYear = new RelativeYear(2024) };
         var lapcapData = new Mock<CalcResultLapcapData>().Object;
         var lateReportingTonnage = new Mock<CalcResultLateReportingTonnage>().Object;
         var parameterOtherCost = new Mock<CalcResultParameterOtherCost>().Object;

@@ -7,10 +7,12 @@ using EPR.Calculator.API.Data.Queries;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
@@ -27,7 +29,8 @@ public class CalculatorController(
     IRunClassificationValidator runClassificationValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
-    IFileExportService fileExportService
+    IFileExportService fileExportService,
+    IOptions<FeatureFlagOptions> featureFlags
 ) : ControllerBase
 {
     [HttpPost]
@@ -177,8 +180,11 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DownloadResultCsv(int runId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DownloadResultCsv(int runId, [FromQuery] bool? downloadFromBlobStorage = null, CancellationToken cancellationToken = default)
     {
+        if (downloadFromBlobStorage ?? featureFlags.Value.DownloadFromBlobStorage)
+            return await DownloadResultCsvFromBlobStorage(runId);
+
         return await fileExportService.Export(runId, FileExportType.ResultsCsv, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),

@@ -1,5 +1,6 @@
 using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
+using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
@@ -17,6 +18,7 @@ public class CalculatorRunProcessor(
     ICalculatorRunDataInitializer dataInitializer,
     ICalculatorRunFinalizer finalizer,
     IResultBuilder resultBuilder,
+    ICalculatorFileGenerator fileGenerator,
     ILogger<CalculatorRunProcessor> logger)
     : ICalculatorRunProcessor
 {
@@ -36,8 +38,12 @@ public class CalculatorRunProcessor(
             // For CalculatorRunContext, it causes external state mutations.
             var (calcResult, producerFeeDetails) = await resultBuilder.BuildAsync(runContext, cancellationToken);
 
+            // This writes the CSV file to blob storage.
+            // It does not mutate the database state (handled in the finalizer).
+            var exportResult = await fileGenerator.SerializeAndExport(runContext, calcResult, producerFeeDetails, cancellationToken);
+
             // This mutates the state of various database entities to reflect the completed run.
-            await finalizer.FinalizeAsCompleted(runContext, calcResult, producerFeeDetails, cancellationToken);
+            await finalizer.FinalizeAsCompleted(runContext, calcResult, producerFeeDetails, exportResult, cancellationToken);
 
             return new CalculatorRunResult();
         }

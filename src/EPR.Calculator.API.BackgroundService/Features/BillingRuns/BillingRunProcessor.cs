@@ -1,4 +1,6 @@
+﻿using EPR.Calculator.API.BackgroundService.Exporter;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
+using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
@@ -16,6 +18,8 @@ public class BillingRunProcessor(
     ApplicationDBContext dbContext,
     ICalcResultReader calcResultReader,
     IBillingRunFinalizer finalizer,
+    IRunFileExporter runFileExporter,
+    IBillingFileGenerator fileGenerator,
     ILogger<BillingRunProcessor> logger
 ) : IBillingRunProcessor
 {
@@ -35,8 +39,21 @@ public class BillingRunProcessor(
 
             var producerFeeDetails = calcResultReader.StreamProducerFeeDetails(runContext.RunId).ToList();
 
+            // This reads the run's stored results, filtered for billing, once - for both billing files.
+            // It does not cause any external state mutations.
+            var billingResult = await runFileExporter.GetBillingResult(runContext, cancellationToken)
+                                ?? throw new InvalidOperationException("Stored results cannot be null for billing file run");
+
+            var acceptedFeeDetails = producerFeeDetails
+                .Where(d => runContext.AcceptedProducerIds.Contains(d.ProducerId))
+                .ToList();
+
+            // This writes the CSV/JSON files to blob storage.
+            // It does not mutate the database state (handled in the finalizer).
+            var exportResult = await fileGenerator.SerializeAndExport(runContext, billingResult, acceptedFeeDetails, cancellationToken);
+
             // This mutates the state of various database entities to reflect the completed run.
-            await finalizer.FinalizeAsCompleted(runContext, producerFeeDetails, cancellationToken);
+            await finalizer.FinalizeAsCompleted(runContext, producerFeeDetails, exportResult, cancellationToken);
 
             return new BillingRunResult();
         }

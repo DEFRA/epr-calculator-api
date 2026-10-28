@@ -75,11 +75,18 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             },
             $"Calculator run {runId} did not complete.");
 
+        var resultsCsv = await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services, expectUtf8Bom: true);
+
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services, expectUtf8Bom: true),
+            actualContents: resultsCsv,
             expectedPath: $"ExpectedData/{relativeYear}-results.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Results CSV");
+
+        // The calculator run also wrote the results CSV to blob storage - downloading that should give the one built
+        // from the database
+        (await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId, downloadFromBlobStorage: true), services, expectUtf8Bom: true))
+            .ShouldBe(resultsCsv, "Results CSV from blob storage");
 
         // Billing
         foreach (var run in await db.CalculatorRuns
@@ -128,17 +135,27 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             },
             $"Billing run for calculator run {runId} did not complete.");
 
+        var billingCsv = await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services, expectUtf8Bom: true);
+        var billingJson = await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services, expectUtf8Bom: false);
+
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services, expectUtf8Bom: true),
+            actualContents: billingCsv,
             expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Billing CSV");
 
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services, expectUtf8Bom: false),
+            actualContents: billingJson,
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
+
+        // The billing run also wrote both billing files to blob storage - downloading those should give the ones built
+        // from the database
+        (await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId, downloadFromBlobStorage: true), services, expectUtf8Bom: true))
+            .ShouldBe(billingCsv, "Billing CSV from blob storage");
+        (await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId, downloadFromBlobStorage: true), services, expectUtf8Bom: false))
+            .ShouldBe(billingJson, "Billing JSON from blob storage");
 
         // Send to FSS - uploads the billing JSON, then marks the billing file as shared
         var sendResult = await CreateController<CalculatorNewController>(services).PrepareBillingFileSendToFSS(runId);

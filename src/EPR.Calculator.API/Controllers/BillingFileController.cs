@@ -1,8 +1,10 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.Controllers;
 
@@ -12,7 +14,8 @@ namespace EPR.Calculator.API.Controllers;
 public class BillingFileController(
     IBlobStorageService blobStorage,
     IFileExportService fileExportService,
-    ApplicationDBContext context
+    ApplicationDBContext context,
+    IOptions<FeatureFlagOptions> featureFlags
 ) : ControllerBase
 {
     [HttpGet]
@@ -20,8 +23,11 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DownloadBillingCsv(int runId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DownloadBillingCsv(int runId, [FromQuery] bool? downloadFromBlobStorage = null, CancellationToken cancellationToken = default)
     {
+        if (downloadFromBlobStorage ?? featureFlags.Value.DownloadFromBlobStorage)
+            return await DownloadBillingCsvFromBlobStorage(runId);
+
         return await fileExportService.Export(runId, FileExportType.BillingCsv, cancellationToken) switch
         {
             FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),
@@ -37,11 +43,14 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DownloadBillingJson(int runId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DownloadBillingJson(int runId, [FromQuery] bool? downloadFromBlobStorage = null, CancellationToken cancellationToken = default)
     {
         // FSS may only have the billing JSON once the billing file has been sent to it.
         if (User.IsInRole("FssApiPolicy") && !await IsBillingFileShared(runId, cancellationToken))
             return NotFound(string.Format(CommonResources.BillingFileNotShared, runId));
+
+        if (downloadFromBlobStorage ?? featureFlags.Value.DownloadFromBlobStorage)
+            return await DownloadBillingJsonFromBlobStorage(runId);
 
         return await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
         {

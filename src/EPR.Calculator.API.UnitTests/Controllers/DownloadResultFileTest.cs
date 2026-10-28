@@ -36,15 +36,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.mockBlobStorage = new Mock<IBlobStorageService>();
             this.fileExportServiceMock = new Mock<IFileExportService>();
 
-            this.controller = new CalculatorController(
+            this.controller = this.CreateController(downloadFromBlobStorage: false);
+        }
+
+        private CalculatorController CreateController(bool downloadFromBlobStorage) =>
+            new(
                 this.context,
                 this.mockBlobStorage.Object,
                 Mock.Of<IBackgroundTaskQueue>(),
                 Mock.Of<IRunClassificationValidator>(),
                 Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 Mock.Of<IAvailableClassificationsService>(),
-                fileExportServiceMock.Object);
-        }
+                fileExportServiceMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new EPR.Calculator.API.Options.FeatureFlagOptions { DownloadFromBlobStorage = downloadFromBlobStorage }));
 
         [TestCleanup]
         public void TestCleanup()
@@ -138,6 +142,57 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             var notFound = result.ShouldBeOfType<NotFoundObjectResult>();
             notFound.Value.ShouldBe(string.Format(CommonResources.NoCSVFileFound, RunId));
+        }
+
+        [TestMethod]
+        public async Task DownloadResultCsv_DownloadFromBlobStorage_ReturnsTheBlobFile_WithoutBuildingItFromTheDatabase()
+        {
+            this.AddResultsFileMetadata();
+            using var stream = new MemoryStream();
+            this.SetupResultCsvStream(stream);
+
+            var result = await this.CreateController(downloadFromBlobStorage: true).DownloadResultCsv(RunId);
+
+            var fileResult = result.ShouldBeOfType<FileStreamResult>();
+            fileResult.ContentType.ShouldBe("text/csv");
+            fileResult.FileDownloadName.ShouldBe(ResultsFileName);
+            fileExportServiceMock.Verify(x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DownloadResultCsv_DownloadFromBlobStorage_ReturnsNotFound_WhenThereIsNoBlobFile()
+        {
+            var result = await this.CreateController(downloadFromBlobStorage: true).DownloadResultCsv(RunId);
+
+            var notFound = result.ShouldBeOfType<NotFoundObjectResult>();
+            notFound.Value.ShouldBe(string.Format(CommonResources.NoCSVFileFound, RunId));
+            fileExportServiceMock.Verify(x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DownloadResultCsv_QueryParamFalse_BuildsFromTheDatabase_EvenWhenTheFeatureFlagIsOn()
+        {
+            fileExportServiceMock
+                .Setup(x => x.Export(RunId, FileExportType.ResultsCsv, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new FileExportResult.Streamed((_, _) => Task.CompletedTask, "test.csv"));
+
+            var result = await this.CreateController(downloadFromBlobStorage: true).DownloadResultCsv(RunId, downloadFromBlobStorage: false);
+
+            result.ShouldBeOfType<PushStreamFileResult>();
+            this.mockBlobStorage.Verify(x => x.OpenResultCsvStream(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DownloadResultCsv_QueryParamTrue_ServesFromBlobStorage_EvenWhenTheFeatureFlagIsOff()
+        {
+            this.AddResultsFileMetadata();
+            using var stream = new MemoryStream();
+            this.SetupResultCsvStream(stream);
+
+            var result = await this.CreateController(downloadFromBlobStorage: false).DownloadResultCsv(RunId, downloadFromBlobStorage: true);
+
+            result.ShouldBeOfType<FileStreamResult>().FileDownloadName.ShouldBe(ResultsFileName);
+            fileExportServiceMock.Verify(x => x.Export(It.IsAny<int>(), It.IsAny<FileExportType>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         private void AddResultsFileMetadata()

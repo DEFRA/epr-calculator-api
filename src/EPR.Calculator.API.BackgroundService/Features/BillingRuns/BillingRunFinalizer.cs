@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 /// </summary>
 public interface IBillingRunFinalizer
 {
-    Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
+    Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, BillingFileResult exportResult, CancellationToken cancellationToken);
     Task FinalizeAsErrored(BillingRunContext runContext, CancellationToken cancellationToken);
 }
 
@@ -28,14 +28,14 @@ public class BillingRunFinalizer(
 ) : IBillingRunFinalizer
 {
     [ActivityTrace]
-    public async Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
+    public async Task FinalizeAsCompleted(BillingRunContext runContext, IReadOnlyList<FeeDetail> producerFeeDetails, BillingFileResult exportResult, CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
             await SaveSuggestedBillingFees(runContext, producerFeeDetails, cancellationToken);
-            await SaveExportMetadata(runContext, cancellationToken);
+            await SaveExportMetadata(exportResult, cancellationToken);
             await SaveCompletedRunStatus(runContext, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -95,17 +95,10 @@ public class BillingRunFinalizer(
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SaveExportMetadata(BillingRunContext runContext, CancellationToken cancellationToken)
+    private async Task SaveExportMetadata(BillingFileResult exportResult, CancellationToken cancellationToken)
     {
-        var metadata = new CalculatorRunBillingFileMetadata
-        {
-            CalculatorRunId = runContext.RunId,
-            BillingCsvFileName = string.Empty,
-            BillingFileCreatedBy = runContext.User,
-            BillingFileCreatedDate = runContext.ProcessingStartedAt.UtcDateTime,
-            BillingJsonFileName = string.Empty
-        };
-        dbContext.CalculatorRunBillingFileMetadata.Add(metadata);
+        dbContext.CalculatorRunCsvFileMetadata.Add(exportResult.CsvMetadata);
+        dbContext.CalculatorRunBillingFileMetadata.Add(exportResult.JsonMetadata);
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
