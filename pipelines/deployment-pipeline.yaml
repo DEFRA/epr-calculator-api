@@ -29,7 +29,7 @@ parameters:
     - prod
     - DEV15
 - name: imageTag
-  displayName: Enter Tag for the Image (Docker tag) or Release name (Git repo tag)
+  displayName: Enter Tag for the Image (Docker tag)
   default: ''
   type: string
 
@@ -58,10 +58,6 @@ variables:
     - name: env
       value: DEV15
     - template: vars/${{ parameters.envToDeploy }}.yaml
-# Release tags reference
-  - template: pipelines/image-tags/${{ parameters.envToDeploy }}.yaml@ReleaseTags
-  - ${{ if eq(parameters.envToDeploy, 'development') }}:
-    - template: pipelines/image-tags/${{ parameters.teamName }}-${{ parameters.envToDeploy }}.yaml@ReleaseTags
 
 resources:
   repositories:
@@ -70,13 +66,6 @@ resources:
       type: github
       endpoint: defra
       ref: main
-
-    # The repo will be reference the repo by a release tag (if the imageTag parameter contains 'release') otherwise it will pull down the main branch.
-    - repository: ReleaseTags
-      name: RWD-CPR-EPR4P-ADO/epr-app-config-settings
-      type: git
-      ref: ${{ replace(replace(contains(parameters.imageTag, 'RELEASE'),'True',replace('refs/tags/RELEASETAG','RELEASETAG', parameters.imageTag)),'False','main') }}
-
 
     - repository: AutomationTesting #this repo contain the automation testing script
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
@@ -87,10 +76,7 @@ extends:
   template: epr-deployment-pipeline.yaml@CommonTemplates
   parameters:
     envToDeploy: ${{ parameters.envToDeploy }}
-    ${{ if contains(parameters.imageTag, 'RELEASE') }}:
-      imageTag: $(DEVRWDWEBWAx422)
-    ${{ else }}:
-      imageTag: ${{ parameters.imageTag }}
+    imageTag: ${{ parameters.imageTag }}
     azureSubscription: ${{ variables.azureSubscription }}
     acrName: $(acr.azureContainerRegistryName)
     registryName: $(acr.repositoryName)

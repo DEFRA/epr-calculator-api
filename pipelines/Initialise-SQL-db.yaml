@@ -32,7 +32,7 @@ parameters:
     default: src
 
   - name: branchName
-    displayName: 'Enter main branch for corresponding migration script (e.g. main-20230627.1) or Release name (e.g. Release-2.8.2)'
+    displayName: 'Enter main branch for corresponding migration script (e.g. main-20230627.1)'
     type: string
     default: ''
 
@@ -63,21 +63,9 @@ resources:
       endpoint: defra
       ref: main
 
-    # The repo will be reference the repo by a release tag (if the branchName parameter contains 'release') otherwise it will pull down the main branch.
-    - repository: ReleaseTags
-      name: RWD-CPR-EPR4P-ADO/epr-app-config-settings
-      type: git
-      ref: ${{ replace(replace(contains(parameters.branchName, 'RELEASE'),'True',replace('refs/tags/RELEASETAG','RELEASETAG', parameters.branchName)),'False','main') }}
-
 jobs:
   - job: RunSQLMigrationScript
     displayName: Executing Migration Script
-    ${{ if contains(parameters.branchName, 'RELEASE') }}:
-      variables:
-        # Release tags reference
-        - template: pipelines/image-tags/${{ parameters.envToDeploy }}.yaml@ReleaseTags
-        - ${{ if eq(parameters.envToDeploy, 'development') }}:
-          - template: pipelines/image-tags/${{ parameters.teamName }}-${{ parameters.envToDeploy }}.yaml@ReleaseTags
     steps:
       - template: templates/docker-run-sql-migration.yaml@CommonTemplates
         parameters:
@@ -86,7 +74,4 @@ jobs:
           projectFolder: $(projectFolder)
           azureContainerRegistryName: $(acr.azureContainerRegistryName)
           repositoryName: $(acr.repositoryName)
-          ${{ if contains(parameters.branchName, 'RELEASE') }}:
-            branchName: $(DEVRWDWEBWAx422)
-          ${{ else }}:
-            branchName: ${{ parameters.branchName }}
+          branchName: ${{ parameters.branchName }}
