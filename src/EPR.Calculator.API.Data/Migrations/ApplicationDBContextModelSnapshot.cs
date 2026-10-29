@@ -1781,6 +1781,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("description");
 
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(400)
