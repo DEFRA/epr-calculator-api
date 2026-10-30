@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Telemetry;
 /// </remarks>
 [ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method)]
-internal sealed class ActivityMetricAttribute : BaseActivityAttribute
+public sealed class ActivityMetricAttribute : BaseActivityAttribute
 {
     private readonly string argMetricName;
 
@@ -36,24 +36,34 @@ internal sealed class ActivityMetricAttribute : BaseActivityAttribute
         : base(activityName, threshold)
     {
         argMetricName = metricName;
+
+        // Metalama only selects OverrideAsyncMethod() for methods with the `async` modifier
+        // by default. Methods that return Task/Task<T> by forwarding to another call -
+        // without being declared `async` themselves - don't count as async under that rule,
+        // even though they are perfectly awaitable. Opting in here routes any awaitable
+        // method to OverrideAsyncMethod() below, regardless of the `async` modifier.
+        UseAsyncTemplateForAnyAwaitable = true;
     }
 
     public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
     {
         base.BuildEligibility(builder);
 
-        // There currently aren't any synchronous methods that need metrics recording, so
-        // they aren't supported. This generates a compile-time error if attempted.
+        // Synchronous, non-awaitable methods aren't supported, since ITelemetry has no
+        // Metric() overload that can time them. This generates a compile-time error if
+        // attempted. Awaitable methods are fine whether or not they're declared `async`
+        // themselves - see UseAsyncTemplateForAnyAwaitable above.
         builder.MustSatisfy(
-            m => m.GetAsyncInfo().IsAsync == true,
-            m => $"{m} must be an async method, as {nameof(ActivityMetricAttribute)} only supports async methods");
+            m => m.GetAsyncInfo().IsAwaitable,
+            m => $"{m} must return an awaitable type (e.g. Task or Task<T>), as {nameof(ActivityMetricAttribute)} only supports asynchronous methods");
     }
 
-    // Unreachable in practice: BuildEligibility above rejects non-async methods at
-    // compile time. Kept as a defensive fallback since OverrideMethod() is abstract on
-    // the base class.
+    // Unreachable in practice: BuildEligibility above rejects non-awaitable methods at
+    // compile time, and UseAsyncTemplateForAnyAwaitable routes every awaitable method to
+    // OverrideAsyncMethod() below. Kept as a defensive fallback since OverrideMethod() is
+    // abstract on the base class.
     public override dynamic OverrideMethod()
-        => throw new NotSupportedException($"{nameof(ActivityMetricAttribute)} only supports async methods.");
+        => throw new NotSupportedException($"{nameof(ActivityMetricAttribute)} only supports asynchronous methods.");
 
     public override async Task<dynamic?> OverrideAsyncMethod()
     {

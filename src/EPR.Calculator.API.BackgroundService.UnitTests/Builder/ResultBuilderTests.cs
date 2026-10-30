@@ -82,7 +82,8 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         var mockCalcResultScaledUpProducersData = new Mock<CalcResultScaledupProducers>();
         var mockCalcResultPartialObligationsData = new Mock<CalcResultPartialObligations>();
         var mockCalcResultProjectedProducersData = new Mock<CalcResultProjectedProducers>();
-        var mockProducerFees = new Mock<ProducerFees>();
+        var mockProducerFeesTotal = new Mock<FeeDetail>();
+        var mockProducerFeeDetails = new List<FeeDetail>();
         var mockCancelledProducers = new Mock<List<CalcResultCancelledProducer>>();
 
         mockCalcResultDetailBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<CancellationToken>()))
@@ -109,7 +110,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         mockCalcResultPartialObligationBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), mockProducers2))
             .ReturnsAsync((mockProducers2, mockCalcResultPartialObligationsData.Object));
         mockSummaryBuilder.Setup(x => x.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<CalcResult>(), It.IsAny<SelfManagedConsumerWaste>()))
-            .ReturnsAsync(mockProducerFees.Object);
+            .ReturnsAsync((mockProducerFeesTotal.Object, (IReadOnlyList<FeeDetail>)mockProducerFeeDetails));
 
         mockSelfManagedConsumerWasteService.Setup(x => x.Calculate(
                 It.IsAny<RunContext>(),
@@ -121,7 +122,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
                 TotalByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>()
             });
 
-        var result = await testSubject.BuildAsync(runContext, CancellationToken.None);
+        var (result, producerFeeDetails) = await testSubject.BuildAsync(runContext, CancellationToken.None);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(mockResultDetail.Object, result.CalcResultDetail);
@@ -134,7 +135,8 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         Assert.AreSame(mockCalcResultScaledUpProducersData.Object, result.CalcResultScaledupProducers);
         Assert.AreSame(mockCalcResultPartialObligationsData.Object, result.CalcResultPartialObligations);
         Assert.AreNotEqual(mockCalcResultProjectedProducersData.Object, result.CalcResultProjectedProducers);
-        Assert.AreEqual(mockProducerFees.Object, result.ProducerFees);
+        Assert.AreSame(mockProducerFeesTotal.Object, result.ProducerFeesTotal);
+        Assert.AreSame(mockProducerFeeDetails, producerFeeDetails);
         Assert.AreSame(mockCancelledProducers.Object, result.CalcResultCancelledProducers);
 
         mockCalcRunLaDisposalCostBuilder.Verify(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<CalcResultLapcapData>(), It.IsAny<CalcResultLateReportingTonnage>(), It.IsAny<SelfManagedConsumerWaste>()), Times.Once);
@@ -175,7 +177,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         mockCalcResultPartialObligationBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), mockProducers2))
             .ReturnsAsync((mockProducers2, mockCalcResultPartialObligationsData.Object));
 
-        var result = await testSubject.BuildAsync(runContext, CancellationToken.None);
+        var (result, _) = await testSubject.BuildAsync(runContext, CancellationToken.None);
 
         Assert.IsNotNull(result);
         Assert.AreNotEqual(mockCalcResultScaledUpProducersData.Object, result.CalcResultScaledupProducers);
@@ -214,7 +216,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         mockCalcResultPartialObligationBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), mockProducers2))
             .ReturnsAsync((mockProducers2, mockCalcResultPartialObligationsData.Object));
 
-        var result = await testSubject.BuildAsync(runContext, CancellationToken.None);
+        var (result, _) = await testSubject.BuildAsync(runContext, CancellationToken.None);
 
         Assert.IsNotNull(result);
         Assert.AreSame(mockCalcResultScaledUpProducersData.Object, result.CalcResultScaledupProducers);
@@ -231,11 +233,11 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
     public async Task Build_ShouldReturnCalcResult_Write_ResultFile()
     {
         var runContext = TestDataHelper.CalculatorRun2026;
-        var result = await testSubject.BuildAsync(runContext, CancellationToken.None);
+        var (result, producerFeeDetails) = await testSubject.BuildAsync(runContext, CancellationToken.None);
 
         Assert.IsNotNull(result);
 
-        mockCalcResultWriter.Verify(m => m.StoreProducerFees(runContext.RunId, result.ProducerFees, CancellationToken.None), Times.Once);
+        mockCalcResultWriter.Verify(m => m.StoreProducerFees(runContext.RunId, result.ProducerFeesTotal, producerFeeDetails, CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StoreSmcw(runContext.RunId, result.Smcw!, CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StoreModulationResult(runContext.RunId, result.CalcResultModulation!, CancellationToken.None), Times.Once);
     }

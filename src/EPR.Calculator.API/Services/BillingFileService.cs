@@ -22,15 +22,6 @@ public interface IBillingFileService
         CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Gets the billing file name from the calculator_run_billing_file_metadata based on the run ID.
-    ///     and then calls blob storage to move the json file to the FSS container.
-    /// </summary>
-    /// <param name="runId">The calculator run id.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A <see cref="string" /> containing the name of the json billing file.</returns>
-    Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken);
-
-    /// <summary>
     ///     Gets producer billing instructions for a given calculator run.
     /// </summary>
     /// <param name="runId">The calculator run id.</param>
@@ -41,8 +32,7 @@ public interface IBillingFileService
 }
 
 public class BillingFileService(
-    ApplicationDBContext dbContext,
-    IBlobStorageService blobStorage
+    ApplicationDBContext dbContext
 ) : IBillingFileService
 {
     private const string NoActionPlaceholder = "-";
@@ -91,20 +81,6 @@ public class BillingFileService(
         {
             StatusCode = HttpStatusCode.NoContent
         };
-    }
-
-    public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
-    {
-        var billingFileMetaData =
-            await dbContext.CalculatorRunBillingFileMetadata.Where(m => m.CalculatorRunId == runId)
-                .OrderByDescending(m => m.BillingFileCreatedDate)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-        if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
-            return false;
-
-        return await blobStorage.MoveBillingJsonToFss(billingFileMetaData.BillingJsonFileName, cancellationToken);
     }
 
     public async Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(
