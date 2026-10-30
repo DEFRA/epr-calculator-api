@@ -1,0 +1,209 @@
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
+namespace EPR.Calculator.API.UnitTests.DataModels
+{
+    [TestClass]
+    public class CalculatorRunTests
+    {
+        public CalculatorRunTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRun>();
+        }
+
+        private CalculatorRun TestClass { get; init; }
+
+        private IFixture Fixture { get; } = TestFixtures.New();
+
+        [TestMethod]
+        public void CanSetAndGetClassification()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<RunClassification>();
+
+            // Act
+            this.TestClass.Classification = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.Classification);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetId()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<int>();
+
+            // Act
+            this.TestClass.Id = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.Id);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetName()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.Name = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.Name);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetRelativeYear()
+        {
+            // Arrange
+            var testValue = Fixture.Create<RelativeYear>();
+
+            // Act
+            this.TestClass.RelativeYear = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.RelativeYear);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetCreatedBy()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.CreatedBy = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.CreatedBy);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetCreatedAt()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<DateTime>();
+
+            // Act
+            this.TestClass.CreatedAt = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.CreatedAt);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetUpdatedBy()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.UpdatedBy = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.UpdatedBy);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetUpdatedAt()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<DateTime?>();
+
+            // Act
+            this.TestClass.UpdatedAt = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.UpdatedAt);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetOrgPomDataLoadedAt()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<DateTime?>();
+
+            // Act
+            this.TestClass.OrgPomDataLoadedAt = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.OrgPomDataLoadedAt);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetLapcapDataMasterId()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<int?>();
+
+            // Act
+            this.TestClass.LapcapDataMasterId = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.LapcapDataMasterId);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetDefaultParameterSettingMasterId()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<int?>();
+
+            // Act
+            this.TestClass.DefaultParameterSettingMasterId = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.DefaultParameterSettingMasterId);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetLapcapDataMaster()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<LapcapDataMaster>();
+
+            // Act
+            this.TestClass.LapcapDataMaster = testValue;
+
+            // Assert
+            Assert.AreSame(testValue, this.TestClass.LapcapDataMaster);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetDefaultParameterSettingMaster()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<DefaultParameterSettingMaster>();
+
+            // Act
+            this.TestClass.DefaultParameterSettingMaster = testValue;
+
+            // Assert
+            Assert.AreSame(testValue, this.TestClass.DefaultParameterSettingMaster);
+        }
+
+        [TestMethod]
+        public void CanGetProducerDetails()
+        {
+            // Assert
+            Assert.IsInstanceOfType(this.TestClass.ProducerDetails, typeof(ICollection<ProducerDetail>));
+        }
+
+        [TestMethod]
+        public void CanGetCountryApportionments()
+        {
+            // Assert
+            Assert.IsInstanceOfType(this.TestClass.CountryApportionments, typeof(ICollection<CountryApportionment>));
+        }
+
+        [TestMethod]
+        public void CanGetCalculatorRunOrganisations()
+        {
+            // Assert
+            Assert.IsInstanceOfType(this.TestClass.CalculatorRunOrganisations, typeof(ICollection<CalculatorRunOrganisation>));
+        }
+    }
+}

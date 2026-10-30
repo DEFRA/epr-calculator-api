@@ -1,0 +1,39 @@
+using System.Runtime.CompilerServices;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+
+namespace EPR.Calculator.API.IntegrationTests;
+
+internal class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequestHandler
+{
+    public ImmutableList<PayCalOrganisation> Organisations { get; set; } = [];
+
+    public async IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var organisation in Organisations)
+        {
+            yield return organisation;
+
+            await Task.Yield();
+        }
+    }
+}
+
+internal class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
+{
+    // A factory, invoked fresh on each Handle() call, so POM rows are streamed rather than held in
+    // memory as a list - matching the real handler, which reads rows off a SQL reader one at a time.
+    public Func<IEnumerable<PayCalPom>> Poms { get; set; } = () => [];
+
+    public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var pom in Poms())
+        {
+            yield return pom;
+
+            await Task.Yield();
+        }
+    }
+}
