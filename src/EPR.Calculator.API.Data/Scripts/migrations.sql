@@ -8689,3 +8689,24 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261020094552_UpdateHistoricStatusCodes'
+)
+BEGIN
+    UPDATE dbo.calculator_run_organization_data_detail SET status_code = NULL WHERE status_code LIKE '% to %'
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261020094552_UpdateHistoricStatusCodes'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261020094552_UpdateHistoricStatusCodes', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
