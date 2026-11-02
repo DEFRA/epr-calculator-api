@@ -71,18 +71,18 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     rated for every material never appears in either section at all (of
     ~4,300 producers in Calculation Result, only ~1,950 show up in H1/H2 -
     confirmed by set-difference against the Results File used to build
-    this script). For that "calc-only" majority we have no per-period, no
-    per-RAG-category data whatsoever - only the annual Calculation Result
-    total. Per the same "SMCW" principle as (3): the household/public-bin
-    TOTAL tonnage (Total Household packaging-X / Public binned-X /
-    Household drinks containers-Glass) is taken from Calculation Result
-    and attributed 100% to the H2 row, 0 to H1. The RAM/RAM-M/R/G/A
-    breakdown columns are left BLANK (not derived) for these producers -
-    Calculation Result's own Red/Amber/Green figures already have any
-    unrated tonnage defaulted into Red (same "output of blank processing"
-    problem as decision 2), so reusing them here would silently violate
-    the "report the input, not the defaulted output" rule. We simply don't
-    have the input for these producers.
+    this script). For that "calc-only" majority we have no per-period data
+    - only the annual Calculation Result figures. Per the same "SMCW"
+    principle as (3): the household/public-bin/drinks-container totals AND
+    their RAM/RAM-M/R/G/A breakdown are taken from Calculation Result and
+    attributed 100% to the H2 row, 0 to H1. Using Calculation Result's
+    Red/Amber/Green here does not break the "report the input, not the
+    defaulted output" rule of decision 2: these producers had no unrated
+    tonnage (that's why they aren't in the H1/H2 sections), so nothing was
+    defaulted into Red and the figures are the producer's own ratings.
+    Leaving the breakdown blank instead (as an earlier version did) made
+    downstream RAM-gap filling treat each producer's entire tonnage as
+    unrated and default it all to Red.
 
 4. Org_ID = Subsidiary ID when present, else Producer ID (each subsidiary is
    its own org-data entity). Org_name is looked up from the "Calculation
@@ -133,6 +133,13 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     the user: downstream tooling just needs these columns non-blank: the
     actual value doesn't matter, so a single unvarying constant is used
     rather than inventing plausible-looking per-row data.
+
+11. Group subtotal rows are dropped. For a producer group, the H1/H2 and
+    Calculation Result sections each carry a Level 1 row (blank Subsidiary
+    ID) holding the sum of the group's Level 2 member rows. Outputting it
+    would count the group's tonnage twice, so only the Level 2 rows are
+    used. A Level 1 row with no Level 2 rows under it is a standalone
+    producer and is kept.
 
 Sections are located by marker text and header text (not hardcoded line
 numbers), so this should keep working against other Results File runs of
@@ -316,7 +323,10 @@ class MaterialCols:
         return self.idx(f"Public Bin {suffix}")
 
     def drinks_total(self):
-        return self.idx("Household Drinks Containers Tonnage")
+        # Calculation Result names this column "... Tonnage - Glass"; the
+        # H1/H2 sections name it without the suffix.
+        idx = self.idx("Household Drinks Containers Tonnage")
+        return idx if idx is not None else self.idx("Household Drinks Containers Tonnage - Glass")
 
     def drinks_rag(self, suffix):
         return self.idx(f"Household Drinks Containers {suffix}")
@@ -386,23 +396,22 @@ def populate_material_columns(row_out, row_src, mcols, target_name, materials_wi
     # and no drinks-container weight for materials other than Glass.
 
 
-def populate_totals_only_from_calc(row_out, calc_row, calc_group, calc_header, target_name, src_material):
+def drop_group_subtotals(rows, group, header):
     """
-    For producers with no H1/H2 audit row at all (see design decision 3b):
-    populate just the material's total tonnage from the annual Calculation
-    Result row, same treatment as Self-managed consumer waste. No RAM/RAG
-    breakdown is populated - see module docstring for why.
+    Drops the Level 1 subtotal row of every producer group (design decision
+    11). A Level 1 row is a subtotal when the same Producer ID also has
+    Level 2 rows; a Level 1 row on its own is a standalone producer and is
+    kept.
     """
-    group_name = f"{src_material} Breakdown"
-    hh_idx = col_index(calc_group, calc_header, group_name, "Household Tonnage")
-    pb_idx = col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
-
-    row_out[f"Total Household packaging-{target_name}"] = fmt(num(calc_row, hh_idx))
-    row_out[f"Public binned-{target_name}"] = fmt(num(calc_row, pb_idx))
-
-    if target_name == "Glass":
-        drinks_idx = col_index(calc_group, calc_header, group_name, "Household Drinks Containers Tonnage - Glass")
-        row_out["Household drinks containers-Glass (Kg)"] = fmt(num(calc_row, drinks_idx))
+    pid_idx = col_index(group, header, "", "Producer ID")
+    level_idx = col_index(group, header, "", "Level")
+    if level_idx is None:
+        return rows
+    grouped_pids = {row[pid_idx].strip() for row in rows if row[level_idx].strip() == "2"}
+    return [
+        row for row in rows
+        if not (row[level_idx].strip() == "1" and row[pid_idx].strip() in grouped_pids)
+    ]
 
 
 def main():
@@ -421,6 +430,10 @@ def main():
     h2_rows, h2_group, h2_header = build_section(lines, "H2 Packaging Data - Submitted and Projected")
     h1_rows, h1_group, h1_header = build_section(lines, "H1 Packaging Data - Submitted and Projected")
     calc_rows, calc_group, calc_header = build_section(lines, "Calculation Result")
+
+    h2_rows = drop_group_subtotals(h2_rows, h2_group, h2_header)
+    h1_rows = drop_group_subtotals(h1_rows, h1_group, h1_header)
+    calc_rows = drop_group_subtotals(calc_rows, calc_group, calc_header)
 
     calc_lookup = build_lookup(calc_rows, calc_group, calc_header)
     name_idx = col_index(calc_group, calc_header, "", "Producer / Subsidiary Name")
@@ -522,8 +535,8 @@ def main():
     # Design decision 3b: producers present in Calculation Result but never
     # audited in either H1 or H2 section - i.e. every material in both
     # periods was fully RAG-rated, so no "blank" needed inferring. Emit the
-    # same two rows as everyone else, but sourced from the annual total
-    # (100% H2 / 0% H1), with RAM breakdown left blank - see docstring.
+    # same two rows as everyone else, but sourced from the annual totals and
+    # RAM breakdown (100% H2 / 0% H1) - see docstring.
     audited_keys = h1_keys | h2_keys
     calc_only_keys = sorted(k for k in calc_lookup if k not in audited_keys)
     for pid, sid in calc_only_keys:
@@ -531,7 +544,8 @@ def main():
 
         h2_row_out = base_row(pid, sid, period_code_h2, "H2")
         for src_material, disp in MATERIALS:
-            populate_totals_only_from_calc(h2_row_out, calc_row, calc_group, calc_header, disp, src_material)
+            mcols = MaterialCols(calc_group, calc_header, src_material)
+            populate_material_columns(h2_row_out, calc_row, mcols, disp)
         out_rows.append(h2_row_out)
 
         h1_row_out = base_row(pid, sid, period_code_h1, "H1")
