@@ -262,7 +262,11 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
   # H1/H2 sections. For every other material the target schema has a
   # column for it but the source has nothing - left blank, not 0.
   if (target_name %in% materials_with_drinks) {
-    drinks_total <- num(row_src, material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage"))
+    # Calculation Result names this column "... Tonnage - Glass"; the H1/H2
+    # sections name it without the suffix.
+    drinks_idx <- material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage")
+    if (is.na(drinks_idx)) drinks_idx <- material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage - Glass")
+    drinks_total <- num(row_src, drinks_idx)
     row_out[[sprintf("Household drinks containers-%s (Kg)", target_name)]] <- fmt(drinks_total)
 
     drinks_rag <- setNames(numeric(length(RAG_MAP)), vapply(RAG_MAP, `[[`, character(1), "src"))
@@ -292,23 +296,18 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
   row_out
 }
 
-# For producers with no H1/H2 audit row at all (see design decision 3b):
-# populate just the material's total tonnage from the annual Calculation
-# Result row, same treatment as Self-managed consumer waste. No RAM/RAG
-# breakdown is populated - see module docstring for why.
-populate_totals_only_from_calc <- function(row_out, calc_row, calc_group, calc_header, target_name, src_material) {
-  group_name <- paste0(src_material, " Breakdown")
-  hh_idx <- col_index(calc_group, calc_header, group_name, "Household Tonnage")
-  pb_idx <- col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
-
-  row_out[[sprintf("Total Household packaging-%s", target_name)]] <- fmt(num(calc_row, hh_idx))
-  row_out[[sprintf("Public binned-%s", target_name)]] <- fmt(num(calc_row, pb_idx))
-
-  if (target_name == "Glass") {
-    drinks_idx <- col_index(calc_group, calc_header, group_name, "Household Drinks Containers Tonnage - Glass")
-    row_out[["Household drinks containers-Glass (Kg)"]] <- fmt(num(calc_row, drinks_idx))
-  }
-  row_out
+# Drops the Level 1 subtotal row of every producer group (design decision
+# 11). A Level 1 row is a subtotal when the same Producer ID also has Level 2
+# rows; a Level 1 row on its own is a standalone producer and is kept.
+drop_group_subtotals <- function(section) {
+  pid_idx <- col_index(section$group, section$header, "", "Producer ID")
+  level_idx <- col_index(section$group, section$header, "", "Level")
+  if (is.na(level_idx)) return(section)
+  pids <- vapply(section$rows, function(r) trimws(r[pid_idx]), character(1))
+  levels <- vapply(section$rows, function(r) trimws(r[level_idx]), character(1))
+  grouped_pids <- unique(pids[levels == "2"])
+  section$rows <- section$rows[!(levels == "1" & pids %in% grouped_pids)]
+  section
 }
 
 # ---------------------------------------------------------------------------
@@ -361,6 +360,10 @@ main <- function() {
   h2 <- build_section(lines, "H2 Packaging Data - Submitted and Projected")
   h1 <- build_section(lines, "H1 Packaging Data - Submitted and Projected")
   calc <- build_section(lines, "Calculation Result")
+
+  h2 <- drop_group_subtotals(h2)
+  h1 <- drop_group_subtotals(h1)
+  calc <- drop_group_subtotals(calc)
 
   calc_lookup <- build_lookup(calc$rows, calc$group, calc$header)
   name_idx <- col_index(calc$group, calc$header, "", "Producer / Subsidiary Name")
@@ -467,8 +470,8 @@ main <- function() {
   # Design decision 3b: producers present in Calculation Result but never
   # audited in either H1 or H2 section - i.e. every material in both
   # periods was fully RAG-rated, so no "blank" needed inferring. Emit the
-  # same two rows as everyone else, but sourced from the annual total
-  # (100% H2 / 0% H1), with RAM breakdown left blank - see docstring.
+  # same two rows as everyone else, but sourced from the annual totals and
+  # RAM breakdown (100% H2 / 0% H1) - see docstring.
   audited_keys <- unique(c(h1_keys, h2_keys))
   calc_keys_all <- ls(calc_lookup)
   calc_only_keys <- sort(setdiff(calc_keys_all, audited_keys), method = "radix")
@@ -481,7 +484,7 @@ main <- function() {
 
     h2_row_out <- base_row(pid, sid, period_code_h2, "H2")
     for (m in MATERIALS) {
-      h2_row_out <- populate_totals_only_from_calc(h2_row_out, calc_row, calc$group, calc$header, m[["disp"]], m[["src"]])
+      h2_row_out <- populate_material_columns(h2_row_out, calc_row, calc$group, calc$header, m[["src"]], m[["disp"]])
     }
     out_rows[[length(out_rows) + 1]] <- h2_row_out
 
