@@ -204,8 +204,12 @@ reporting_year <- function(period_code) {
 # Per-material column resolution within a raw H1/H2 section
 # ---------------------------------------------------------------------------
 
+# Sections disagree on material name casing (e.g. "Paper or card" vs
+# "Paper or Card"), so resolve to whichever spelling this section actually uses.
 material_col_idx <- function(group, header, src_material, col_name) {
-  col_index(group, header, paste0(src_material, " Breakdown"), col_name)
+  wanted <- paste0(src_material, " Breakdown")
+  match <- group[tolower(group) == tolower(wanted)]
+  col_index(group, header, if (length(match) > 0) match[1] else wanted, col_name)
 }
 
 populate_material_columns <- function(row_out, row_src, group, header, src_material, target_name,
@@ -365,12 +369,25 @@ main <- function() {
   h1 <- drop_group_subtotals(h1)
   calc <- drop_group_subtotals(calc)
 
+  # Design decision 12. Older Results Files have no such section.
+  partial <- tryCatch(build_section(lines, "Partial Obligation Calculation"),
+                      error = function(e) list(rows = list(), group = character(0), header = character(0)))
+  partial <- drop_group_subtotals(partial)
+
   calc_lookup <- build_lookup(calc$rows, calc$group, calc$header)
+  partial_lookup <- build_lookup(partial$rows, partial$group, partial$header)
   name_idx <- col_index(calc$group, calc$header, "", "Producer / Subsidiary Name")
-  smcw_idx_by_material <- setNames(
-    vapply(MATERIALS, function(m) col_index(calc$group, calc$header, paste0(m[["src"]], " Breakdown"), "Self-managed Consumer Waste Tonnage"), integer(1)),
-    vapply(MATERIALS, `[[`, character(1), "src")
-  )
+
+  # The annual (H1+H2) row to take calc-only tonnages and SMCW from, with its
+  # group/header: the pre-pro-rating Partial Obligation row if the producer
+  # has one, else its Calculation Result row.
+  annual_source <- function(pid, sid) {
+    partial_row <- lookup_get(partial_lookup, pid, sid)
+    if (!is.null(partial_row)) {
+      return(list(row = partial_row, group = partial$group, header = partial$header))
+    }
+    list(row = lookup_get(calc_lookup, pid, sid), group = calc$group, header = calc$header)
+  }
   blank_row <- function() {
     row <- as.list(setNames(rep("", length(target_header)), target_header))
     row
@@ -418,10 +435,11 @@ main <- function() {
     row[["los_cd_filename"]] <- DEFAULT_FILENAME
 
     if (half == "H2") {
+      src <- annual_source(pid, sid)
       for (m in MATERIALS) {
-        idx <- smcw_idx_by_material[[m[["src"]]]]
-        if (!is.null(calc_row) && !is.na(idx)) {
-          row[[sprintf("Self-managed consumer waste-%s", m[["disp"]])]] <- fmt(num(calc_row, idx))
+        idx <- material_col_idx(src$group, src$header, m[["src"]], "Self-managed Consumer Waste Tonnage")
+        if (!is.null(src$row) && !is.na(idx)) {
+          row[[sprintf("Self-managed consumer waste-%s", m[["disp"]])]] <- fmt(num(src$row, idx))
         }
       }
     }
@@ -480,11 +498,11 @@ main <- function() {
     parts <- strsplit(key, KEY_SEP, fixed = TRUE)[[1]]
     pid <- if (length(parts) >= 1) parts[1] else ""
     sid <- if (length(parts) >= 2) parts[2] else ""
-    calc_row <- get(key, envir = calc_lookup)
+    src <- annual_source(pid, sid)
 
     h2_row_out <- base_row(pid, sid, period_code_h2, "H2")
     for (m in MATERIALS) {
-      h2_row_out <- populate_material_columns(h2_row_out, calc_row, calc$group, calc$header, m[["src"]], m[["disp"]])
+      h2_row_out <- populate_material_columns(h2_row_out, src$row, src$group, src$header, m[["src"]], m[["disp"]])
     }
     out_rows[[length(out_rows) + 1]] <- h2_row_out
 
