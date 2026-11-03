@@ -264,6 +264,26 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
         }
 
         [TestMethod]
+        public void Export_WritesEachMaterialUnderItsOwnHeading_WhateverOrderTheTonnagesAreIn()
+        {
+            var runContext = TestDataHelper.CalculatorRun2026;
+            var inOrder = new CalcResultPartialObligations { PartialObligations = GetCalcResultPartialObligationsListWithRam() };
+            var reversed = new CalcResultPartialObligations
+            {
+                PartialObligations = GetCalcResultPartialObligationsListWithRam()
+                    .Select(p => { p.PartialObligationTonnageByMaterial = p.PartialObligationTonnageByMaterial.Reverse().ToDictionary(); return p; })
+                    .ToImmutableList()
+            };
+            var expected = new StringBuilder();
+            var actual = new StringBuilder();
+
+            exporter.Export(runContext, inOrder, materials, expected);
+            exporter.Export(runContext, reversed, materials, actual);
+
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
+        [TestMethod]
         public void Export_ShouldHandleWhenEmpty()
         {
             var runContext = TestDataHelper.CalculatorRun2026;

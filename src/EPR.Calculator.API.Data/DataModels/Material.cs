@@ -6,6 +6,7 @@ public class Material
     public required string Code { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
+    public int DisplayOrder { get; set; }
 
     #region EF navigational properties
 

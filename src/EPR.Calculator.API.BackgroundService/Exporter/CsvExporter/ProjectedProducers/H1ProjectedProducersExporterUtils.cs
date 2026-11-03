@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
 {
     public static class H1ProjectedProducersExporterUtils
     {
-        public static void AppendProjectedProducers(IImmutableList<CalcResultH1ProjectedProducer> h1ProjectedProducers, StringBuilder csvContent)
+        public static void AppendProjectedProducers(IImmutableList<CalcResultH1ProjectedProducer> h1ProjectedProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             var l1ProportionsByProducer = h1ProjectedProducers
                 .Where(p => p.Level == CommonConstants.LevelOne.ToString())
@@ -26,18 +26,18 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.SubmissionPeriodCode));
 
                 var l1Proportions = l1ProportionsByProducer.GetValueOrDefault(producer.ProducerId);
-                AppendProjectedProducerTonnageByMaterial(csvContent, producer.H1ProjectedTonnageByMaterial, l1Proportions);
+                AppendProjectedProducerTonnageByMaterial(csvContent, materials, producer.H1ProjectedTonnageByMaterial, l1Proportions);
 
                 csvContent.AppendLine();
             }
         }
 
-        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IReadOnlyDictionary<string, CalcResultH1ProjectedProducerMaterialTonnage> h1ProjectedProducerTonnageByMaterial, IReadOnlyDictionary<string, RAMProportions>? l1Proportions)
+        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IImmutableList<MaterialDetail> materials, IReadOnlyDictionary<string, CalcResultH1ProjectedProducerMaterialTonnage> h1ProjectedProducerTonnageByMaterial, IReadOnlyDictionary<string, RAMProportions>? l1Proportions)
         {
-            foreach (var producerTonnage in h1ProjectedProducerTonnageByMaterial)
+            foreach (var material in materials)
             {
-                var materialL1Proportions = l1Proportions?.GetValueOrDefault(producerTonnage.Key);
-                AppendMaterialTonnage(csvContent, producerTonnage.Key, producerTonnage.Value, materialL1Proportions);
+                var materialL1Proportions = l1Proportions?.GetValueOrDefault(material.Code);
+                AppendMaterialTonnage(csvContent, material.Code, h1ProjectedProducerTonnageByMaterial[material.Code], materialL1Proportions);
             }
         }
 
