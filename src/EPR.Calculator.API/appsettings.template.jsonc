@@ -75,6 +75,6 @@
   },
 
   "FeatureFlags": {
-    "UploadFssBillingFileToBlobStorage": true
+    "DownloadFromBlobStorage": true
   }
 }
