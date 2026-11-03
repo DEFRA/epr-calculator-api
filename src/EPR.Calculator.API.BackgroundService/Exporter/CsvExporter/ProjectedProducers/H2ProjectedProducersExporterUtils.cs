@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
 {
     public static class H2ProjectedProducersExporterUtils
     {
-        public static void AppendProjectedProducers(IImmutableList<CalcResultH2ProjectedProducer> h2ProjectedProducers, StringBuilder csvContent)
+        public static void AppendProjectedProducers(IImmutableList<CalcResultH2ProjectedProducer> h2ProjectedProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             foreach (var producer in h2ProjectedProducers)
             {
@@ -18,13 +18,13 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.Level));
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.SubmissionPeriodCode));
 
-                AppendProjectedProducerTonnageByMaterial(csvContent, producer.H2ProjectedTonnageByMaterial);
+                AppendProjectedProducerTonnageByMaterial(csvContent, materials, producer.H2ProjectedTonnageByMaterial);
 
                 csvContent.AppendLine();
             }
         }
 
-        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IReadOnlyDictionary<string, CalcResultH2ProjectedProducerMaterialTonnage> h2ProjectedProducerTonnageByMaterial)
+        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IImmutableList<MaterialDetail> materials, IReadOnlyDictionary<string, CalcResultH2ProjectedProducerMaterialTonnage> h2ProjectedProducerTonnageByMaterial)
         {
             void appendRamTonnage(RamTonnage tonnage)
             {
@@ -36,10 +36,9 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.GreenMedical, DecimalPlaces.Three, DecimalFormats.F3));
             }
 
-            foreach (var producerTonnage in h2ProjectedProducerTonnageByMaterial)
+            foreach (var materialCode in materials.Select(m => m.Code))
             {
-                var materialCode = producerTonnage.Key;
-                var tonnage = producerTonnage.Value;
+                var tonnage = h2ProjectedProducerTonnageByMaterial[materialCode];
 
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.HouseholdTonnage, DecimalPlaces.Three, DecimalFormats.F3));
                 appendRamTonnage(tonnage.HouseholdRAMTonnage);

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260925170235_SplitRunClassification")]
+    [Migration("20261027000000_SplitRunClassification")]
     partial class SplitRunClassification
     {
         /// <inheritdoc />
@@ -1715,6 +1715,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("description");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
 
                     b.Property<string>("Name")
                         .IsRequired()

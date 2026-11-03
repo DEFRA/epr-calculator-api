@@ -72,6 +72,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             Assert.AreEqual("0.000", h2Data[CalcResultProjectedProducersHeaders.HouseholdDrinksContainersGreenMedicalTonnage].First());
             Assert.AreEqual("500.000", h2Data[CalcResultProjectedProducersHeaders.HouseholdDrinksContainersTonnageWithoutRAMDefaultedToRed].First());
             Assert.AreEqual("800.000", h2Data[CalcResultProjectedProducersHeaders.TotalTonnage][1]);
+            //Other materials
+            Assert.AreEqual("10.000", h2Data[CalcResultProjectedProducersHeaders.HouseholdTonnageWithoutRAMDefaultedToRed][2]);
+            Assert.AreEqual("30.000", h2Data[CalcResultProjectedProducersHeaders.TotalTonnage][2]);
 
             // Assert H1
             Assert.IsTrue(rows[9][0].Contains(CalcResultProjectedProducersHeaders.H1ProjectedProducers));
@@ -151,6 +154,32 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             Assert.AreEqual("-", h1Data[CalcResultProjectedProducersHeaders.RedMedicalH2MaterialTonnageProportion][2]);
             Assert.AreEqual("-", h1Data[CalcResultProjectedProducersHeaders.AmberMedicalH2MaterialTonnageProportion][2]);
             Assert.AreEqual("-", h1Data[CalcResultProjectedProducersHeaders.GreenMedicalH2MaterialTonnageProportion][2]);
+        }
+
+        [TestMethod]
+        public void Export_WritesEachMaterialUnderItsOwnHeading_WhateverOrderTheTonnagesAreIn()
+        {
+            var inOrder = new CalcResultProjectedProducers
+            {
+                H2ProjectedProducers = GetH2ProjectedProducersList(),
+                H1ProjectedProducers = GetH1ProjectedProducersList(),
+            };
+            var reversed = new CalcResultProjectedProducers
+            {
+                H2ProjectedProducers = GetH2ProjectedProducersList()
+                    .Select(p => p with { H2ProjectedTonnageByMaterial = p.H2ProjectedTonnageByMaterial.Reverse().ToDictionary() })
+                    .ToImmutableList(),
+                H1ProjectedProducers = GetH1ProjectedProducersList()
+                    .Select(p => p with { H1ProjectedTonnageByMaterial = p.H1ProjectedTonnageByMaterial.Reverse().ToDictionary() })
+                    .ToImmutableList(),
+            };
+            var expected = new StringBuilder();
+            var actual = new StringBuilder();
+
+            exporter.Export(inOrder, materials, expected);
+            exporter.Export(reversed, materials, actual);
+
+            Assert.AreEqual(expected.ToString(), actual.ToString());
         }
 
         [TestMethod]
@@ -264,6 +293,22 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
                                 ProjectedPublicBinRAMTonnage = new RamTonnage{ Red = 30, RedMedical = 40, Amber = 40, AmberMedical = 0, Green = 0, GreenMedical = 0 },
                                 ProjectedHouseholdDrinksContainerTonnage = 500,
                                 ProjectedHouseholdDrinksContainerRAMTonnage = new RamTonnage{ Red = 500, RedMedical = 0, Amber = 0, AmberMedical = 0, Green = 0, GreenMedical = 0 },
+                            }
+                        },
+                        {
+                            "OT",
+                            new CalcResultH2ProjectedProducerMaterialTonnage
+                            {
+                                HouseholdTonnage = 10,
+                                HouseholdRAMTonnage = RamTonnage.Empty,
+                                HouseholdTonnageWithoutRAM = 10,
+                                PublicBinTonnage = 20,
+                                PublicBinRAMTonnage = RamTonnage.Empty,
+                                PublicBinTonnageWithoutRAM = 20,
+                                ProjectedHouseholdTonnage = 10,
+                                ProjectedHouseholdRAMTonnage = new RamTonnage{ Red = 10, RedMedical = 0, Amber = 0, AmberMedical = 0, Green = 0, GreenMedical = 0 },
+                                ProjectedPublicBinTonnage = 20,
+                                ProjectedPublicBinRAMTonnage = new RamTonnage{ Red = 20, RedMedical = 0, Amber = 0, AmberMedical = 0, Green = 0, GreenMedical = 0 },
                             }
                         },
                     },

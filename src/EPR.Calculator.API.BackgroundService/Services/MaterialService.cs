@@ -16,6 +16,7 @@ public class MaterialService(ApplicationDBContext dbContext)
     {
         return await dbContext
             .Material
+            .OrderBy(m => m.DisplayOrder)
             .Select(m => new MaterialDetail
             {
                 Id = m.Id,
