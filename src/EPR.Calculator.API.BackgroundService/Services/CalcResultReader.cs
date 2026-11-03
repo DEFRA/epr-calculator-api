@@ -302,6 +302,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
             await dbContext.CancelledProducers
                     .AsNoTracking()
                     .Where(p => p.CalculatorRunId == runId)
+                    .OrderBy(p => p.Id)
                     .Select(x => x.CancelledProducer)
                     .ToImmutableListAsync(cancellationToken);
 
