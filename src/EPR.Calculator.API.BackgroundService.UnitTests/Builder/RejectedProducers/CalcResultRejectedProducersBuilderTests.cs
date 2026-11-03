@@ -164,7 +164,8 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
             Id = runId,
             Name = $"Run {runId}",
             RelativeYear = Year,
-            Classification = isCompleted ? RunClassification.InitialCompleted : RunClassification.Initial,
+            Classification = RunClassification.Initial,
+            IsBillingFileShared = isCompleted,
             CalculatorRunOrganisationDataMasterId = master.Id
         });
     }

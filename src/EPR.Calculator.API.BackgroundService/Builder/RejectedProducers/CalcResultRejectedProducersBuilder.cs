@@ -4,6 +4,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Queries;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
@@ -123,12 +124,10 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
                 return [];
 
             var latestInvoicedRunByProducer = await (
-                from run in dbContext.CalculatorRuns.AsNoTracking()
+                from run in dbContext.CalculatorRuns.WhereCompletedOfficialForYear(runContext.RelativeYear).AsNoTracking()
                 join prsbi in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                     on run.Id equals prsbi.CalculatorRunId
-                where RunClassificationHelper.CompletedClassifications.Contains(run.Classification)
-                      && run.RelativeYear == runContext.RelativeYear
-                      && run.Id < runContext.RunId
+                where run.Id < runContext.RunId
                       && producerIds.Contains(prsbi.ProducerId)
                       && prsbi.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                       && prsbi.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel
