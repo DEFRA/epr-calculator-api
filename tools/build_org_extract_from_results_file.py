@@ -141,6 +141,18 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     used. A Level 1 row with no Level 2 rows under it is a standalone
     producer and is kept.
 
+12. Partial-obligation pro-rating is undone. For a producer that joined
+    or left during the year, Calculation Result's tonnages (and its Self-
+    managed consumer waste) have been pro-rated by the producer's obligated
+    days. The "Partial Obligation Calculation" section carries the same
+    annual figures before that pro-rating, so for any producer listed there
+    the calc-only totals/RAM breakdown of decision 3b and the SMCW of
+    decision 3 are taken from it instead - keeping every row of the output
+    as reported, the same as the H1/H2 rows. Scaling-up of part-period
+    submissions is NOT undone (it doesn't apply to 2026 runs), so for a run
+    with scaling the calc-only figures of a scaled-up producer are still
+    post-scaling.
+
 Sections are located by marker text and header text (not hardcoded line
 numbers), so this should keep working against other Results File runs of
 the same export format.
@@ -305,7 +317,11 @@ class MaterialCols:
     def __init__(self, group, header, src_material):
         self.group = group
         self.header = header
-        self.src_material = f"{src_material} Breakdown"
+        # Sections disagree on material name casing (e.g. Calculation
+        # Result's "Paper or card" vs Partial Obligation's "Paper or Card"),
+        # so resolve to whichever spelling this section actually uses.
+        wanted = f"{src_material} Breakdown"
+        self.src_material = next((g for g in group if g.lower() == wanted.lower()), wanted)
 
     def idx(self, col_name):
         return col_index(self.group, self.header, self.src_material, col_name)
@@ -435,12 +451,27 @@ def main():
     h1_rows = drop_group_subtotals(h1_rows, h1_group, h1_header)
     calc_rows = drop_group_subtotals(calc_rows, calc_group, calc_header)
 
+    # Design decision 12. Older Results Files have no such section.
+    try:
+        partial_rows, partial_group, partial_header = build_section(lines, "Partial Obligation Calculation")
+    except ValueError:
+        partial_rows, partial_group, partial_header = [], [], []
+    partial_rows = drop_group_subtotals(partial_rows, partial_group, partial_header)
+
     calc_lookup = build_lookup(calc_rows, calc_group, calc_header)
+    partial_lookup = build_lookup(partial_rows, partial_group, partial_header)
     name_idx = col_index(calc_group, calc_header, "", "Producer / Subsidiary Name")
-    smcw_idx_by_material = {
-        src: col_index(calc_group, calc_header, f"{src} Breakdown", "Self-managed Consumer Waste Tonnage")
-        for src, _ in MATERIALS
-    }
+
+    def annual_source(pid, sid):
+        """
+        The annual (H1+H2) row to take calc-only tonnages and SMCW from, with
+        its group/header: the pre-pro-rating Partial Obligation row if the
+        producer has one, else its Calculation Result row.
+        """
+        partial_row = partial_lookup.get((pid, sid))
+        if partial_row is not None:
+            return partial_row, partial_group, partial_header
+        return calc_lookup.get((pid, sid)), calc_group, calc_header
 
     def blank_row():
         return {h: "" for h in target_header}
@@ -486,11 +517,11 @@ def main():
         row["los_cd_filename"] = DEFAULT_FILENAME
 
         if half == "H2":
-            for src, _ in MATERIALS:
-                idx = smcw_idx_by_material[src]
-                if calc_row is not None and idx is not None:
-                    disp = dict(MATERIALS)[src]
-                    row[f"Self-managed consumer waste-{disp}"] = fmt(num(calc_row, idx))
+            src_row, src_group, src_header = annual_source(pid, sid)
+            for src, disp in MATERIALS:
+                idx = MaterialCols(src_group, src_header, src).idx("Self-managed Consumer Waste Tonnage")
+                if src_row is not None and idx is not None:
+                    row[f"Self-managed consumer waste-{disp}"] = fmt(num(src_row, idx))
         return row
 
     out_rows = []
@@ -540,12 +571,12 @@ def main():
     audited_keys = h1_keys | h2_keys
     calc_only_keys = sorted(k for k in calc_lookup if k not in audited_keys)
     for pid, sid in calc_only_keys:
-        calc_row = calc_lookup[(pid, sid)]
+        src_row, src_group, src_header = annual_source(pid, sid)
 
         h2_row_out = base_row(pid, sid, period_code_h2, "H2")
         for src_material, disp in MATERIALS:
-            mcols = MaterialCols(calc_group, calc_header, src_material)
-            populate_material_columns(h2_row_out, calc_row, mcols, disp)
+            mcols = MaterialCols(src_group, src_header, src_material)
+            populate_material_columns(h2_row_out, src_row, mcols, disp)
         out_rows.append(h2_row_out)
 
         h1_row_out = base_row(pid, sid, period_code_h1, "H1")
