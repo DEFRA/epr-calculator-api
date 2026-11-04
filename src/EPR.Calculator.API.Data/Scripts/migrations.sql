@@ -9056,7 +9056,6 @@ IF NOT EXISTS (
 )
 BEGIN
 
-                    IF OBJECT_ID(N'[data_api_load_organisations]', N'U') IS NULL
                     CREATE TABLE [data_api_load_organisations] (
                         [id] int NOT NULL IDENTITY,
                         [organisation_id] int NOT NULL,
@@ -9088,7 +9087,6 @@ IF NOT EXISTS (
 )
 BEGIN
 
-                    IF OBJECT_ID(N'[data_api_load_poms]', N'U') IS NULL
                     CREATE TABLE [data_api_load_poms] (
                         [id] bigint NOT NULL IDENTITY,
                         [organisation_id] int NOT NULL,

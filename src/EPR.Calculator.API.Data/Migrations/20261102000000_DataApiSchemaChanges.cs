@@ -199,7 +199,6 @@ namespace EPR.Calculator.API.Data.Migrations
             // pipeline the app database has. Raw SQL so they stay out of ApplicationDBContext's model
             // snapshot - EF must never try to manage or drop them.
             migrationBuilder.Sql(@"
-                IF OBJECT_ID(N'[data_api_load_organisations]', N'U') IS NULL
                 CREATE TABLE [data_api_load_organisations] (
                     [id] int NOT NULL IDENTITY,
                     [organisation_id] int NOT NULL,
@@ -225,7 +224,6 @@ namespace EPR.Calculator.API.Data.Migrations
                 );");
 
             migrationBuilder.Sql(@"
-                IF OBJECT_ID(N'[data_api_load_poms]', N'U') IS NULL
                 CREATE TABLE [data_api_load_poms] (
                     [id] bigint NOT NULL IDENTITY,
                     [organisation_id] int NOT NULL,
@@ -251,6 +249,9 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP TABLE [data_api_load_organisations];");
+            migrationBuilder.Sql("DROP TABLE [data_api_load_poms];");
+
             migrationBuilder.DropTable(
                 name: "calculator_run_organisation");
 
@@ -344,14 +345,17 @@ namespace EPR.Calculator.API.Data.Migrations
                 type: "int",
                 nullable: true);
 
-            // Runs created after the upgrade have no master rows and stay NULL.
+            // Runs created after the upgrade have no master rows and stay NULL. Wrapped in EXEC so the
+            // columns added above resolve at execution time when this runs through sqlcmd.
             migrationBuilder.Sql(@"
-                UPDATE r
-                SET calculator_run_organization_data_master_id = b.calculator_run_organization_data_master_id,
-                    calculator_run_pom_data_master_id = b.calculator_run_pom_data_master_id
-                FROM calculator_run r
-                INNER JOIN calculator_run_bk b
-                    ON b.id = r.id;");
+                EXEC(N'
+                    UPDATE r
+                    SET calculator_run_organization_data_master_id = b.calculator_run_organization_data_master_id,
+                        calculator_run_pom_data_master_id = b.calculator_run_pom_data_master_id
+                    FROM calculator_run r
+                    INNER JOIN calculator_run_bk b
+                        ON b.id = r.id;
+                ');");
 
             migrationBuilder.DropTable(
                 name: "calculator_run_bk");
