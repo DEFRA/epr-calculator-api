@@ -9128,7 +9128,15 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261103000000_AddOrganisationSizeToDataApiLoadTables'
 )
 BEGIN
-    ALTER TABLE [data_api_load_organisations] ADD [organisation_size] nvarchar(10) NOT NULL;
+    ALTER TABLE [data_api_load_organisations] ADD [organisation_size] nvarchar(10) NOT NULL CONSTRAINT [DF_data_api_load_organisations_organisation_size] DEFAULT '';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261103000000_AddOrganisationSizeToDataApiLoadTables'
+)
+BEGIN
+    ALTER TABLE [data_api_load_organisations] DROP CONSTRAINT [DF_data_api_load_organisations_organisation_size];
 END;
 
 IF NOT EXISTS (
