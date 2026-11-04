@@ -8914,7 +8914,8 @@ BEGIN
                         INNER JOIN calculator_run_organization_data_detail d
                             ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
                            AND d.organisation_id = pd.producer_id
-                           AND ISNULL(d.subsidiary_id, '''') = ISNULL(pd.subsidiary_id, '''');
+                           AND ISNULL(d.subsidiary_id, '''') = ISNULL(pd.subsidiary_id, '''')
+                           AND d.obligation_status = ''O'';
                     ');
 END;
 

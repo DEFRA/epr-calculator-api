@@ -128,7 +128,8 @@ namespace EPR.Calculator.API.Data.Migrations
                     ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;");
 
             // The obligation columns moved onto producer_detail; backfill historical runs from the
-            // matching organisation-detail row so consumers (e.g. partial-obligation export) still work.
+            // matching obligated organisation-detail row, the only rows the calculation used, so consumers
+            // (e.g. partial-obligation export) still work.
             migrationBuilder.Sql(@"
                 EXEC(N'
                     UPDATE pd
@@ -142,7 +143,8 @@ namespace EPR.Calculator.API.Data.Migrations
                     INNER JOIN calculator_run_organization_data_detail d
                         ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
                        AND d.organisation_id = pd.producer_id
-                       AND ISNULL(d.subsidiary_id, '''') = ISNULL(pd.subsidiary_id, '''');
+                       AND ISNULL(d.subsidiary_id, '''') = ISNULL(pd.subsidiary_id, '''')
+                       AND d.obligation_status = ''O'';
                 ');");
 
             // See the comment on BackedUpTables for renamed vs. copied.
