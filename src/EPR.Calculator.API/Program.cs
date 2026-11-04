@@ -25,6 +25,7 @@ builder.Services
     .AddPayCalAuthorization()
     .AddPayCalRequestValidation()
     .AddPayCalDatabase()
+    .AddPayCalDataApi(builder.Configuration)
     .AddPayCalBlobStorage()
     .AddPayCalServices()
     .AddPayCalBackgroundServices();

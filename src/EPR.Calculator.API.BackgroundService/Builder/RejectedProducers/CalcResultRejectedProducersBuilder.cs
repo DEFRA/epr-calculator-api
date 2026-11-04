@@ -1,9 +1,7 @@
 ﻿using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Queries;
 using Microsoft.EntityFrameworkCore;
 
@@ -153,14 +151,12 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
             var runIds = runIdByProducer.Values.Distinct().ToList();
 
             var organisations = await (
-                from run in dbContext.CalculatorRuns.AsNoTracking()
-                join crodd in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking()
-                    on run.CalculatorRunOrganisationDataMasterId equals crodd.CalculatorRunOrganisationDataMasterId
-                where runIds.Contains(run.Id)
-                      && producerIds.Contains(crodd.OrganisationId)
-                      && crodd.SubsidiaryId == null
-                      && crodd.ObligationStatus == ObligationStates.Obligated
-                select new { RunId = run.Id, crodd.Id, crodd.OrganisationId, crodd.OrganisationName, crodd.TradingName }
+                from org in dbContext.CalculatorRunOrganisations.AsNoTracking()
+                where runIds.Contains(org.CalculatorRunId)
+                      && producerIds.Contains(org.OrganisationId)
+                      && org.SubsidiaryId == null
+                      && !org.IsError
+                select new { RunId = org.CalculatorRunId, org.Id, org.OrganisationId, org.OrganisationName, org.TradingName }
             ).ToListAsync(cancellationToken);
 
             return organisations
