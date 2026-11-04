@@ -9125,7 +9125,7 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+    WHERE [MigrationId] = N'20261103000000_AddOrganisationSizeToDataApiLoadTables'
 )
 BEGIN
     ALTER TABLE [data_api_load_organisations] ADD [organisation_size] nvarchar(10) NOT NULL;
@@ -9133,7 +9133,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+    WHERE [MigrationId] = N'20261103000000_AddOrganisationSizeToDataApiLoadTables'
 )
 BEGIN
     ALTER TABLE [data_api_load_poms]          ADD [organisation_size] nvarchar(10) NULL;
@@ -9141,11 +9141,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261012080843_AddOrganisationSizeToDataApiLoadTables'
+    WHERE [MigrationId] = N'20261103000000_AddOrganisationSizeToDataApiLoadTables'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20261012080843_AddOrganisationSizeToDataApiLoadTables', N'10.0.11');
+    VALUES (N'20261103000000_AddOrganisationSizeToDataApiLoadTables', N'10.0.11');
 END;
 
 COMMIT;

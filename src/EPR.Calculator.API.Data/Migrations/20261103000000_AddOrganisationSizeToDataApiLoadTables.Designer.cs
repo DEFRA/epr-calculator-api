@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261012080843_AddOrganisationSizeToDataApiLoadTables")]
+    [Migration("20261103000000_AddOrganisationSizeToDataApiLoadTables")]
     partial class AddOrganisationSizeToDataApiLoadTables
     {
         /// <inheritdoc />
@@ -1535,6 +1535,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("description");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
 
                     b.Property<string>("Name")
                         .IsRequired()
