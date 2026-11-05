@@ -9162,7 +9162,7 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+    WHERE [MigrationId] = N'20261104000000_NullableRegulatorStatusOnDataApiLoadTables'
 )
 BEGIN
     ALTER TABLE [data_api_load_organisations] ALTER COLUMN [regulator_status] nvarchar(50) NULL;
@@ -9170,7 +9170,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+    WHERE [MigrationId] = N'20261104000000_NullableRegulatorStatusOnDataApiLoadTables'
 )
 BEGIN
     ALTER TABLE [data_api_load_poms]          ADD [regulator_status] nvarchar(50) NULL;
@@ -9178,11 +9178,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables'
+    WHERE [MigrationId] = N'20261104000000_NullableRegulatorStatusOnDataApiLoadTables'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20261022125458_NullableRegulatorStatusOnDataApiLoadTables', N'10.0.11');
+    VALUES (N'20261104000000_NullableRegulatorStatusOnDataApiLoadTables', N'10.0.11');
 END;
 
 COMMIT;

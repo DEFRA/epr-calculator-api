@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261022125458_NullableRegulatorStatusOnDataApiLoadTables")]
+    [Migration("20261104000000_NullableRegulatorStatusOnDataApiLoadTables")]
     partial class NullableRegulatorStatusOnDataApiLoadTables
     {
         /// <inheritdoc />
@@ -1535,6 +1535,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)")
                         .HasColumnName("description");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("display_order");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3769,6 +3773,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
+
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
                         .WithMany("RunDetails")
                         .HasForeignKey("DefaultParameterSettingMasterId");
