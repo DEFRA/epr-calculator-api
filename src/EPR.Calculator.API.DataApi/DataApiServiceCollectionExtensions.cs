@@ -19,6 +19,7 @@ public static class DataApiServiceCollectionExtensions
     ///     else is an internal detail, so this is the single point where the host wires DataApi up.
     /// </summary>
     /// <param name="loadTableConnectionString">Resolves the connection string of the database that hosts the data_api_load_* tables.</param>
+    /// <param name="loadTableCommandTimeout">Resolves the timeout for load table commands, which include clearing and refilling millions of rows.</param>
     /// <param name="loadTablesEnabled">
     ///     Whether a run refreshes the load tables from the RPD source before reading them (true), or
     ///     reads them as they already stand, without refreshing first (false) - e.g. to run several
@@ -34,6 +35,7 @@ public static class DataApiServiceCollectionExtensions
     public static IServiceCollection AddDataApi(
         this IServiceCollection services,
         Func<IServiceProvider, string> loadTableConnectionString,
+        Func<IServiceProvider, TimeSpan> loadTableCommandTimeout,
         Func<IServiceProvider, bool> loadTablesEnabled,
         bool captureMemoryMetrics = false)
     {
@@ -68,7 +70,9 @@ public static class DataApiServiceCollectionExtensions
             .Configure<IServiceProvider>((options, provider) => options.Enabled = loadTablesEnabled(provider));
 
         services.AddDbContextFactory<DataApiLoadContext>((provider, builder) =>
-            builder.UseSqlServer(loadTableConnectionString(provider)));
+            builder.UseSqlServer(
+                loadTableConnectionString(provider),
+                sqlOptions => sqlOptions.CommandTimeout((int)loadTableCommandTimeout(provider).TotalSeconds)));
 
         services.AddTransient<ILoadTableRefresher, LoadTableRefresher>();
         services.AddTransient<CommonDataApiSource>();
