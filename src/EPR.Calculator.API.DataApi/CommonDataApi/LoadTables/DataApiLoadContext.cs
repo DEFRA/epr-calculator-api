@@ -36,6 +36,7 @@ internal sealed class DataApiLoadContext(DbContextOptions<DataApiLoadContext> op
             entity.Property(e => e.NumDaysObligated).HasColumnName("num_days_obligated");
             entity.Property(e => e.ErrorCode).HasColumnName("error_code");
             entity.Property(e => e.SubmissionPeriodYear).HasColumnName("submission_period_year");
+            entity.Property(e => e.OrganisationSize).HasColumnName("organisation_size").HasMaxLength(10);
             entity.Property(e => e.HasH1).HasColumnName("has_h1");
             entity.Property(e => e.HasH2).HasColumnName("has_h2");
             entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(400);
@@ -61,6 +62,7 @@ internal sealed class DataApiLoadContext(DbContextOptions<DataApiLoadContext> op
             entity.Property(e => e.PackagingMaterialSubtype).HasColumnName("packaging_material_subtype").HasMaxLength(400);
             entity.Property(e => e.PackagingMaterialWeight).HasColumnName("packaging_material_weight");
             entity.Property(e => e.RamRagRating).HasColumnName("ram_rag_rating").HasMaxLength(50);
+            entity.Property(e => e.OrganisationSize).HasColumnName("organisation_size").HasMaxLength(10);
             entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(400);
             entity.Property(e => e.IsResubmission).HasColumnName("is_resubmission");
             entity.Property(e => e.CreatedDateTime).HasColumnName("created_date_time");
