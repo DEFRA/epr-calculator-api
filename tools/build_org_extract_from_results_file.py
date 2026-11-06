@@ -229,10 +229,17 @@ def find_header_row(lines, after, first_cell="Producer ID"):
     raise ValueError(f"Header row (first cell {first_cell!r}) not found after line {after}")
 
 
-def forward_fill_group(group_row):
+def forward_fill_group(group_row, width):
+    """
+    The exporter writes a section's material-group row only as far as the
+    cell naming its LAST group, so that row is shorter than the column-header
+    row beneath it. Pad out to the header row's width so the last group's
+    trailing columns (e.g. Other Materials' Public Bin columns) still get
+    labelled with it.
+    """
     filled = []
     last = ""
-    for cell in group_row:
+    for cell in list(group_row) + [""] * (width - len(group_row)):
         if cell.strip():
             last = cell.strip()
         filled.append(last)
@@ -247,8 +254,8 @@ def build_section(lines, marker_text, id_cols=("Producer ID", "Subsidiary ID")):
     """
     marker = find_marker(lines, marker_text)
     header_idx = find_header_row(lines, marker + 1)
-    group = forward_fill_group(parse_csv_line(lines[header_idx - 1]))
     header = parse_csv_line(lines[header_idx])
+    group = forward_fill_group(parse_csv_line(lines[header_idx - 1]), len(header))
 
     rows = []
     i = header_idx + 1

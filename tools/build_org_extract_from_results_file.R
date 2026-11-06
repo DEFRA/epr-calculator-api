@@ -115,7 +115,12 @@ find_header_row <- function(lines, after, first_cell = "Producer ID") {
   stop(sprintf("Header row (first cell '%s') not found after row %d", first_cell, after))
 }
 
-forward_fill_group <- function(group_row) {
+# The exporter writes a section's material-group row only as far as the cell
+# naming its LAST group, so that row is shorter than the column-header row
+# beneath it. Pad out to the header row's width so the last group's trailing
+# columns (e.g. Other Materials' Public Bin columns) still get labelled with it.
+forward_fill_group <- function(group_row, width) {
+  if (length(group_row) < width) group_row <- c(group_row, rep("", width - length(group_row)))
   filled <- character(length(group_row))
   last <- ""
   for (i in seq_along(group_row)) {
@@ -130,8 +135,8 @@ forward_fill_group <- function(group_row) {
 build_section <- function(lines, marker_text) {
   marker <- find_marker(lines, marker_text)
   header_idx <- find_header_row(lines, marker + 1)
-  group <- forward_fill_group(parse_csv_line(lines[header_idx - 1]))
   header <- parse_csv_line(lines[header_idx])
+  group <- forward_fill_group(parse_csv_line(lines[header_idx - 1]), length(header))
 
   rows <- list()
   i <- header_idx + 1
