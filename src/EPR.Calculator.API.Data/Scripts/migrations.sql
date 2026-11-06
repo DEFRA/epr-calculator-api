@@ -9188,3 +9188,43 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261105000000_AddTruncateProceduresForDataApiLoadTables'
+)
+BEGIN
+    IF HAS_PERMS_BY_NAME(NULL, N'DATABASE', N'CONTROL') = 1
+    BEGIN
+        EXEC(N'CREATE PROCEDURE dbo.TruncateDataApiLoadOrganisations WITH EXECUTE AS OWNER AS TRUNCATE TABLE dbo.data_api_load_organisations;');
+        EXEC(N'CREATE PROCEDURE dbo.TruncateDataApiLoadPoms WITH EXECUTE AS OWNER AS TRUNCATE TABLE dbo.data_api_load_poms;');
+
+        DECLARE @grants nvarchar(max) = (
+            SELECT STRING_AGG(CONVERT(nvarchar(max),
+                N'GRANT EXECUTE ON dbo.TruncateDataApiLoadOrganisations TO ' + name + N'; '
+                + N'GRANT EXECUTE ON dbo.TruncateDataApiLoadPoms TO ' + name + N';'), N' ')
+            FROM sys.database_principals
+            WHERE name IN (
+                N'DEVRWDWEBWA1422', N'DEVRWDWEBWA2422', N'DEVRWDWEBWA3422', N'DEVRWDWEBWA4422',
+                N'DEVRWDWEBWA7422', N'DEVRWDWEBWA8422', N'DEVRWDWEBWA9422', N'DEVRWDWEBWAE422',
+                N'DEVRWDWEBWAF422', N'TSTRWDWEBWA1422', N'PRERWDWEBWA1422', N'PRERWDWEBWA2422',
+                N'PRDRWDWEBWA1422'));
+
+        EXEC(@grants);
+    END
+    ELSE
+        PRINT N'Skipped creating the DataApi load table truncate procedures: the login does not have CONTROL on the database.';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261105000000_AddTruncateProceduresForDataApiLoadTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261105000000_AddTruncateProceduresForDataApiLoadTables', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
