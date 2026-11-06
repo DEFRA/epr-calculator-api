@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
             // is_error is derived from the old obligation status: an "E" organisation was one excluded
             // from calculation by a hard error, which is what is_error now records.
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(Exec(@"
                 INSERT INTO calculator_run_organisation
                     (calculator_run_id, organisation_id, subsidiary_id, organisation_name,
                      trading_name, num_days_obligated, joiner_date, leaver_date,
@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.Data.Migrations
                     CASE WHEN d.obligation_status = 'E' THEN 1 ELSE 0 END
                 FROM calculator_run_organization_data_detail d
                 INNER JOIN calculator_run r
-                    ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;");
+                    ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;"));
 
             // The obligation columns moved onto producer_detail; backfill historical runs from the
             // matching obligated organisation-detail row, the only rows the calculation used, so consumers
@@ -151,7 +151,7 @@ namespace EPR.Calculator.API.Data.Migrations
             foreach (var (table, renamed) in BackedUpTables)
                 migrationBuilder.Sql(renamed
                     ? $"EXEC sp_rename N'{table}', N'{table}_bk';"
-                    : $"SELECT * INTO {table}_bk FROM {table};");
+                    : Exec($"SELECT * INTO {table}_bk FROM {table};"));
 
             migrationBuilder.DropForeignKey(
                 name: "FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id",
@@ -393,5 +393,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 principalTable: "calculator_run_pom_data_master",
                 principalColumn: "id");
         }
+
+        private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";
     }
 }

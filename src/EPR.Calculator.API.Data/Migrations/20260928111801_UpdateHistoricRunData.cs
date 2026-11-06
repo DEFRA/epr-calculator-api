@@ -10,9 +10,11 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"UPDATE calculator_run_organization_data_detail SET obligation_status = 'O' WHERE obligation_status = ''");
+            // EXEC so the idempotent script still compiles once later migrations change these tables, as
+            // DataApiSchemaChanges does by dropping the calculator_run master id columns.
+            migrationBuilder.Sql(Exec(@"UPDATE calculator_run_organization_data_detail SET obligation_status = 'O' WHERE obligation_status = ''"));
 
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(Exec(@"
             -- ============================================================
             -- STEP 1: all producer_reported_material rows needing a submission_period split
             -- ============================================================
@@ -116,9 +118,11 @@ namespace EPR.Calculator.API.Data.Migrations
                 packaging_tonnage_red_medical, packaging_tonnage_amber_medical, packaging_tonnage_green_medical,
                 submission_period
             FROM ##rows_to_insert;
-            ");
+            "));
 
         }
+
+        private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
