@@ -1,7 +1,12 @@
 using EPR.Calculator.Api.DataApi;
+using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.LoadTables;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.DataApi.UnitTests;
 
@@ -26,6 +31,7 @@ public class DataApiServiceCollectionExtensionsTests
 
         services.AddDataApi(
             loadTableConnectionString: _ => "Server=(local);Database=Unused;Trusted_Connection=True;TrustServerCertificate=True;",
+            loadTableCommandTimeout: _ => TimeSpan.FromMinutes(15),
             loadTablesEnabled: _ => loadTablesEnabled);
 
         var provider = services.BuildServiceProvider();
@@ -33,5 +39,50 @@ public class DataApiServiceCollectionExtensionsTests
         var dataSource = provider.GetRequiredService<IPayCalDataSource>();
 
         dataSource.ShouldBeOfType<LoadTableDataSource>();
+    }
+
+    [TestMethod]
+    [DataRow(null, false)]
+    [DataRow("0", false)]
+    [DataRow("13", false)]
+    [DataRow("1", true)]
+    [DataRow("12", true)]
+    public void AddDataApi_ValidatesLateSubmissionsAfterMonth(string? lateSubmissionsAfterMonth, bool expectValid)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["CalculatorDataApi:LateSubmissionsAfterMonth"] = lateSubmissionsAfterMonth })
+            .Build());
+
+        services.AddDataApi(
+            loadTableConnectionString: _ => "Server=(local);Database=Unused;Trusted_Connection=True;TrustServerCertificate=True;",
+            loadTableCommandTimeout: _ => TimeSpan.FromMinutes(15),
+            loadTablesEnabled: _ => true);
+
+        var resolve = () => services.BuildServiceProvider().GetRequiredService<IOptions<CalculatorDataApiOptions>>().Value;
+
+        if (expectValid)
+            resolve().LateSubmissionsAfterMonth.ShouldBe(int.Parse(lateSubmissionsAfterMonth!));
+        else
+            Should.Throw<OptionsValidationException>(resolve);
+    }
+
+    [TestMethod]
+    public async Task AddDataApi_AppliesCommandTimeoutToTheLoadTableContext()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        services.AddDataApi(
+            loadTableConnectionString: _ => "Server=(local);Database=Unused;Trusted_Connection=True;TrustServerCertificate=True;",
+            loadTableCommandTimeout: _ => TimeSpan.FromMinutes(15),
+            loadTablesEnabled: _ => true);
+
+        var provider = services.BuildServiceProvider();
+
+        await using var context = await provider.GetRequiredService<IDbContextFactory<DataApiLoadContext>>().CreateDbContextAsync();
+
+        context.Database.GetCommandTimeout().ShouldBe(900);
     }
 }

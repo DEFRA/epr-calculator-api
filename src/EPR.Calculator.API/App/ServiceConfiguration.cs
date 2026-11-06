@@ -159,6 +159,7 @@ public static class ServiceConfiguration
         {
             services.AddDataApi(
                 provider => provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.ConnectionString,
+                provider => provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.CommandTimeout,
                 provider => provider.GetRequiredService<IConfiguration>().GetValue("CommonDataApi:DataLoader:Enabled", true),
                 captureMemoryMetrics: configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false));
 
