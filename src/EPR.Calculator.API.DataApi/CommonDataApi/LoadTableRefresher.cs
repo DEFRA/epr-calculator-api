@@ -41,10 +41,10 @@ internal sealed class LoadTableRefresher(
         await using var orgDb = await dbContextFactory.CreateDbContextAsync(ct);
         await using var pomDb = await dbContextFactory.CreateDbContextAsync(ct);
 
-        var orgTask = FillTable(orgDb, "data_api_load_organisations", options.Value.OrganisationBatchSize,
-            organisationsHandler.Handle(relativeYear, ct), o => Map(o, loadTs), ct);
-        var pomTask = FillTable(pomDb, "data_api_load_poms", options.Value.PomBatchSize,
-            pomsHandler.Handle(relativeYear, ct), p => Map(p, loadTs), ct);
+        var orgTask = FillTable(orgDb, "dbo.TruncateDataApiLoadOrganisations",
+            options.Value.OrganisationBatchSize, organisationsHandler.Handle(relativeYear, ct), o => Map(o, loadTs), ct);
+        var pomTask = FillTable(pomDb, "dbo.TruncateDataApiLoadPoms",
+            options.Value.PomBatchSize, pomsHandler.Handle(relativeYear, ct), p => Map(p, loadTs), ct);
 
         try
         {
@@ -67,21 +67,23 @@ internal sealed class LoadTableRefresher(
 
     private static async Task<IDbContextTransaction> FillTable<TSource, TTarget>(
         DataApiLoadContext dbContext,
-        string tableName,
+        string truncateProcedure,
         int batchSize,
         IAsyncEnumerable<TSource> source,
         Func<TSource, TTarget> map,
         CancellationToken cancellationToken)
         where TTarget : class
     {
+        var tableName = dbContext.Model.FindEntityType(typeof(TTarget))!.GetTableName();
+
         return await DataApiTelemetry.TraceAsync(typeof(LoadTableRefresher), $"Fill:{tableName}", async () =>
         {
             var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
             try
             {
-                // Note app user does not have permission to TRUNCATE.
-                await dbContext.Set<TTarget>().ExecuteDeleteAsync(cancellationToken);
+                await DataApiTelemetry.TraceAsync(typeof(LoadTableRefresher), $"Clear:{tableName}",
+                    () => ClearTable<TTarget>(dbContext, truncateProcedure, cancellationToken));
 
                 var batch = new List<TTarget>(batchSize);
                 long total = 0;
@@ -106,6 +108,22 @@ internal sealed class LoadTableRefresher(
                 throw;
             }
         });
+    }
+
+    private static async Task ClearTable<TTarget>(DataApiLoadContext dbContext, string truncateProcedure, CancellationToken cancellationToken)
+        where TTarget : class
+    {
+        // OBJECT_ID only sees a procedure the API has been granted, so this also falls back when the grant is missing.
+        var canTruncate = await dbContext.Database
+            .SqlQuery<bool>($"SELECT CAST(IIF(OBJECT_ID({truncateProcedure}, N'P') IS NULL, 0, 1) AS bit) AS Value")
+            .SingleAsync(cancellationToken);
+
+        Activity.Current?.SetTag("clear_method", canTruncate ? "truncate" : "delete");
+
+        if (canTruncate)
+            await dbContext.Database.ExecuteSqlAsync($"EXEC {truncateProcedure}", cancellationToken);
+        else
+            await dbContext.Set<TTarget>().ExecuteDeleteAsync(cancellationToken);
     }
 
     private static async Task<int> Flush<T>(DataApiLoadContext dbContext, List<T> batch, CancellationToken cancellationToken)
