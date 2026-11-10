@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261019134717_RemoveProjectedProducersNotShown")]
+    [Migration("20261110000000_RemoveProjectedProducersNotShown")]
     partial class RemoveProjectedProducersNotShown
     {
         /// <inheritdoc />

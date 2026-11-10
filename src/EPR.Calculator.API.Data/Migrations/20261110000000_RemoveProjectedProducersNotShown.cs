@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.Data.Migrations
             // The same rule as CalcResultProjectedProducers.CompleteRamProducerIds: a producer whose H1 and H2 rows have
             // no tonnage without a RAM rating isn't shown in the projected producers sections. The rows are kept in
             // _bk tables so Down can restore them.
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(Exec(@"
                 DROP TABLE IF EXISTS #complete_ram_producers;
 
                 SELECT calculator_run_id, producer_id
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 DELETE h2 FROM transform_projected_h2 h2 JOIN transform_projected_h2_bk bk ON bk.id = h2.id;
 
                 DROP TABLE #complete_ram_producers;
-            ");
+            "));
         }
 
         /// <inheritdoc />
@@ -44,7 +44,8 @@ namespace EPR.Calculator.API.Data.Migrations
         {
             foreach (var table in new[] { "transform_projected_h1", "transform_projected_h2" })
             {
-                migrationBuilder.Sql($@"
+                // EXEC also gives each table's @columns its own scope, so the rollback script can run both in one batch.
+                migrationBuilder.Sql(Exec($@"
                     DECLARE @columns nvarchar(max) = (
                         SELECT STRING_AGG(QUOTENAME(name), ', ') WITHIN GROUP (ORDER BY column_id)
                         FROM sys.columns WHERE object_id = OBJECT_ID('{table}'));
@@ -52,8 +53,10 @@ namespace EPR.Calculator.API.Data.Migrations
                            INSERT INTO {table} (' + @columns + N') SELECT ' + @columns + N' FROM {table}_bk;
                            SET IDENTITY_INSERT {table} OFF;
                            DROP TABLE {table}_bk;');
-                ");
+                "));
             }
         }
+
+        private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";
     }
 }

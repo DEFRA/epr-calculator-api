@@ -43,12 +43,14 @@ namespace EPR.Calculator.API.Data.Migrations
         // SQL Server won't ALTER COLUMN between json and other types, so copy through a new column instead.
         private static void ConvertColumn(MigrationBuilder migrationBuilder, string table, string column, string type, string convertedValue)
         {
-            migrationBuilder.Sql($@"
+            migrationBuilder.Sql(Exec($@"
                 ALTER TABLE [{table}] ADD [{column}_converted] {type} NULL;
                 EXEC(N'UPDATE [{table}] SET [{column}_converted] = {convertedValue};');
                 ALTER TABLE [{table}] DROP COLUMN [{column}];
                 EXEC sp_rename N'[{table}].[{column}_converted]', N'{column}', N'COLUMN';
-                EXEC(N'ALTER TABLE [{table}] ALTER COLUMN [{column}] {type} NOT NULL;');");
+                EXEC(N'ALTER TABLE [{table}] ALTER COLUMN [{column}] {type} NOT NULL;');"));
         }
+
+        private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";
     }
 }

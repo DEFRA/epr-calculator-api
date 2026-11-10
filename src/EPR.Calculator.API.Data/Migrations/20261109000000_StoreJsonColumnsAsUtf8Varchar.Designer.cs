@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261014134859_StoreJsonColumnsAsUtf8Varchar")]
+    [Migration("20261109000000_StoreJsonColumnsAsUtf8Varchar")]
     partial class StoreJsonColumnsAsUtf8Varchar
     {
         /// <inheritdoc />
