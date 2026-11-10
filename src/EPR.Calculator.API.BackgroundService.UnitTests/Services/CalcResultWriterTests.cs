@@ -303,32 +303,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task StoreSmcw_WorksAsExpected()
-        {
-            var smcw = MkSelfManagedConsumerWaste(1);
-            var expectedProducer = smcw.ProducerTotals.Single();
-
-            await _sut.StoreSmcw(1, smcw, CancellationToken.None);
-
-            var stored = await _dbContext.SelfManagedConsumerWaste
-                .AsNoTracking()
-                .Include(s => s.ProducerTotals)
-                .SingleAsync();
-
-            stored.CalculatorRunId.ShouldBe(1);
-            stored.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage
-                .ShouldBe(smcw.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
-
-            // The producer rows are batch-inserted; confirm the nested owned-JSON round-trips.
-            var storedProducer = stored.ProducerTotals.Single();
-            storedProducer.ProducerId.ShouldBe(expectedProducer.ProducerId);
-            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage
-                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
-            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red
-                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red);
-        }
-
-        [TestMethod]
         public async Task StoreModulationResult_WorksAsExpected()
         {
             var modulation = MkModulationResult(1);
@@ -506,39 +480,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                     }
                 }
             };
-
-        private static SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
-        {
-            var smcwData = new SelfManagedConsumerWasteData
-            {
-                SmcwTonnage = 100,
-                ActionedSmcwTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 },
-                ResidualSmcwTonnage = 20,
-                NetTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 }
-            };
-
-            return new SelfManagedConsumerWaste
-            {
-                CalculatorRunId = runId,
-                ProducerTotals = new List<ProducerSelfManagedConsumerWaste>
-                {
-                    new()
-                    {
-                        ProducerId = 1,
-                        SubsidiaryId = "A",
-                        Level = 1,
-                        SmcwByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                        {
-                            [MaterialCodes.Aluminium] = smcwData
-                        }
-                    }
-                },
-                TotalByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                {
-                    [MaterialCodes.Aluminium] = smcwData
-                }
-            };
-        }
 
         private static ModulationResult MkModulationResult(int runId)
         {

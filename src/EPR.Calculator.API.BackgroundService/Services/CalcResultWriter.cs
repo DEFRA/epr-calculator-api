@@ -12,7 +12,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task StorePartialData(int runId, IReadOnlyList<CalcResultPartialObligation> partial, CancellationToken cancellationToken);
         Task StoreProducerMaterialPackaging(List<L1Producer> producerDetails, CancellationToken cancellationToken);
         Task StoreProducerFees(int runId, FeeDetail total, IReadOnlyList<FeeDetail> details, CancellationToken cancellationToken);
-        Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken);
         Task StoreModulationResult(int runId, ModulationResult modulation, CancellationToken cancellationToken);
         Task StoreLapcapData(int runId, CalcResultLapcapData lapcapData, CancellationToken cancellationToken);
         Task StoreCommsCost(int runId, CalcResultCommsCost commsCost, CancellationToken cancellationToken);
@@ -119,12 +118,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 f => f.Details, (f, d) => f.Details = d, (d, f) => d.ProducerFeesId = f.Id,
                 cancellationToken);
         }
-
-        [ActivityTrace]
-        public async Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken) =>
-            await SaveWithBatchedChildren(smcw,
-                s => s.ProducerTotals, (s, p) => s.ProducerTotals = p, (p, s) => p.SmcwId = s.Id,
-                cancellationToken);
 
         // EFCore.BulkExtensions' SqlBulkCopy path can't serialize the owned-JSON columns on SQL Server.
         // Inserts the parent alone, then the children through SaveChanges in bounded batches, clearing the change tracker between each.

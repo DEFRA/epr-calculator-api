@@ -52,8 +52,6 @@ namespace EPR.Calculator.API.BackgroundService.Models
 
         public IEnumerable<CalcResultErrorReport> CalcResultErrorReports { get; set; } = [];
 
-        public IReadOnlyDictionary<string, SelfManagedConsumerWasteData>? SmcwByMaterial { get; set; }
-
         public ModulationResult? CalcResultModulation { get; set; }
 
         public static CalcResult Empty =>

@@ -211,18 +211,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ReadSmcwByMaterial_WorksAsExpected()
-        {
-            var smcw = MkSelfManagedConsumerWaste(1);
-            _dbContext.Add(smcw);
-            await _dbContext.SaveChangesAsync();
-
-            var result = await _sut.ReadSmcwByMaterial(1, CancellationToken.None);
-
-            result[MaterialCodes.Aluminium].SmcwTonnage.ShouldBe(100);
-        }
-
-        [TestMethod]
         public async Task ReadModulationResult_WorksAsExpected()
         {
             var modulation = MkModulationResult(1);
@@ -455,39 +443,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                         TotalRedMaterialAtAmberDisposalCost = 400,
                         TotalGreenMaterialAtAmberDisposalCost = 500
                     }
-                }
-            };
-        }
-
-        private static SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
-        {
-            var smcwData = new SelfManagedConsumerWasteData
-            {
-                SmcwTonnage = 100,
-                ActionedSmcwTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 },
-                ResidualSmcwTonnage = 20,
-                NetTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 }
-            };
-
-            return new SelfManagedConsumerWaste
-            {
-                CalculatorRunId = runId,
-                ProducerTotals = new List<ProducerSelfManagedConsumerWaste>
-                {
-                    new()
-                    {
-                        ProducerId = 1,
-                        SubsidiaryId = "A",
-                        Level = 1,
-                        SmcwByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                        {
-                            [MaterialCodes.Aluminium] = smcwData
-                        }
-                    }
-                },
-                TotalByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                {
-                    [MaterialCodes.Aluminium] = smcwData
                 }
             };
         }

@@ -24,7 +24,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
         // Deferred - the query runs as the caller enumerates, so a downstream consumer streaming
         // straight to a CSV/JSON writer never holds every producer's fee graph in memory at once.
         IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
-        Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
         Task<CalcResultCommsCost> ReadCommsCost(int runId, CancellationToken cancellationToken);
@@ -231,17 +230,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             Converters = { new JsonStringEnumConverter() }
         };
-
-        [ActivityTrace]
-        public async Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken)
-        {
-            var smcw = await dbContext.SelfManagedConsumerWaste
-                    .AsNoTracking()
-                    .Where(p => p.CalculatorRunId == runId)
-                    .SingleAsync(cancellationToken);
-
-            return smcw.TotalByMaterial;
-        }
 
         [ActivityTrace]
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>

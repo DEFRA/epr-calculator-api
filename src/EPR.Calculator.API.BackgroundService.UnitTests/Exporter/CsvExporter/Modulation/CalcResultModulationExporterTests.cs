@@ -32,7 +32,8 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
                         HouseholdPackagingWasteTonnage = 26181753.110m,
                         PublicBinTonnage = 24610.429m,
                         HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 3500
+                        LateReportingTonnage = 3500,
+                        ActionedSelfManagedConsumerWasteTonnage = 6000m
                     },
                     [fc.Code] = new CalcResultLaDisposalCostDataDetail
                     {
@@ -40,30 +41,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
                         HouseholdPackagingWasteTonnage = 401772.341m,
                         PublicBinTonnage = 1146.546m,
                         HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 789
+                        LateReportingTonnage = 789,
+                        ActionedSelfManagedConsumerWasteTonnage = 0m
                     }
-                }
-            };
-
-            SelfManagedConsumerWasteData mkSmcwData(string materialCode, decimal netR, decimal netA, decimal netG, decimal? actionedSmcwR, decimal? actionedSmcwA, decimal? actionedSmcwG, decimal? residualSmcw)
-            {
-                return new SelfManagedConsumerWasteData
-                {
-                    SmcwTonnage = 0m,
-                    ActionedSmcwTonnage = new RamTonnageGroup { Total = (actionedSmcwR + actionedSmcwA + actionedSmcwG), Red = actionedSmcwR, Amber = actionedSmcwA, Green = actionedSmcwG },
-                    ResidualSmcwTonnage = residualSmcw,
-                    NetTonnage = new RamTonnageGroup { Total = (netR + netA + netG), Red = netR, Amber = netA, Green = netG }
-                };
-            };
-
-            var smcw = new SelfManagedConsumerWaste
-            {
-                CalculatorRunId = 1,
-                ProducerTotals = new List<ProducerSelfManagedConsumerWaste>(),
-                TotalByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                {
-                    [al.Code] = mkSmcwData(al.Code, netR: 21000000.123m, netA: 5000000.234m, netG: 209863.182m, actionedSmcwR: 1000, actionedSmcwA: 2000, actionedSmcwG: 3000, residualSmcw: 654.321m),
-                    [fc.Code] = mkSmcwData(fc.Code, netR:     3001.333m, netA:  400000.222m, netG:    706.332m, actionedSmcwR: null, actionedSmcwA: null, actionedSmcwG: null, residualSmcw: null    )
                 }
             };
 
@@ -102,7 +82,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
             var csvContent = new StringBuilder();
 
             // Act
-            exporter.Export(calcResultLaDisposalCostData, smcw.TotalByMaterial, modulationResult, csvContent);
+            exporter.Export(calcResultLaDisposalCostData, modulationResult, csvContent);
             var result = csvContent.ToString().ReplaceLineEndings("\n").Split("\n").Select(s => s.TrimEnd(',')).ToArray();
             //Console.WriteLine($">> {JsonConvert.SerializeObject(result, Formatting.Indented)}");
             Console.WriteLine(string.Join("\n", result));
