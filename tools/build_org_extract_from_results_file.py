@@ -35,7 +35,7 @@ concept of:
 
 KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
 -----------------------------------------------------------
-1. Two output rows per (producer, subsidiary): one for the "H1 Packaging
+1. Two output rows per producer (Level 1 - see decision 11): one for the "H1 Packaging
    Data - Submitted & Projected" section, one for "H2 Packaging Data -
    Submitted & Projected". This is not "splitting" a combined figure - the
    Results File already keeps H1 and H2 as separate per-period tables; we
@@ -84,10 +84,9 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     downstream RAM-gap filling treat each producer's entire tonnage as
     unrated and default it all to Red.
 
-4. Org_ID = Subsidiary ID when present, else Producer ID (each subsidiary is
-   its own org-data entity). Org_name is looked up from the "Calculation
-   Result" section's "Producer / Subsidiary Name" column for that exact
-   (Producer ID, Subsidiary ID) pair.
+4. Org_ID = Producer ID (only Level 1 rows are output - decision 11).
+   Org_name is looked up from the "Calculation Result" section's
+   "Producer / Subsidiary Name" column for that producer's Level 1 row.
 
 5. organisation_size is assumed 'L' throughout: this Results File / the SQL
    it was built to match is explicitly Large-producer-only
@@ -134,12 +133,15 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     actual value doesn't matter, so a single unvarying constant is used
     rather than inventing plausible-looking per-row data.
 
-11. Group subtotal rows are dropped. For a producer group, the H1/H2 and
-    Calculation Result sections each carry a Level 1 row (blank Subsidiary
-    ID) holding the sum of the group's Level 2 member rows. Outputting it
-    would count the group's tonnage twice, so only the Level 2 rows are
-    used. A Level 1 row with no Level 2 rows under it is a standalone
-    producer and is kept.
+11. Only Level 1 rows are output; Level 2 (subsidiary) rows are dropped.
+    For a producer group, the H1/H2 and Calculation Result sections each
+    carry a Level 1 row (blank Subsidiary ID) holding the sum of the
+    group's Level 2 member rows; a standalone producer is a Level 1 row
+    with nothing under it. Profic treats every org-data row as a Level 1
+    producer, so sending the Level 2 rows instead would stop SMCW being
+    shared across members of the same group. (An H1/H2 section always
+    lists every member of a group it lists, so its Level 1 row is the
+    full group total.)
 
 12. Partial-obligation pro-rating is undone. For a producer that joined
     or left during the year, Calculation Result's tonnages (and its Self-
@@ -148,7 +150,11 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     annual figures before that pro-rating, so for any producer listed there
     the calc-only totals/RAM breakdown of decision 3b and the SMCW of
     decision 3 are taken from it instead - keeping every row of the output
-    as reported, the same as the H1/H2 rows. Scaling-up of part-period
+    as reported, the same as the H1/H2 rows. That section lists individual
+    producers/subsidiaries with no group subtotals, so for a group with
+    partially-obligated members the Level 1 figures are rebuilt as the
+    Level 1 Calculation Result row with each such member's pro-rated
+    figures swapped for its Partial Obligation figures. Scaling-up of part-period
     submissions is NOT undone (it doesn't apply to 2026 runs), so for a run
     with scaling the calc-only figures of a scaled-up producer are still
     post-scaling.
@@ -419,22 +425,65 @@ def populate_material_columns(row_out, row_src, mcols, target_name, materials_wi
     # and no drinks-container weight for materials other than Glass.
 
 
-def drop_group_subtotals(rows, group, header):
+def cell(row, idx):
+    return row[idx].strip() if idx is not None and idx < len(row) else ""
+
+
+def split_levels(rows, group, header):
     """
-    Drops the Level 1 subtotal row of every producer group (design decision
-    11). A Level 1 row is a subtotal when the same Producer ID also has
-    Level 2 rows; a Level 1 row on its own is a standalone producer and is
-    kept.
+    Splits a section's rows into (level_1_rows, level_2_rows) - design
+    decision 11. A section with no Level column is treated as all Level 1.
     """
-    pid_idx = col_index(group, header, "", "Producer ID")
     level_idx = col_index(group, header, "", "Level")
     if level_idx is None:
-        return rows
-    grouped_pids = {row[pid_idx].strip() for row in rows if row[level_idx].strip() == "2"}
-    return [
-        row for row in rows
-        if not (row[level_idx].strip() == "1" and row[pid_idx].strip() in grouped_pids)
+        return rows, []
+    l1 = [row for row in rows if cell(row, level_idx) == "1"]
+    l2 = [row for row in rows if cell(row, level_idx) == "2"]
+    return l1, l2
+
+
+# Every annual figure read from a Calculation Result / Partial Obligation row,
+# as MaterialCols accessors - the columns adjusted when rebuilding a group's
+# pre-pro-rating total (design decision 12).
+ANNUAL_ACCESSORS = (
+    [MaterialCols.household_total, MaterialCols.public_bin_total, MaterialCols.drinks_total,
+     lambda m: m.idx("Self-managed Consumer Waste Tonnage")]
+    + [
+        (lambda s, f: (lambda m: f(m, s)))(s, f)
+        for s, _ in RAG_MAP + RAG_MEDICAL_MAP
+        for f in (MaterialCols.household_rag, MaterialCols.public_bin_rag, MaterialCols.drinks_rag)
     ]
+)
+
+
+def group_annual_row(l1_row, calc_group, calc_header, members, partial_group, partial_header):
+    """
+    A group's Level 1 Calculation Result row with each partially-obligated
+    member's pro-rated figures swapped for its pre-pro-rating Partial
+    Obligation figures, i.e.
+        L1 + sum over partial members of (partial row - Calculation Result row)
+    members is a list of (partial_row, calc_member_row). Returned in the
+    Calculation Result layout.
+    """
+    out = list(l1_row)
+    for src, _ in MATERIALS:
+        cm = MaterialCols(calc_group, calc_header, src)
+        pm = MaterialCols(partial_group, partial_header, src)
+        for accessor in ANNUAL_ACCESSORS:
+            ci, pi = accessor(cm), accessor(pm)
+            if ci is None or pi is None:
+                continue
+            values = [num(l1_row, ci)]
+            for partial_row, calc_row in members:
+                p, c = num(partial_row, pi), num(calc_row, ci)
+                values.append(p)
+                values.append(-c if c is not None else None)
+            if all(v is None for v in values):
+                continue
+            if ci >= len(out):
+                out.extend([""] * (ci + 1 - len(out)))
+            out[ci] = repr(sum(v for v in values if v is not None))
+    return out
 
 
 def main():
@@ -454,39 +503,66 @@ def main():
     h1_rows, h1_group, h1_header = build_section(lines, "H1 Packaging Data - Submitted and Projected")
     calc_rows, calc_group, calc_header = build_section(lines, "Calculation Result")
 
-    h2_rows = drop_group_subtotals(h2_rows, h2_group, h2_header)
-    h1_rows = drop_group_subtotals(h1_rows, h1_group, h1_header)
-    calc_rows = drop_group_subtotals(calc_rows, calc_group, calc_header)
+    # Design decision 11: only Level 1 rows are output.
+    h2_rows, _ = split_levels(h2_rows, h2_group, h2_header)
+    h1_rows, _ = split_levels(h1_rows, h1_group, h1_header)
+    calc_rows, calc_member_rows = split_levels(calc_rows, calc_group, calc_header)
 
     # Design decision 12. Older Results Files have no such section.
     try:
         partial_rows, partial_group, partial_header = build_section(lines, "Partial Obligation Calculation")
     except ValueError:
         partial_rows, partial_group, partial_header = [], [], []
-    partial_rows = drop_group_subtotals(partial_rows, partial_group, partial_header)
 
     calc_lookup = build_lookup(calc_rows, calc_group, calc_header)
-    partial_lookup = build_lookup(partial_rows, partial_group, partial_header)
+    calc_member_lookup = build_lookup(calc_member_rows, calc_group, calc_header)
     name_idx = col_index(calc_group, calc_header, "", "Producer / Subsidiary Name")
 
-    def annual_source(pid, sid):
+    # The Partial Obligation section has one row per partially-obligated
+    # producer/subsidiary and no group subtotals, so collect each group's
+    # partial members (paired with their Calculation Result rows) for
+    # group_annual_row. Rows for producers absent from Calculation Result
+    # (e.g. the section's "None" placeholder) are ignored.
+    grouped_pids = {pid for pid, _ in calc_member_lookup}
+    p_pid_idx = col_index(partial_group, partial_header, "", "Producer ID")
+    p_sid_idx = col_index(partial_group, partial_header, "", "Subsidiary ID")
+    partial_standalone = {}
+    partial_members = {}
+    for prow in partial_rows:
+        pid, sid = cell(prow, p_pid_idx), cell(prow, p_sid_idx)
+        if (pid, "") not in calc_lookup:
+            continue
+        if pid in grouped_pids:
+            partial_members.setdefault(pid, []).append((prow, calc_member_lookup.get((pid, sid), [])))
+        else:
+            partial_standalone[pid] = prow
+
+    def annual_source(pid):
         """
         The annual (H1+H2) row to take calc-only tonnages and SMCW from, with
-        its group/header: the pre-pro-rating Partial Obligation row if the
-        producer has one, else its Calculation Result row.
+        its group/header, before partial-obligation pro-rating: a standalone
+        producer's Partial Obligation row, a group's Level 1 row rebuilt
+        from its members' Partial Obligation rows, else the Level 1
+        Calculation Result row as-is.
         """
-        partial_row = partial_lookup.get((pid, sid))
-        if partial_row is not None:
-            return partial_row, partial_group, partial_header
-        return calc_lookup.get((pid, sid)), calc_group, calc_header
+        if pid in partial_standalone:
+            return partial_standalone[pid], partial_group, partial_header
+        calc_row = calc_lookup.get((pid, ""))
+        if pid in partial_members and calc_row is not None:
+            return (
+                group_annual_row(calc_row, calc_group, calc_header, partial_members[pid], partial_group, partial_header),
+                calc_group,
+                calc_header,
+            )
+        return calc_row, calc_group, calc_header
 
     def blank_row():
         return {h: "" for h in target_header}
 
-    def base_row(pid, sid, period_code, half):
+    def base_row(pid, period_code, half):
         row = blank_row()
-        row["Org_ID"] = sid if sid else pid
-        calc_row = calc_lookup.get((pid, sid))
+        row["Org_ID"] = pid
+        calc_row = calc_lookup.get((pid, ""))
         if calc_row is not None and name_idx is not None:
             row["Org_name"] = calc_row[name_idx].strip()
 
@@ -524,7 +600,7 @@ def main():
         row["los_cd_filename"] = DEFAULT_FILENAME
 
         if half == "H2":
-            src_row, src_group, src_header = annual_source(pid, sid)
+            src_row, src_group, src_header = annual_source(pid)
             for src, disp in MATERIALS:
                 idx = MaterialCols(src_group, src_header, src).idx("Self-managed Consumer Waste Tonnage")
                 if src_row is not None and idx is not None:
@@ -535,12 +611,12 @@ def main():
 
     period_col_idx_h2 = col_index(h2_group, h2_header, "", "Submission period code")
     pid_idx_h2 = col_index(h2_group, h2_header, "", "Producer ID")
-    sid_idx_h2 = col_index(h2_group, h2_header, "", "Subsidiary ID")
+    h2_keys = set()
     for r in h2_rows:
         pid = r[pid_idx_h2].strip()
-        sid = r[sid_idx_h2].strip()
         period_code = r[period_col_idx_h2].strip()
-        row_out = base_row(pid, sid, period_code, "H2")
+        h2_keys.add(pid)
+        row_out = base_row(pid, period_code, "H2")
         for src_material, disp in MATERIALS:
             mcols = MaterialCols(h2_group, h2_header, src_material)
             populate_material_columns(row_out, r, mcols, disp)
@@ -548,22 +624,16 @@ def main():
 
     period_col_idx_h1 = col_index(h1_group, h1_header, "", "Submission period code")
     pid_idx_h1 = col_index(h1_group, h1_header, "", "Producer ID")
-    sid_idx_h1 = col_index(h1_group, h1_header, "", "Subsidiary ID")
     h1_keys = set()
     for r in h1_rows:
         pid = r[pid_idx_h1].strip()
-        sid = r[sid_idx_h1].strip()
         period_code = r[period_col_idx_h1].strip()
-        h1_keys.add((pid, sid))
-        row_out = base_row(pid, sid, period_code, "H1")
+        h1_keys.add(pid)
+        row_out = base_row(pid, period_code, "H1")
         for src_material, disp in MATERIALS:
             mcols = MaterialCols(h1_group, h1_header, src_material)
             populate_material_columns(row_out, r, mcols, disp)
         out_rows.append(row_out)
-
-    h2_keys = set()
-    for r in h2_rows:
-        h2_keys.add((r[pid_idx_h2].strip(), r[sid_idx_h2].strip()))
 
     # Both sections cover a single H1/H2 pair per run - confirmed uniform
     # across every row in this Results File.
@@ -576,17 +646,17 @@ def main():
     # same two rows as everyone else, but sourced from the annual totals and
     # RAM breakdown (100% H2 / 0% H1) - see docstring.
     audited_keys = h1_keys | h2_keys
-    calc_only_keys = sorted(k for k in calc_lookup if k not in audited_keys)
-    for pid, sid in calc_only_keys:
-        src_row, src_group, src_header = annual_source(pid, sid)
+    calc_only_pids = sorted(pid for pid, _ in calc_lookup if pid not in audited_keys)
+    for pid in calc_only_pids:
+        src_row, src_group, src_header = annual_source(pid)
 
-        h2_row_out = base_row(pid, sid, period_code_h2, "H2")
+        h2_row_out = base_row(pid, period_code_h2, "H2")
         for src_material, disp in MATERIALS:
             mcols = MaterialCols(src_group, src_header, src_material)
             populate_material_columns(h2_row_out, src_row, mcols, disp)
         out_rows.append(h2_row_out)
 
-        h1_row_out = base_row(pid, sid, period_code_h1, "H1")
+        h1_row_out = base_row(pid, period_code_h1, "H1")
         out_rows.append(h1_row_out)
 
     with open(output_file, "w", newline="", encoding="utf-8") as f:
