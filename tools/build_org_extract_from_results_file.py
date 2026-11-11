@@ -125,7 +125,9 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
 10. Organisation registration/submission-metadata fields that have no
     signal anywhere in the Results File - CH_number, Nation_of_enrolment,
     Enrolment_date_time, Nation_of_Compliance_Scheme_regulator, the
-    Organisation_data_* first/latest submission metadata columns,
+    Organisation_data_* first/latest submission metadata columns, the
+    Packaging_data_* first/latest submission status, datetime and
+    CS_or_Direct columns,
     Single_File_Submission_* flags, and the fps/lps/fos/los filename
     columns - are hard-coded to a single fixed default value per column
     (see the DEFAULT_* constants), not derived or fabricated per-row. Per
@@ -170,13 +172,13 @@ from pathlib import Path
 
 MATERIALS = [
     ("Aluminium", "Aluminium"),
-    ("Fibre composite", "Fibre Composite"),
+    ("Fibre Composite", "Fibre Composite"),
     ("Glass", "Glass"),
-    ("Paper or card", "Paper / Card"),
+    ("Paper or Card", "Paper / Card"),
     ("Plastic", "Plastic"),
     ("Steel", "Steel"),
     ("Wood", "Wood"),
-    ("Other materials", "Other"),
+    ("Other Materials", "Other"),
 ]
 
 RAG_MAP = [
@@ -199,8 +201,15 @@ DEFAULT_NATION = "England"
 DEFAULT_DATETIME = "1900-01-01 00:00:00.000"
 DEFAULT_CS_OR_DIRECT = "DP"
 DEFAULT_SUBMISSION_STATUS = "GRANTED"
+DEFAULT_PACKAGING_SUBMISSION_STATUS = "ACCEPTED"
 DEFAULT_SINGLE_FILE_SUBMISSION = "N"
 DEFAULT_FILENAME = "N/A"
+
+# Default file locations, used when the corresponding command-line argument
+# (<results.csv> <out.csv> <header.csv>) is omitted. Relative paths are resolved against this script's directory.
+DEFAULT_RESULTS_FILE = "78-R180smoketest_Results File_20260720.csv"
+DEFAULT_OUTPUT_FILE = "v_extract_recent_pom_org_data_from_results.csv"
+DEFAULT_HEADER_FILE = "v_extract_recent_pom_org_data_header.csv"
 
 
 def load_rows(path):
@@ -488,13 +497,14 @@ def group_annual_row(l1_row, calc_group, calc_header, members, partial_group, pa
 
 def main():
     base = Path(__file__).resolve().parent
-    results_file = Path(sys.argv[1]) if len(sys.argv) > 1 else base / "78-R180smoketest_Results File_20260720.csv"
-    output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else base / "v_extract_recent_pom_org_data_from_results.csv"
+    results_file = Path(sys.argv[1]) if len(sys.argv) > 1 else base / DEFAULT_RESULTS_FILE
+    output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else base / DEFAULT_OUTPUT_FILE
+    header_file = Path(sys.argv[3]) if len(sys.argv) > 3 else base / DEFAULT_HEADER_FILE
 
     # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
     # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
     # keep this file in sync if that view's columns change.
-    with open(base / "v_extract_recent_pom_org_data_header.csv", newline="", encoding="utf-8") as f:
+    with open(header_file, newline="", encoding="utf-8") as f:
         target_header = next(csv.reader(f))
 
     lines = load_rows(results_file)
@@ -598,6 +608,12 @@ def main():
         row["lps_pm_filename"] = DEFAULT_FILENAME
         row["fos_cd_filename"] = DEFAULT_FILENAME
         row["los_cd_filename"] = DEFAULT_FILENAME
+
+        row["Packaging_data_first_submission_status"] = DEFAULT_PACKAGING_SUBMISSION_STATUS
+        row["Packaging_data_latest_submission_status"] = DEFAULT_PACKAGING_SUBMISSION_STATUS
+        row["Packaging_data_first_submission_datetime"] = DEFAULT_DATETIME
+        row["Packaging_data_latest_submission_datetime"] = DEFAULT_DATETIME
+        row["Packaging_data_latest_submitted_CS_or_Direct"] = DEFAULT_CS_OR_DIRECT
 
         if half == "H2":
             src_row, src_group, src_header = annual_source(pid)

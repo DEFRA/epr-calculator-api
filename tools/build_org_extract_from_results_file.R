@@ -24,13 +24,13 @@
 
 MATERIALS <- list(
   c(src = "Aluminium", disp = "Aluminium"),
-  c(src = "Fibre composite", disp = "Fibre Composite"),
+  c(src = "Fibre Composite", disp = "Fibre Composite"),
   c(src = "Glass", disp = "Glass"),
-  c(src = "Paper or card", disp = "Paper / Card"),
+  c(src = "Paper or Card", disp = "Paper / Card"),
   c(src = "Plastic", disp = "Plastic"),
   c(src = "Steel", disp = "Steel"),
   c(src = "Wood", disp = "Wood"),
-  c(src = "Other materials", disp = "Other")
+  c(src = "Other Materials", disp = "Other")
 )
 
 RAG_MAP <- list(
@@ -53,8 +53,15 @@ DEFAULT_NATION <- "England"
 DEFAULT_DATETIME <- "1900-01-01 00:00:00.000"
 DEFAULT_CS_OR_DIRECT <- "DP"
 DEFAULT_SUBMISSION_STATUS <- "GRANTED"
+DEFAULT_PACKAGING_SUBMISSION_STATUS <- "ACCEPTED"
 DEFAULT_SINGLE_FILE_SUBMISSION <- "N"
 DEFAULT_FILENAME <- "N/A"
+
+# Default file locations, used when the corresponding command-line argument
+# (<results.csv> <out.csv> <header.csv>) is omitted. Relative paths are resolved against this script's directory.
+DEFAULT_RESULTS_FILE <- "78-R180smoketest_Results File_20260720.csv"
+DEFAULT_OUTPUT_FILE <- "v_extract_recent_pom_org_data_from_results.csv"
+DEFAULT_HEADER_FILE <- "v_extract_recent_pom_org_data_header.csv"
 
 # Separator used to join (Producer ID, Subsidiary ID) into a single lookup
 # key. Unit Separator (0x1F) can't appear in the source data, so this can't
@@ -406,13 +413,14 @@ script_dir <- function() {
 main <- function() {
   base <- script_dir()
   argv <- commandArgs(trailingOnly = TRUE)
-  results_file <- if (length(argv) >= 1) argv[1] else file.path(base, "78-R180smoketest_Results File_20260720.csv")
-  output_file <- if (length(argv) >= 2) argv[2] else file.path(base, "v_extract_recent_pom_org_data_from_results.csv")
+  results_file <- if (length(argv) >= 1) argv[1] else file.path(base, DEFAULT_RESULTS_FILE)
+  output_file <- if (length(argv) >= 2) argv[2] else file.path(base, DEFAULT_OUTPUT_FILE)
+  header_file <- if (length(argv) >= 3) argv[3] else file.path(base, DEFAULT_HEADER_FILE)
 
   # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
   # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
   # keep this file in sync if that view's columns change.
-  target_header <- colnames(read.csv(file.path(base, "v_extract_recent_pom_org_data_header.csv"),
+  target_header <- colnames(read.csv(header_file,
                                       nrows = 0, check.names = FALSE, encoding = "UTF-8"))
 
   lines <- load_rows(results_file)
@@ -523,6 +531,12 @@ main <- function() {
     row[["lps_pm_filename"]] <- DEFAULT_FILENAME
     row[["fos_cd_filename"]] <- DEFAULT_FILENAME
     row[["los_cd_filename"]] <- DEFAULT_FILENAME
+
+    row[["Packaging_data_first_submission_status"]] <- DEFAULT_PACKAGING_SUBMISSION_STATUS
+    row[["Packaging_data_latest_submission_status"]] <- DEFAULT_PACKAGING_SUBMISSION_STATUS
+    row[["Packaging_data_first_submission_datetime"]] <- DEFAULT_DATETIME
+    row[["Packaging_data_latest_submission_datetime"]] <- DEFAULT_DATETIME
+    row[["Packaging_data_latest_submitted_CS_or_Direct"]] <- DEFAULT_CS_OR_DIRECT
 
     if (half == "H2") {
       src <- annual_source(pid)

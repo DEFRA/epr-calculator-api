@@ -19,9 +19,10 @@
           buildInputs = [ rEnv ];
         };
 
-        # `nix run .#build-org-extract -- <results.csv> <out.csv>` -- must be
+        # `nix run .#build-org-extract -- <results.csv> <out.csv> [<header.csv>]` -- must be
         # run from inside tools/. build_org_extract_from_results_file.R locates
-        # its own directory (to read the sibling v_extract_recent_pom_org_data_header.csv)
+        # its own directory (to read the sibling v_extract_recent_pom_org_data_header.csv
+        # when no <header.csv> is given)
         # the same way the Python original does, which only works against the
         # real checkout -- so this deliberately runs the in-tree script by a
         # plain relative path (resolved against $PWD) rather than a
