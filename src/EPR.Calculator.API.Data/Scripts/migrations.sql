@@ -9484,6 +9484,31 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'UPDATE x
+    SET late_reporting_tonnage = JSON_MODIFY(x.late_reporting_tonnage, ''$.Total'', JSON_QUERY(t.total_json))
+    FROM dbo.calc_result_late_reporting_tonnage x
+    CROSS APPLY (
+        SELECT (
+            SELECT ISNULL(SUM(m.Total), 0) AS Total,
+                   ISNULL(SUM(m.Red), 0)   AS Red,
+                   ISNULL(SUM(m.Amber), 0) AS Amber,
+                   ISNULL(SUM(m.Green), 0) AS Green
+            FROM OPENJSON(x.late_reporting_tonnage, ''$.MaterialTonnages'') WITH (
+                Total decimal(24, 6) ''$.Detail.Total'',
+                Red   decimal(24, 6) ''$.Detail.Red'',
+                Amber decimal(24, 6) ''$.Detail.Amber'',
+                Green decimal(24, 6) ''$.Detail.Green'') m
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE JSON_QUERY(x.late_reporting_tonnage, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

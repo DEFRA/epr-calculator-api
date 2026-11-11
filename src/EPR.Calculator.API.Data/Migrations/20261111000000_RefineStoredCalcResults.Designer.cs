@@ -3423,6 +3423,30 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLateReportingTonnageEntryId");
 
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLateReportingTonnageDetail", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLateReportingTonnageEntryId");
+
+                                    b2.Property<decimal>("Amber")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Green")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Red")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLateReportingTonnageEntryId");
+
+                                    b2.ToTable("calc_result_late_reporting_tonnage");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLateReportingTonnageEntryId");
+                                });
+
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLateReportingTonnageData", "MaterialTonnages", b2 =>
                                 {
                                     b2.Property<int>("CalcResultLateReportingTonnageEntryId");
@@ -3471,6 +3495,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                 });
 
                             b1.Navigation("MaterialTonnages");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LateReportingTonnage")

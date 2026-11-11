@@ -1,4 +1,5 @@
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -53,7 +54,7 @@ public class ThreeSaCostsProducerTests
         CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
         CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
-        CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage { ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>() },
+        CalcResultLateReportingTonnageData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>()),
         CalcResultProjectedProducers = new CalcResultProjectedProducers(){
             H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
             H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty,

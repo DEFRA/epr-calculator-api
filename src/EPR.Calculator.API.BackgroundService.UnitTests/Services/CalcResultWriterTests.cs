@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -433,13 +434,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultLateReportingTonnage MkLateReportingTonnage() =>
-            new()
+            CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>
-                {
-                    [MaterialCodes.Aluminium] = new CalcResultLateReportingTonnageDetail { Total = 10, Red = 2, Amber = 3, Green = 5 }
-                }
-            };
+                [MaterialCodes.Aluminium] = new CalcResultLateReportingTonnageDetail { Total = 10, Red = 2, Amber = 3, Green = 5 }
+            });
 
         private static CalcResultParameterOtherCost MkParameterOtherCost() =>
             new()

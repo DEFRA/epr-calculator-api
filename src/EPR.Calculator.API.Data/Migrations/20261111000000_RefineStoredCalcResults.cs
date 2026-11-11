@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.Data.Migrations
     public partial class RefineStoredCalcResults : Migration
     {
         private const string Money = "decimal(20, 3)";
+        private const string Tonnage = "decimal(24, 6)";
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,6 +47,27 @@ namespace EPR.Calculator.API.Data.Migrations
                 WHERE JSON_QUERY(x.lapcap, '$.Total') IS NULL
                 """));
 
+            migrationBuilder.Sql(Exec($"""
+                UPDATE x
+                SET late_reporting_tonnage = JSON_MODIFY(x.late_reporting_tonnage, '$.Total', JSON_QUERY(t.total_json))
+                FROM dbo.calc_result_late_reporting_tonnage x
+                CROSS APPLY (
+                    SELECT (
+                        SELECT ISNULL(SUM(m.Total), 0) AS Total,
+                               ISNULL(SUM(m.Red), 0)   AS Red,
+                               ISNULL(SUM(m.Amber), 0) AS Amber,
+                               ISNULL(SUM(m.Green), 0) AS Green
+                        FROM OPENJSON(x.late_reporting_tonnage, '$.MaterialTonnages') WITH (
+                            Total {Tonnage} '$.Detail.Total',
+                            Red   {Tonnage} '$.Detail.Red',
+                            Amber {Tonnage} '$.Detail.Amber',
+                            Green {Tonnage} '$.Detail.Green') m
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ) AS total_json
+                ) t
+                WHERE JSON_QUERY(x.late_reporting_tonnage, '$.Total') IS NULL
+                """));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -70,6 +92,11 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.Sql(Exec("""
                 UPDATE dbo.calc_result_lapcap_data
                 SET lapcap = JSON_MODIFY(JSON_MODIFY(lapcap, '$.Total', NULL), '$.CountryApportionment', NULL)
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE dbo.calc_result_late_reporting_tonnage
+                SET late_reporting_tonnage = JSON_MODIFY(late_reporting_tonnage, '$.Total', NULL)
                 """));
         }
 

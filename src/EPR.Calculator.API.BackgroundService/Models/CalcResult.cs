@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 
@@ -20,7 +21,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
             };
 
         public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; } =
-            new() { ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>() };
+            CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>());
 
 
         public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; } =
@@ -60,10 +61,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
             {
                 CalcResultDetail = new CalcResultDetail { RunId = 0, RelativeYear = new RelativeYear() } ,
                 CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
-                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
-                {
-                    ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()
-                },
+                CalcResultLateReportingTonnageData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>()),
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost(),
                 CalcResultPartialObligations = new CalcResultPartialObligations(){
                     PartialObligations = ImmutableList<CalcResultPartialObligation>.Empty,

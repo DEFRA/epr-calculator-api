@@ -1,4 +1,5 @@
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -240,20 +241,17 @@ public static partial class TestDataHelper
 
     public static CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage()
     {
-        return new CalcResultLateReportingTonnage
+        return CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>
-            {
-                ["AL"] = new() { Red = 1000.00m, Amber = 2000.00m, Green = 5000.00m, Total = 8000.00m },
-                ["FC"] = new() { Red =    5.00m, Amber =    0.00m, Green =    5.00m, Total =   10.00m },
-                ["GL"] = new() { Red =   10.00m, Amber =    0.00m, Green =    0.00m, Total =   10.00m },
-                ["PC"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["PL"] = new() { Red = 1000.00m, Amber =  500.00m, Green =  500.00m, Total = 2000.00m },
-                ["ST"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["WD"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["OT"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m }
-            }
-        };
+            ["AL"] = new() { Red = 1000.00m, Amber = 2000.00m, Green = 5000.00m, Total = 8000.00m },
+            ["FC"] = new() { Red =    5.00m, Amber =    0.00m, Green =    5.00m, Total =   10.00m },
+            ["GL"] = new() { Red =   10.00m, Amber =    0.00m, Green =    0.00m, Total =   10.00m },
+            ["PC"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["PL"] = new() { Red = 1000.00m, Amber =  500.00m, Green =  500.00m, Total = 2000.00m },
+            ["ST"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["WD"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["OT"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m }
+        });
     }
 
     public static ProducerFees GetProducerFees(bool applyModulation = false)

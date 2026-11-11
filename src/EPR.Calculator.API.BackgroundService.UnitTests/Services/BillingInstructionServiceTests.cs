@@ -1,4 +1,5 @@
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -50,10 +51,7 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
             {
                 SchemeSetupCost = ByCountryCost.Empty
             },
-            CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
-            {
-                ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()
-            },
+            CalcResultLateReportingTonnageData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>()),
             CalcResultCancelledProducers = new List<CalcResultCancelledProducer>
             {
                 new()
