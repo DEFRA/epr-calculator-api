@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Modulation;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -22,30 +23,27 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
         public void Modulation_Export_CSV()
         {
             // Arrange
-            var calcResultLaDisposalCostData = new CalcResultLaDisposalCostData
+            var calcResultLaDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
+                [al.Code] = new CalcResultLaDisposalCostDataDetail
                 {
-                    [al.Code] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = ByCountryCost.Empty,
-                        HouseholdPackagingWasteTonnage = 26181753.110m,
-                        PublicBinTonnage = 24610.429m,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 3500,
-                        ActionedSelfManagedConsumerWasteTonnage = 6000m
-                    },
-                    [fc.Code] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = ByCountryCost.Empty,
-                        HouseholdPackagingWasteTonnage = 401772.341m,
-                        PublicBinTonnage = 1146.546m,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 789,
-                        ActionedSelfManagedConsumerWasteTonnage = 0m
-                    }
+                    Cost = ByCountryCost.Empty,
+                    HouseholdPackagingWasteTonnage = 26181753.110m,
+                    PublicBinTonnage = 24610.429m,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 3500,
+                    ActionedSelfManagedConsumerWasteTonnage = 6000m
+                },
+                [fc.Code] = new CalcResultLaDisposalCostDataDetail
+                {
+                    Cost = ByCountryCost.Empty,
+                    HouseholdPackagingWasteTonnage = 401772.341m,
+                    PublicBinTonnage = 1146.546m,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 789,
+                    ActionedSelfManagedConsumerWasteTonnage = 0m
                 }
-            };
+            });
 
             var modulationResult = new ModulationResult
             {

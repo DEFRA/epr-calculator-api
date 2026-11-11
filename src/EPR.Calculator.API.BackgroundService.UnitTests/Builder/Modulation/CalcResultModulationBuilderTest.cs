@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.Modulation;
+﻿using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -95,20 +96,17 @@ public class CalcResultModulationBuilderTest
     [TestMethod]
     public async Task ModulationBuilder_TestCalculation()
     {
-        var laDisposalCostData = new CalcResultLaDisposalCostData
+        var laDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                [al.Code] = MkLaDisposalCost(100),
-                [fc.Code] = MkLaDisposalCost(130),
-                [gl.Code] = MkLaDisposalCost(150),
-                [pc.Code] = MkLaDisposalCost(200),
-                [pl.Code] = MkLaDisposalCost(250),
-                [st.Code] = MkLaDisposalCost(175),
-                [wd.Code] = MkLaDisposalCost(150),
-                [ot.Code] = MkLaDisposalCost(400)
-            }
-        };
+            [al.Code] = MkLaDisposalCost(100),
+            [fc.Code] = MkLaDisposalCost(130),
+            [gl.Code] = MkLaDisposalCost(150),
+            [pc.Code] = MkLaDisposalCost(200),
+            [pl.Code] = MkLaDisposalCost(250),
+            [st.Code] = MkLaDisposalCost(175),
+            [wd.Code] = MkLaDisposalCost(150),
+            [ot.Code] = MkLaDisposalCost(400)
+        });
 
         var smcw = new SelfManagedConsumerWaste
         {
@@ -179,20 +177,17 @@ public class CalcResultModulationBuilderTest
     [TestMethod]
     public async Task ModulationBuilder_TestCalculationRounding()
     {
-        var laDisposalCostData = new CalcResultLaDisposalCostData
+        var laDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                [al.Code] = MkLaDisposalCost(0.1508m),
-                [fc.Code] = MkLaDisposalCost(0.0045m),
-                [gl.Code] = MkLaDisposalCost(0.4961m),
-                [pc.Code] = MkLaDisposalCost(0.5788m),
-                [pl.Code] = MkLaDisposalCost(0.0057m),
-                [st.Code] = MkLaDisposalCost(0.2118m),
-                [wd.Code] = MkLaDisposalCost(0.1134m),
-                [ot.Code] = MkLaDisposalCost(0.0039m)
-            }
-        };
+            [al.Code] = MkLaDisposalCost(0.1508m),
+            [fc.Code] = MkLaDisposalCost(0.0045m),
+            [gl.Code] = MkLaDisposalCost(0.4961m),
+            [pc.Code] = MkLaDisposalCost(0.5788m),
+            [pl.Code] = MkLaDisposalCost(0.0057m),
+            [st.Code] = MkLaDisposalCost(0.2118m),
+            [wd.Code] = MkLaDisposalCost(0.1134m),
+            [ot.Code] = MkLaDisposalCost(0.0039m)
+        });
 
         var smcw = new SelfManagedConsumerWaste
         {
@@ -248,20 +243,17 @@ public class CalcResultModulationBuilderTest
     [TestMethod]
     public async Task ModulationBuilder_Factor1()
     {
-        var laDisposalCostData = new CalcResultLaDisposalCostData
+        var laDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                [al.Code] = MkLaDisposalCost(100),
-                [fc.Code] = MkLaDisposalCost(130),
-                [gl.Code] = MkLaDisposalCost(150),
-                [pc.Code] = MkLaDisposalCost(200),
-                [pl.Code] = MkLaDisposalCost(250),
-                [st.Code] = MkLaDisposalCost(175),
-                [wd.Code] = MkLaDisposalCost(150),
-                [ot.Code] = MkLaDisposalCost(400)
-            }
-        };
+            [al.Code] = MkLaDisposalCost(100),
+            [fc.Code] = MkLaDisposalCost(130),
+            [gl.Code] = MkLaDisposalCost(150),
+            [pc.Code] = MkLaDisposalCost(200),
+            [pl.Code] = MkLaDisposalCost(250),
+            [st.Code] = MkLaDisposalCost(175),
+            [wd.Code] = MkLaDisposalCost(150),
+            [ot.Code] = MkLaDisposalCost(400)
+        });
         var smcw = new SelfManagedConsumerWaste
         {
             CalculatorRunId = 1,
@@ -306,20 +298,17 @@ public class CalcResultModulationBuilderTest
     [TestMethod]
     public async Task ModulationBuilder_NoGreen()
     {
-        var laDisposalCostData = new CalcResultLaDisposalCostData
+        var laDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                [al.Code] = MkLaDisposalCost(100),
-                [fc.Code] = MkLaDisposalCost(130),
-                [gl.Code] = MkLaDisposalCost(150),
-                [pc.Code] = MkLaDisposalCost(200),
-                [pl.Code] = MkLaDisposalCost(250),
-                [st.Code] = MkLaDisposalCost(175),
-                [wd.Code] = MkLaDisposalCost(150),
-                [ot.Code] = MkLaDisposalCost(400)
-            }
-        };
+            [al.Code] = MkLaDisposalCost(100),
+            [fc.Code] = MkLaDisposalCost(130),
+            [gl.Code] = MkLaDisposalCost(150),
+            [pc.Code] = MkLaDisposalCost(200),
+            [pl.Code] = MkLaDisposalCost(250),
+            [st.Code] = MkLaDisposalCost(175),
+            [wd.Code] = MkLaDisposalCost(150),
+            [ot.Code] = MkLaDisposalCost(400)
+        });
         var smcw = new SelfManagedConsumerWaste
         {
             CalculatorRunId = 1,

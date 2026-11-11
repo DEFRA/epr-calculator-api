@@ -9509,6 +9509,73 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'UPDATE x
+    SET la_disposal_cost = JSON_MODIFY(JSON_MODIFY(x.la_disposal_cost,
+        ''$.MaterialCosts'', JSON_QUERY(a.materials_json)),
+        ''$.Total'', JSON_QUERY(t.total_json))
+    FROM dbo.calc_result_la_disposal_cost x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(JSON_MODIFY(m.value,
+                    ''$.Detail.TotalTonnage'', d.TotalTonnage),
+                    ''$.Detail.DisposalCostPricePerTonne'', d.DisposalCostPricePerTonne) AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY m.ord), '''') + '']'' AS materials_json,
+               ISNULL(SUM(v.England), 0)         AS England,
+               ISNULL(SUM(v.Wales), 0)           AS Wales,
+               ISNULL(SUM(v.Scotland), 0)        AS Scotland,
+               ISNULL(SUM(v.NorthernIreland), 0) AS NorthernIreland,
+               ISNULL(SUM(v.Household), 0)       AS Household,
+               ISNULL(SUM(v.PublicBin), 0)       AS PublicBin,
+               ISNULL(SUM(v.DrinkContainers), 0) AS DrinkContainers,
+               ISNULL(SUM(v.LateReporting), 0)   AS LateReporting,
+               ISNULL(SUM(v.Smcw), 0)            AS Smcw
+        FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.la_disposal_cost, ''$.MaterialCosts'')) m
+        CROSS APPLY OPENJSON(m.value, ''$.Detail'') WITH (
+            England         decimal(20, 3) ''$.Cost.England'',
+            Wales           decimal(20, 3) ''$.Cost.Wales'',
+            Scotland        decimal(20, 3) ''$.Cost.Scotland'',
+            NorthernIreland decimal(20, 3) ''$.Cost.NorthernIreland'',
+            Household       decimal(24, 6) ''$.HouseholdPackagingWasteTonnage'',
+            PublicBin       decimal(24, 6) ''$.PublicBinTonnage'',
+            DrinkContainers decimal(24, 6) ''$.HouseholdDrinkContainersTonnage'',
+            LateReporting   decimal(24, 6) ''$.LateReportingTonnage'',
+            Smcw            decimal(24, 6) ''$.ActionedSelfManagedConsumerWasteTonnage'') v
+        CROSS APPLY (
+            SELECT CAST(v.LateReporting + v.Household + v.PublicBin + v.DrinkContainers - ISNULL(v.Smcw, 0) AS decimal(24, 6)) AS TotalTonnage,
+                   CAST(v.England + v.Wales + v.Scotland + v.NorthernIreland AS decimal(20, 3)) AS Cost
+        ) c
+        CROSS APPLY (
+            SELECT c.TotalTonnage,
+                   CASE WHEN c.TotalTonnage = 0 THEN NULL ELSE ROUND(c.Cost / c.TotalTonnage, 4) END AS DisposalCostPricePerTonne
+        ) d
+    ) a
+    CROSS APPLY (
+        SELECT CAST(a.LateReporting + a.Household + a.PublicBin + a.DrinkContainers - a.Smcw AS decimal(24, 6)) AS TotalTonnage,
+               CAST(a.England + a.Wales + a.Scotland + a.NorthernIreland AS decimal(20, 3)) AS Cost
+    ) tc
+    CROSS APPLY (
+        SELECT (
+            SELECT a.England         AS [Cost.England],
+                   a.Wales           AS [Cost.Wales],
+                   a.Scotland        AS [Cost.Scotland],
+                   a.NorthernIreland AS [Cost.NorthernIreland],
+                   a.Household       AS HouseholdPackagingWasteTonnage,
+                   a.PublicBin       AS PublicBinTonnage,
+                   a.DrinkContainers AS HouseholdDrinkContainersTonnage,
+                   a.LateReporting   AS LateReportingTonnage,
+                   a.Smcw            AS ActionedSelfManagedConsumerWasteTonnage,
+                   tc.TotalTonnage   AS TotalTonnage,
+                   CASE WHEN tc.TotalTonnage = 0 THEN NULL ELSE ROUND(tc.Cost / tc.TotalTonnage, 4) END AS DisposalCostPricePerTonne
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE JSON_QUERY(x.la_disposal_cost, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

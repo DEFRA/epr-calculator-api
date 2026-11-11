@@ -3195,6 +3195,66 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLaDisposalCostDataEntryId");
 
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLaDisposalCostDataDetail", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.Property<decimal?>("ActionedSelfManagedConsumerWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal?>("DisposalCostPricePerTonne")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdDrinkContainersTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdPackagingWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("LateReportingTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PublicBinTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.ToTable("calc_result_la_disposal_cost");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b3 =>
+                                        {
+                                            b3.Property<int>("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+
+                                            b3.Property<decimal>("England")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("NorthernIreland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Wales")
+                                                .HasPrecision(18, 6);
+
+                                            b3.HasKey("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+
+                                            b3.ToTable("calc_result_la_disposal_cost");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+                                        });
+
+                                    b2.Navigation("Cost")
+                                        .IsRequired();
+                                });
+
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLaDisposalCostData", "MaterialCosts", b2 =>
                                 {
                                     b2.Property<int>("CalcResultLaDisposalCostDataEntryId");
@@ -3221,6 +3281,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal?>("ActionedSelfManagedConsumerWasteTonnage")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal?>("DisposalCostPricePerTonne")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("HouseholdDrinkContainersTonnage")
                                                 .HasPrecision(18, 6);
 
@@ -3231,6 +3294,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PublicBinTonnage")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("TotalTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.HasKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostData__synthesizedOrdinal");
@@ -3275,6 +3341,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                 });
 
                             b1.Navigation("MaterialCosts");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LaDisposalCost")

@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+﻿using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -461,21 +462,18 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultLaDisposalCostData MkLaDisposalCostData() =>
-            new()
+            CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
+                [MaterialCodes.Aluminium] = new CalcResultLaDisposalCostDataDetail
                 {
-                    [MaterialCodes.Aluminium] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                        HouseholdPackagingWasteTonnage = 10,
-                        PublicBinTonnage = 20,
-                        HouseholdDrinkContainersTonnage = 30,
-                        LateReportingTonnage = 5,
-                        ActionedSelfManagedConsumerWasteTonnage = 2
-                    }
+                    Cost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                    HouseholdPackagingWasteTonnage = 10,
+                    PublicBinTonnage = 20,
+                    HouseholdDrinkContainersTonnage = 30,
+                    LateReportingTonnage = 5,
+                    ActionedSelfManagedConsumerWasteTonnage = 2
                 }
-            };
+            });
 
         private static ModulationResult MkModulationResult(int runId)
         {

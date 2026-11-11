@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -102,27 +103,24 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.La
 
         private static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
         {
-            return new CalcResultLaDisposalCostData
+            return CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
+                ["AL"] = new CalcResultLaDisposalCostDataDetail
                 {
-                    ["AL"] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = new() { England = 100m, Wales = 50m, Scotland = 0m, NorthernIreland = 0m },
-                        HouseholdPackagingWasteTonnage = 0m,
-                        PublicBinTonnage = 0m,
-                        HouseholdDrinkContainersTonnage = 100.12345m
-                    },
-                    ["FC"] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = new() { England = 100m, Wales = 50m, Scotland = 0m, NorthernIreland = 0m },
-                        HouseholdPackagingWasteTonnage = 2m,
-                        PublicBinTonnage = 0m,
-                        HouseholdDrinkContainersTonnage = 0m,
-                        ActionedSelfManagedConsumerWasteTonnage = 1.23m
-                    }
+                    Cost = new() { England = 100m, Wales = 50m, Scotland = 0m, NorthernIreland = 0m },
+                    HouseholdPackagingWasteTonnage = 0m,
+                    PublicBinTonnage = 0m,
+                    HouseholdDrinkContainersTonnage = 100.12345m
+                },
+                ["FC"] = new CalcResultLaDisposalCostDataDetail
+                {
+                    Cost = new() { England = 100m, Wales = 50m, Scotland = 0m, NorthernIreland = 0m },
+                    HouseholdPackagingWasteTonnage = 2m,
+                    PublicBinTonnage = 0m,
+                    HouseholdDrinkContainersTonnage = 0m,
+                    ActionedSelfManagedConsumerWasteTonnage = 1.23m
                 }
-            };
+            });
         }
     }
 }

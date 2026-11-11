@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Constants;
@@ -98,84 +99,81 @@ public static partial class TestDataHelper
 
     public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
     {
-        return new CalcResultLaDisposalCostData
+        return CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                ["AL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 5000, Wales = 1750, Scotland = 2000, NorthernIreland = 1250 },
-                        HouseholdPackagingWasteTonnage = 6980,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 8000
-                    },
-                ["FC"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 7500, Wales = 2100, Scotland = 3400, NorthernIreland = 1750 },
-                        HouseholdPackagingWasteTonnage = 11850,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 7000
-                    },
-                ["GL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 45000, Wales = 0, Scotland = 20700, NorthernIreland = 4500 },
-                        HouseholdPackagingWasteTonnage = 4900,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 100,
-                        LateReportingTonnage = 6000
-                    },
-                ["PC"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 12500, Wales = 2300, Scotland = 4500, NorthernIreland = 3400 },
-                        HouseholdPackagingWasteTonnage = 4270,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 5000
-                    },
-                ["PL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 23000, Wales = 4500, Scotland = 6700, NorthernIreland = 2100 },
-                        HouseholdPackagingWasteTonnage = 12805,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 4000
-                    },
-                ["ST"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 13400, Wales = 0, Scotland = 7800, NorthernIreland = 0 },
-                        HouseholdPackagingWasteTonnage = 7700,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 3000
-                    },
-                ["WD"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 0, Wales = 12000, Scotland = 0, NorthernIreland = 5600 },
-                        HouseholdPackagingWasteTonnage = 6800,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 2000
-                    },
-                ["OT"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 3400, Wales = 2100, Scotland = 4200, NorthernIreland = 700 },
-                        HouseholdPackagingWasteTonnage = 7700,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 1000
-                    }
-            }
-        };
+            ["AL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 5000, Wales = 1750, Scotland = 2000, NorthernIreland = 1250 },
+                    HouseholdPackagingWasteTonnage = 6980,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 8000
+                },
+            ["FC"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 7500, Wales = 2100, Scotland = 3400, NorthernIreland = 1750 },
+                    HouseholdPackagingWasteTonnage = 11850,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 7000
+                },
+            ["GL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 45000, Wales = 0, Scotland = 20700, NorthernIreland = 4500 },
+                    HouseholdPackagingWasteTonnage = 4900,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 100,
+                    LateReportingTonnage = 6000
+                },
+            ["PC"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 12500, Wales = 2300, Scotland = 4500, NorthernIreland = 3400 },
+                    HouseholdPackagingWasteTonnage = 4270,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 5000
+                },
+            ["PL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 23000, Wales = 4500, Scotland = 6700, NorthernIreland = 2100 },
+                    HouseholdPackagingWasteTonnage = 12805,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 4000
+                },
+            ["ST"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 13400, Wales = 0, Scotland = 7800, NorthernIreland = 0 },
+                    HouseholdPackagingWasteTonnage = 7700,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 3000
+                },
+            ["WD"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 0, Wales = 12000, Scotland = 0, NorthernIreland = 5600 },
+                    HouseholdPackagingWasteTonnage = 6800,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 2000
+                },
+            ["OT"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 3400, Wales = 2100, Scotland = 4200, NorthernIreland = 700 },
+                    HouseholdPackagingWasteTonnage = 7700,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 1000
+                }
+        });
     }
 
     public static CalcResultLapcapData GetCalcResultLapcapData()
