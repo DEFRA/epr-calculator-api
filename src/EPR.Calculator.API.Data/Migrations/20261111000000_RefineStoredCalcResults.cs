@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.Migrations
     {
         private const string Money = "decimal(20, 3)";
         private const string Tonnage = "decimal(24, 6)";
+        private const string FullPrecisionMoney = "decimal(38, 28)";
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -131,6 +132,68 @@ namespace EPR.Calculator.API.Data.Migrations
                 WHERE JSON_QUERY(x.la_disposal_cost, '$.Total') IS NULL
                 """));
 
+            migrationBuilder.Sql(Exec($"""
+                UPDATE x
+                SET comms_cost = JSON_MODIFY(JSON_MODIFY(x.comms_cost,
+                    '$.MaterialCosts', JSON_QUERY(a.materials_json)),
+                    '$.Total', JSON_QUERY(t.total_json))
+                FROM dbo.calc_result_comms_cost x
+                CROSS APPLY (
+                    SELECT '[' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(JSON_MODIFY(m.value,
+                                '$.CommsCost.TotalTonnage', d.TotalTonnage),
+                                '$.CommsCost.PricePerTonne', d.PricePerTonne) AS nvarchar(max)), ',')
+                                WITHIN GROUP (ORDER BY m.ord), '') + ']' AS materials_json,
+                           ISNULL(SUM(v.England), 0)         AS England,
+                           ISNULL(SUM(v.Wales), 0)           AS Wales,
+                           ISNULL(SUM(v.Scotland), 0)        AS Scotland,
+                           ISNULL(SUM(v.NorthernIreland), 0) AS NorthernIreland,
+                           ISNULL(SUM(v.TotalCost), 0)       AS TotalCost,
+                           ISNULL(SUM(v.Household), 0)       AS Household,
+                           ISNULL(SUM(v.PublicBin), 0)       AS PublicBin,
+                           ISNULL(SUM(v.DrinksContainers), 0) AS DrinksContainers,
+                           ISNULL(SUM(v.LateReporting), 0)   AS LateReporting
+                    FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.comms_cost, '$.MaterialCosts')) m
+                    CROSS APPLY OPENJSON(m.value, '$.CommsCost') WITH (
+                        England          {FullPrecisionMoney} '$.Cost.England',
+                        Wales            {FullPrecisionMoney} '$.Cost.Wales',
+                        Scotland         {FullPrecisionMoney} '$.Cost.Scotland',
+                        NorthernIreland  {FullPrecisionMoney} '$.Cost.NorthernIreland',
+                        TotalCost        {Money}  '$.TotalCost',
+                        Household        {Tonnage}  '$.HouseholdPackagingWasteTonnage',
+                        PublicBin        {Tonnage}  '$.PublicBinTonnage',
+                        DrinksContainers {Tonnage}  '$.HouseholdDrinksContainersTonnage',
+                        LateReporting    {Tonnage}  '$.LateReportingTonnage') v
+                    CROSS APPLY (
+                        SELECT CAST(v.Household + v.LateReporting + v.PublicBin + v.DrinksContainers AS {Tonnage}) AS TotalTonnage
+                    ) c
+                    CROSS APPLY (
+                        SELECT c.TotalTonnage,
+                               CASE WHEN c.TotalTonnage = 0 THEN 0 ELSE ROUND(v.TotalCost / c.TotalTonnage, 4) END AS PricePerTonne
+                    ) d
+                ) a
+                CROSS APPLY (
+                    SELECT CAST(a.Household + a.LateReporting + a.PublicBin + a.DrinksContainers AS {Tonnage}) AS TotalTonnage,
+                           CAST(a.TotalCost AS {Money}) AS TotalCost
+                ) tc
+                CROSS APPLY (
+                    SELECT (
+                        SELECT a.England          AS [Cost.England],
+                               a.Wales            AS [Cost.Wales],
+                               a.Scotland         AS [Cost.Scotland],
+                               a.NorthernIreland  AS [Cost.NorthernIreland],
+                               a.TotalCost        AS TotalCost,
+                               a.Household        AS HouseholdPackagingWasteTonnage,
+                               a.PublicBin        AS PublicBinTonnage,
+                               a.DrinksContainers AS HouseholdDrinksContainersTonnage,
+                               a.LateReporting    AS LateReportingTonnage,
+                               tc.TotalTonnage    AS TotalTonnage,
+                               CASE WHEN tc.TotalTonnage = 0 THEN 0 ELSE ROUND(tc.TotalCost / tc.TotalTonnage, 4) END AS PricePerTonne
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ) AS total_json
+                ) t
+                WHERE JSON_QUERY(x.comms_cost, '$.Total') IS NULL
+                """));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -174,6 +237,21 @@ namespace EPR.Calculator.API.Data.Migrations
                                 '$.Detail.DisposalCostPricePerTonne', NULL) AS nvarchar(max)), ',')
                                 WITHIN GROUP (ORDER BY CAST(m.[key] AS int)), '') + ']' AS materials_json
                     FROM OPENJSON(x.la_disposal_cost, '$.MaterialCosts') m
+                ) a
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE x
+                SET comms_cost = JSON_MODIFY(JSON_MODIFY(x.comms_cost,
+                    '$.MaterialCosts', JSON_QUERY(a.materials_json)),
+                    '$.Total', NULL)
+                FROM dbo.calc_result_comms_cost x
+                CROSS APPLY (
+                    SELECT '[' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(JSON_MODIFY(m.value,
+                                '$.CommsCost.TotalTonnage', NULL),
+                                '$.CommsCost.PricePerTonne', NULL) AS nvarchar(max)), ',')
+                                WITHIN GROUP (ORDER BY CAST(m.[key] AS int)), '') + ']' AS materials_json
+                    FROM OPENJSON(x.comms_cost, '$.MaterialCosts') m
                 ) a
                 """));
         }

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
@@ -202,16 +203,15 @@ public static partial class TestDataHelper
 
     public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
     {
-        return new CalcResultCommsCost
-        {
-            OnePlusFourApportionment = new ByCountryApportionment
+        return CalcResultCommsCostBuilder.Create(
+            onePlusFourApportionment: new ByCountryApportionment
             {
                 England         = 50.23m,
                 Wales           = 30.34m,
                 Scotland        = 10.45m,
                 NorthernIreland = 8.98m
             },
-            ByMaterial = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
+            byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
             {
                 ["AL"] = new()
                 {
@@ -232,9 +232,8 @@ public static partial class TestDataHelper
                     LateReportingTonnage = 4.56m
                 }
             },
-            CommsCostUkWide    = new ByCountryCost { England = 1500, Wales = 200, Scotland = 500, NorthernIreland = 331 },
-            CommsCostByCountry = new ByCountryCost { England = 1400, Wales = 250, Scotland = 600, NorthernIreland = 280 }
-        };
+            commsCostUkWide:          new ByCountryCost { England = 1500, Wales = 200, Scotland = 500, NorthernIreland = 331 },
+            commsCostByCountry:       new ByCountryCost { England = 1400, Wales = 250, Scotland = 600, NorthernIreland = 280 });
     }
 
     public static CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage()

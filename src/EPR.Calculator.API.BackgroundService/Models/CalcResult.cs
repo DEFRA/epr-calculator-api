@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Data.DataModels;
@@ -14,12 +15,11 @@ namespace EPR.Calculator.API.BackgroundService.Models
             CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>());
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; } =
-            new() {
-                OnePlusFourApportionment = ByCountryApportionment.Empty,
-                ByMaterial               = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>(),
-                CommsCostUkWide          = ByCountryCost.Empty,
-                CommsCostByCountry       = ByCountryCost.Empty
-            };
+            CalcResultCommsCostBuilder.Create(
+                onePlusFourApportionment: ByCountryApportionment.Empty,
+                byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>(),
+                commsCostUkWide:          ByCountryCost.Empty,
+                commsCostByCountry:       ByCountryCost.Empty);
 
         public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; } =
             CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>());

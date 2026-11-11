@@ -3083,6 +3083,66 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasForeignKey("CalcResultCommsCostEntryId");
                                 });
 
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultCommsCostCommsCostByMaterial", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
+
+                                    b2.Property<decimal>("HouseholdDrinksContainersTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdPackagingWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("LateReportingTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PricePerTonne")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PublicBinTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalCost")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultCommsCostEntryId");
+
+                                    b2.ToTable("calc_result_comms_cost");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultCommsCostEntryId");
+
+                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b3 =>
+                                        {
+                                            b3.Property<int>("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+
+                                            b3.Property<decimal>("England")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("NorthernIreland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Wales")
+                                                .HasPrecision(18, 6);
+
+                                            b3.HasKey("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+
+                                            b3.ToTable("calc_result_comms_cost");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+                                        });
+
+                                    b2.Navigation("Cost")
+                                        .IsRequired();
+                                });
+
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialCommsCostData", "MaterialCosts", b2 =>
                                 {
                                     b2.Property<int>("CalcResultCommsCostEntryId");
@@ -3115,10 +3175,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("LateReportingTonnage")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("PricePerTonne")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("PublicBinTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("TotalCost")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("TotalTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.HasKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostData__synthesizedOrdinal");
@@ -3171,6 +3237,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Navigation("MaterialCosts");
 
                             b1.Navigation("OnePlusFourApportionment")
+                                .IsRequired();
+
+                            b1.Navigation("Total")
                                 .IsRequired();
                         });
 

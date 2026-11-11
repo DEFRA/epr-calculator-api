@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Constants;
@@ -415,10 +416,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             });
 
         private static CalcResultCommsCost MkCommsCost() =>
-            new()
-            {
-                OnePlusFourApportionment = new ByCountryApportionment { England = 25, Wales = 25, Scotland = 25, NorthernIreland = 25 },
-                ByMaterial = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
+            CalcResultCommsCostBuilder.Create(
+                onePlusFourApportionment: new ByCountryApportionment { England = 25, Wales = 25, Scotland = 25, NorthernIreland = 25 },
+                byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
                 {
                     [MaterialCodes.Aluminium] = new CalcResultCommsCostCommsCostByMaterial
                     {
@@ -430,9 +430,8 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                         LateReportingTonnage = 4
                     }
                 },
-                CommsCostUkWide = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                CommsCostByCountry = new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 }
-            };
+                commsCostUkWide:          new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                commsCostByCountry:       new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 });
 
         private static CalcResultLateReportingTonnage MkLateReportingTonnage() =>
             CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
