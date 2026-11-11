@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
+﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -27,19 +28,16 @@ public class CalcResultOnePlusFourApportionmentBuilderTest : CalcResultOnePlusFo
             CalcResultPartialObligations = new CalcResultPartialObligations(){
                     PartialObligations = ImmutableList<CalcResultPartialObligation>.Empty,
                 },
-            CalcResultLapcapData = new CalcResultLapcapData
+            CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
             {
-                ByMaterial = new Dictionary<string, ByCountryCost>
+                ["AL"] = new()
                 {
-                    ["AL"] = new()
-                    {
-                        England = 13280.45m,
-                        Wales = 210.28m,
-                        Scotland = 91.00m,
-                        NorthernIreland = 91.00m
-                    }
+                    England = 13280.45m,
+                    Wales = 210.28m,
+                    Scotland = 91.00m,
+                    NorthernIreland = 91.00m
                 }
-            },
+            }),
 
             CalcResultParameterOtherCost = new CalcResultParameterOtherCost
             {

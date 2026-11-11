@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -44,10 +45,7 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
                 RunName = "RunName",
                 RelativeYear = new RelativeYear(2024)
             },
-            CalcResultLapcapData = new CalcResultLapcapData
-            {
-                ByMaterial = new Dictionary<string, ByCountryCost>()
-            },
+            CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
             CalcResultParameterOtherCost = new CalcResultParameterOtherCost
             {
                 SchemeSetupCost = ByCountryCost.Empty

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -29,7 +30,7 @@ public class LaDataPrepCostsProducerTests
         },
         CalcResultDetail = new CalcResultDetail { RunId = 1, RelativeYear = new RelativeYear(2024) },
         CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData { ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>() },
-        CalcResultLapcapData = new CalcResultLapcapData { ByMaterial = new Dictionary<string, ByCountryCost>() },
+        CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
         CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment
         {
             LaDisposalCost = new ByCountryCost { England = 0.10M, Wales = 20M, Scotland = 0.15M, NorthernIreland = 0.15M },

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -178,20 +179,17 @@ public static partial class TestDataHelper
 
     public static CalcResultLapcapData GetCalcResultLapcapData()
     {
-        return new CalcResultLapcapData
+        return CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
         {
-            ByMaterial = new Dictionary<string, ByCountryCost>
-            {
-                ["AL"] = new() { England =  5000, Wales =  1750, Scotland =  2000, NorthernIreland = 1250 },
-                ["FC"] = new() { England =  7500, Wales =  2100, Scotland =  3400, NorthernIreland = 1750 },
-                ["GL"] = new() { England = 45000, Wales =     0, Scotland = 20700, NorthernIreland = 4500 },
-                ["PC"] = new() { England = 12500, Wales =  2300, Scotland =  4500, NorthernIreland = 3400 },
-                ["PL"] = new() { England = 23000, Wales =  4500, Scotland =  6700, NorthernIreland = 2100 },
-                ["ST"] = new() { England = 13400, Wales =     0, Scotland =  7800, NorthernIreland =    0 },
-                ["WD"] = new() { England =     0, Wales = 12000, Scotland =     0, NorthernIreland = 5600 },
-                ["OT"] = new() { England =  3400, Wales =  2100, Scotland =  4200, NorthernIreland =  700 }
-            }
-        };
+            ["AL"] = new() { England =  5000, Wales =  1750, Scotland =  2000, NorthernIreland = 1250 },
+            ["FC"] = new() { England =  7500, Wales =  2100, Scotland =  3400, NorthernIreland = 1750 },
+            ["GL"] = new() { England = 45000, Wales =     0, Scotland = 20700, NorthernIreland = 4500 },
+            ["PC"] = new() { England = 12500, Wales =  2300, Scotland =  4500, NorthernIreland = 3400 },
+            ["PL"] = new() { England = 23000, Wales =  4500, Scotland =  6700, NorthernIreland = 2100 },
+            ["ST"] = new() { England = 13400, Wales =     0, Scotland =  7800, NorthernIreland =    0 },
+            ["WD"] = new() { England =     0, Wales = 12000, Scotland =     0, NorthernIreland = 5600 },
+            ["OT"] = new() { England =  3400, Wales =  2100, Scotland =  4200, NorthernIreland =  700 }
+        });
     }
 
     public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()

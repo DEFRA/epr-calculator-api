@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.Summary;
+﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -49,10 +50,7 @@ public class SaSetupCostsProducerTests
                     }
             }
         },
-        CalcResultLapcapData = new CalcResultLapcapData
-        {
-            ByMaterial = new Dictionary<string, ByCountryCost>()
-        },
+        CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
         CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
         CalcResultLateReportingTonnageData = TestDataHelper.GetCalcResultLateReportingTonnage(),

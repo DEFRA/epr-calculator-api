@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -346,13 +347,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultLapcapData MkLapcapData() =>
-            new()
+            CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
             {
-                ByMaterial = new Dictionary<string, ByCountryCost>
-                {
-                    [MaterialCodes.Aluminium] = new ByCountryCost { England = 10, Wales = 20, Scotland = 30, NorthernIreland = 40 }
-                }
-            };
+                [MaterialCodes.Aluminium] = new ByCountryCost { England = 10, Wales = 20, Scotland = 30, NorthernIreland = 40 }
+            });
 
         private static CalcResultCommsCost MkCommsCost() =>
             new()

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -49,10 +50,7 @@ public class ThreeSaCostsProducerTests
                     }
             }
         },
-        CalcResultLapcapData = new CalcResultLapcapData
-        {
-            ByMaterial = new Dictionary<string, ByCountryCost>()
-        },
+        CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
         CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
         CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage { ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>() },

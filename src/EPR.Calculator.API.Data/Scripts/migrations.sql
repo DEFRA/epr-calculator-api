@@ -9444,7 +9444,44 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261111000000_BackUpSmcwTables'
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET lapcap = JSON_MODIFY(JSON_MODIFY(x.lapcap,
+        ''$.Total'', JSON_QUERY(t.total_json)),
+        ''$.CountryApportionment'', JSON_QUERY(a.apportionment_json))
+    FROM dbo.calc_result_lapcap_data x
+    CROSS APPLY (
+        SELECT CAST(ISNULL(SUM(m.England), 0)         AS decimal(20, 3)) AS England,
+               CAST(ISNULL(SUM(m.Wales), 0)           AS decimal(20, 3)) AS Wales,
+               CAST(ISNULL(SUM(m.Scotland), 0)        AS decimal(20, 3)) AS Scotland,
+               CAST(ISNULL(SUM(m.NorthernIreland), 0) AS decimal(20, 3)) AS NorthernIreland
+        FROM OPENJSON(x.lapcap, ''$.MaterialCosts'') WITH (
+            England         decimal(20, 3) ''$.Cost.England'',
+            Wales           decimal(20, 3) ''$.Cost.Wales'',
+            Scotland        decimal(20, 3) ''$.Cost.Scotland'',
+            NorthernIreland decimal(20, 3) ''$.Cost.NorthernIreland'') m
+    ) s
+    CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS decimal(20, 3)) AS uk) u
+    CROSS APPLY (
+        SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+    ) t
+    CROSS APPLY (
+        SELECT (
+            SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS apportionment_json
+    ) a
+    WHERE JSON_QUERY(x.lapcap, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
@@ -9452,7 +9489,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261111000000_BackUpSmcwTables'
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
     EXEC sp_rename N'[calc_result_smcw]', N'calc_result_smcw_bk', 'OBJECT';
@@ -9460,11 +9497,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20261111000000_BackUpSmcwTables'
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20261111000000_BackUpSmcwTables', N'10.0.11');
+    VALUES (N'20261111000000_RefineStoredCalcResults', N'10.0.11');
 END;
 
 COMMIT;

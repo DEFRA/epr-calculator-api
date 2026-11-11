@@ -61,9 +61,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
                 })
             ).ToDictionary();
 
-            var lapcapData = new CalcResultLapcapData {
-                ByMaterial = data
-            };
+            var lapcapData = Create(data);
 
             if(runContext.RunType == RunType.Calculator)
             {
@@ -82,6 +80,35 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
             return lapcapData;
         }
 #pragma warning restore
+
+        public static CalcResultLapcapData Create(IReadOnlyDictionary<string, ByCountryCost> byMaterial)
+        {
+            var total = ByCountryCost.Sum([.. byMaterial.Values]);
+            return new CalcResultLapcapData
+            {
+                ByMaterial           = byMaterial,
+                Total                = total,
+                CountryApportionment = GetCountryApportionment(total)
+            };
+        }
+
+        private static ByCountryApportionment GetCountryApportionment(ByCountryCost total)
+        {
+            if (total.Total == 0)
+            {
+                return ByCountryApportionment.Empty;
+            }
+
+            decimal Percentage(decimal value) => value / total.Total * 100;
+
+            return new ByCountryApportionment
+            {
+                England         = Percentage(total.England),
+                Wales           = Percentage(total.Wales),
+                Scotland        = Percentage(total.Scotland),
+                NorthernIreland = Percentage(total.NorthernIreland)
+            };
+        }
 
         internal static decimal GetMaterialDisposalCostPerCountry(string country, MaterialDetail material, IEnumerable<ResultsClass> results)
         {

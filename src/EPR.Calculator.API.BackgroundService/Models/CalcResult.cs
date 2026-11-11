@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.Models
@@ -8,7 +9,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
         public required CalcResultDetail CalcResultDetail { get; set; }
 
         public required CalcResultLapcapData CalcResultLapcapData { get; set; } =
-            new() { ByMaterial = new Dictionary<string, ByCountryCost>() };
+            CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>());
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; } =
             new() {
@@ -58,10 +59,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
             new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail { RunId = 0, RelativeYear = new RelativeYear() } ,
-                CalcResultLapcapData = new CalcResultLapcapData
-                {
-                    ByMaterial = new Dictionary<string, ByCountryCost>()
-                },
+                CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
                 CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
                 {
                     ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()

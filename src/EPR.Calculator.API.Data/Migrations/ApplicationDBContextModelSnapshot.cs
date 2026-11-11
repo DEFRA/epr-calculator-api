@@ -3295,6 +3295,54 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLapcapDataEntryId");
 
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "CountryApportionment", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLapcapDataEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLapcapDataEntryId");
+
+                                    b2.ToTable("calc_result_lapcap_data");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLapcapDataEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLapcapDataEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLapcapDataEntryId");
+
+                                    b2.ToTable("calc_result_lapcap_data");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLapcapDataEntryId");
+                                });
+
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLapcapData", "MaterialCosts", b2 =>
                                 {
                                     b2.Property<int>("CalcResultLapcapDataEntryId");
@@ -3342,7 +3390,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .IsRequired();
                                 });
 
+                            b1.Navigation("CountryApportionment")
+                                .IsRequired();
+
                             b1.Navigation("MaterialCosts");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LapcapData")

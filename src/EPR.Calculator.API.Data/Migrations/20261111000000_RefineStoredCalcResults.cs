@@ -1,0 +1,78 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace EPR.Calculator.API.Data.Migrations
+{
+    /// <inheritdoc />
+    public partial class RefineStoredCalcResults : Migration
+    {
+        private const string Money = "decimal(20, 3)";
+
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            // The casts before dividing are kept small so SQL Server keeps 19 decimal places.
+            migrationBuilder.Sql(Exec($"""
+                UPDATE x
+                SET lapcap = JSON_MODIFY(JSON_MODIFY(x.lapcap,
+                    '$.Total', JSON_QUERY(t.total_json)),
+                    '$.CountryApportionment', JSON_QUERY(a.apportionment_json))
+                FROM dbo.calc_result_lapcap_data x
+                CROSS APPLY (
+                    SELECT CAST(ISNULL(SUM(m.England), 0)         AS {Money}) AS England,
+                           CAST(ISNULL(SUM(m.Wales), 0)           AS {Money}) AS Wales,
+                           CAST(ISNULL(SUM(m.Scotland), 0)        AS {Money}) AS Scotland,
+                           CAST(ISNULL(SUM(m.NorthernIreland), 0) AS {Money}) AS NorthernIreland
+                    FROM OPENJSON(x.lapcap, '$.MaterialCosts') WITH (
+                        England         {Money} '$.Cost.England',
+                        Wales           {Money} '$.Cost.Wales',
+                        Scotland        {Money} '$.Cost.Scotland',
+                        NorthernIreland {Money} '$.Cost.NorthernIreland') m
+                ) s
+                CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS {Money}) AS uk) u
+                CROSS APPLY (
+                    SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+                ) t
+                CROSS APPLY (
+                    SELECT (
+                        SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ) AS apportionment_json
+                ) a
+                WHERE JSON_QUERY(x.lapcap, '$.Total') IS NULL
+                """));
+
+            // Kept as _bk tables so Down can restore them.
+            migrationBuilder.RenameTable(
+                name: "calc_result_smcw_producer",
+                newName: "calc_result_smcw_producer_bk");
+
+            migrationBuilder.RenameTable(
+                name: "calc_result_smcw",
+                newName: "calc_result_smcw_bk");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameTable(
+                name: "calc_result_smcw_bk",
+                newName: "calc_result_smcw");
+
+            migrationBuilder.RenameTable(
+                name: "calc_result_smcw_producer_bk",
+                newName: "calc_result_smcw_producer");
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE dbo.calc_result_lapcap_data
+                SET lapcap = JSON_MODIFY(JSON_MODIFY(lapcap, '$.Total', NULL), '$.CountryApportionment', NULL)
+                """));
+        }
+
+        private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";
+    }
+}
