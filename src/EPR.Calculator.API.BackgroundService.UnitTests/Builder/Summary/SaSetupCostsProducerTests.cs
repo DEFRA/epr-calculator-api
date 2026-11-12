@@ -54,25 +54,6 @@ public class SaSetupCostsProducerTests
             ByMaterial = new Dictionary<string, ByCountryCost>()
         },
         CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
-        ProducerFees = new ProducerFees
-        {
-            CalculatorRunId = 0,
-            Details = new List<ProducerFeeDetail>
-            {
-                new()
-                {
-                    FeeDetail = new FeeDetail
-                    {
-                        FeesByMaterial = new Dictionary<string, Fees>(),
-                        ProducerId = 1,
-                        ProducerName = "Test",
-                        SubsidiaryId = "1",
-                        TotalOnePlus2A2B2CWithBadDebtPercentage = 1
-                    }
-                }
-            },
-            Total = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty, TotalOnePlus2A2B2CWithBadDebtPercentage = 100 }
-        },
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
         CalcResultLateReportingTonnageData = TestDataHelper.GetCalcResultLateReportingTonnage(),
         CalcResultProjectedProducers = new CalcResultProjectedProducers(){
@@ -81,22 +62,42 @@ public class SaSetupCostsProducerTests
         }
     };
 
+    private readonly ProducerFees producerFees = new()
+    {
+        CalculatorRunId = 0,
+        Details = new List<ProducerFeeDetail>
+        {
+            new()
+            {
+                FeeDetail = new FeeDetail
+                {
+                    FeesByMaterial = new Dictionary<string, Fees>(),
+                    ProducerId = 1,
+                    ProducerName = "Test",
+                    SubsidiaryId = "1",
+                    TotalOnePlus2A2B2CWithBadDebtPercentage = 1
+                }
+            }
+        },
+        Total = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty, TotalOnePlus2A2B2CWithBadDebtPercentage = 100 }
+    };
+
     [TestMethod]
     public void SaSetupCostsProducer_CanCallSetValues()
     {
         // Act
-        SaSetupCostsProducer.SetValues(calcResult, calcResult.ProducerFees);
+        SaSetupCostsProducer.SetValues(calcResult, producerFees);
 
         // Assert
-        Assert.AreEqual(100    , calcResult.ProducerFees.Total.SaSetupCostsSection5.FeeWithoutBadDebt);
-        Assert.AreEqual(6      , calcResult.ProducerFees.Total.SaSetupCostsSection5.BadDebt);
-        Assert.AreEqual(106    , calcResult.ProducerFees.Total.SaSetupCostsSection5.ByCountry.Total);
-        Assert.AreEqual(1      , calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.FeeWithoutBadDebt);
-        Assert.AreEqual(0.06m  , calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.BadDebt);
-        Assert.AreEqual(1.06m  , calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Total);
-        Assert.AreEqual(0.4240m, calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.England);
-        Assert.AreEqual(0.1060m, calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Wales);
-        Assert.AreEqual(0.1590m, calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Scotland);
-        Assert.AreEqual(0.3710m, calcResult.ProducerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.NorthernIreland);
+        Assert.AreEqual(100    , producerFees.Total.SaSetupCostsSection5.FeeWithoutBadDebt);
+        Assert.AreEqual(6      , producerFees.Total.SaSetupCostsSection5.BadDebt);
+        Assert.AreEqual(106    , producerFees.Total.SaSetupCostsSection5.ByCountry.Total);
+        Assert.AreEqual(1      , producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.FeeWithoutBadDebt);
+        Assert.AreEqual(0.06m  , producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.BadDebt);
+        Assert.AreEqual(1.06m  , producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Total);
+        Assert.AreEqual(0.4240m, producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.England);
+        Assert.AreEqual(0.1060m, producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Wales);
+        Assert.AreEqual(0.1590m, producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.Scotland);
+        Assert.AreEqual(0.3710m, producerFees.Details.ToList()[0].FeeDetail.SaSetupCostsSection5!.ByCountry.NorthernIreland);
     }
 }

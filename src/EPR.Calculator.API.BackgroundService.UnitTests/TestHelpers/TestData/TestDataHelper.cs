@@ -24,7 +24,7 @@ public static partial class TestDataHelper
             CalcResultOnePlusFourApportionment = GetCalcResultOnePlusFourApportionment(),
             CalcResultLaDisposalCostData       = GetCalcResultLaDisposalCostData(),
             CalcResultCommsCostReportDetail    = GetCalcResultCommsCostReportDetail(),
-            ProducerFees                       = GetProducerFees(applyModulation),
+            ProducerFeesTotal                  = GetProducerFees(applyModulation).Total,
             CalcResultProjectedProducers       = new CalcResultProjectedProducers(){
                 H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
                 H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty,
@@ -267,6 +267,9 @@ public static partial class TestDataHelper
             Total = GetOverallTotalRow(applyModulation)
         };
     }
+
+    public static IReadOnlyList<FeeDetail> GetProducerFeeDetails(bool applyModulation = false) =>
+        GetProducerFeesDetail(applyModulation).Select(d => d.FeeDetail).ToList();
 
     public static List<ProducerFeeDetail> GetProducerFeesDetail(bool applyModulation = false)
     {

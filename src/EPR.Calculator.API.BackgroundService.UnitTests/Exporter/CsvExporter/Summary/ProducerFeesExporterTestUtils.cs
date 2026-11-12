@@ -9,9 +9,9 @@ public class ProducerFeesExporterTestUtils
 {
     public static void Render(IProducerFeesPartExporter exporter, IReadOnlyList<MaterialDetail> materials, bool applyModulation, ProducerFees producerFees, StringBuilder csvContent)
     {
-        exporter.AppendSectionHeader(csvContent, producerFees, materials, applyModulation);
+        exporter.AppendSectionHeader(csvContent, producerFees.Total, materials, applyModulation);
         csvContent.AppendLine();
-        exporter.AppendGroupHeader(csvContent, producerFees, materials, applyModulation);
+        exporter.AppendGroupHeader(csvContent, producerFees.Total, materials, applyModulation);
         csvContent.AppendLine();
         foreach (var header in exporter.GetColumnHeaders(materials, applyModulation))
             csvContent.Append(CsvSanitiser.SanitiseData(header));

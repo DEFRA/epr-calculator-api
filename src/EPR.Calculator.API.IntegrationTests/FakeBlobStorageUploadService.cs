@@ -9,7 +9,7 @@ public class FakeBlobStorageUploadService : IStorageUploadService, IBlobStorageS
 
     public async Task<string> UploadFileContentAsync(IStorageUploadService.Request request, CancellationToken cancellationToken)
     {
-        await File.WriteAllTextAsync(PathFor(request.FileName), request.Content, cancellationToken);
+        await File.WriteAllBytesAsync(PathFor(request.FileName), request.Content, cancellationToken);
         return request.FileName;
     }
 
@@ -20,10 +20,10 @@ public class FakeBlobStorageUploadService : IStorageUploadService, IBlobStorageS
         return request.FileName;
     }
 
-    public string Get(string fileName)
+    public byte[] Get(string fileName)
     {
         var path = PathFor(fileName);
-        return File.Exists(path) ? File.ReadAllText(path) : throw new Exception($"Blob not found: {fileName}");
+        return File.Exists(path) ? File.ReadAllBytes(path) : throw new Exception($"Blob not found: {fileName}");
     }
 
     // For callers that just want the uploaded content on disk elsewhere (e.g. the performance
@@ -40,6 +40,9 @@ public class FakeBlobStorageUploadService : IStorageUploadService, IBlobStorageS
         OpenStream(filename);
 
     public Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default) =>
+        OpenStream(filename);
+
+    public Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default) =>
         OpenStream(filename);
 
     public Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default) =>

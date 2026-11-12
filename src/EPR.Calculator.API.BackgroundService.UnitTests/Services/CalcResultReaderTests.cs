@@ -144,22 +144,32 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             result.First(p => p.ProducerId == 2 && p.SubsidiaryId == "B").PartialObligationTonnageByMaterial.Count.ShouldBe(2);
         }
 
-        public async Task ReadProducerFees_WorksAsExpected()
+        [TestMethod]
+        public async Task ReadProducerFeesTotal_WorksAsExpected()
         {
             var producerFees = TestDataHelper.GetProducerFees();
             _dbContext.Add(producerFees);
             await _dbContext.SaveChangesAsync();
 
-            var result = await _sut.ReadProducerFees(0, CancellationToken.None);
-
-            result.CalculatorRunId.ShouldBeEquivalentTo(producerFees.CalculatorRunId);
+            var result = await _sut.ReadProducerFeesTotal(0, CancellationToken.None);
 
             // The owned entities round-trip through SQLite as JSON columns, which can change a
             // decimal's scale (e.g. 90 -> 90.0) without changing its value. ShouldBeEquivalentTo
             // is sensitive to that scale drift (and, for this object graph, unreliable even after
             // normalizing it), so compare a normalized JSON projection of both sides instead.
-            SerializeNormalized(result.Details).ShouldBe(SerializeNormalized(producerFees.Details));
-            SerializeNormalized(result.Total).ShouldBe(SerializeNormalized(producerFees.Total));
+            SerializeNormalized(result).ShouldBe(SerializeNormalized(producerFees.Total));
+        }
+
+        [TestMethod]
+        public async Task StreamProducerFeeDetails_WorksAsExpected()
+        {
+            var producerFees = TestDataHelper.GetProducerFees();
+            _dbContext.Add(producerFees);
+            await _dbContext.SaveChangesAsync();
+
+            var result = _sut.StreamProducerFeeDetails(0).ToList();
+
+            SerializeNormalized(result).ShouldBe(SerializeNormalized(producerFees.Details.Select(d => d.FeeDetail).ToList()));
         }
 
         private static readonly JsonSerializerOptions DecimalNormalizingJsonOptions = new()

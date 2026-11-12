@@ -198,6 +198,16 @@ public static class ServiceConfiguration
             services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
             services.AddScoped<IBillingFileService, BillingFileService>();
             services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
+            services.AddScoped<IFileExportService, FileExportService>();
+
+            return services;
+        }
+
+        public IServiceCollection AddPayCalFeatureFlags()
+        {
+            services
+                .AddOptions<FeatureFlagOptions>()
+                .BindConfiguration(FeatureFlagOptions.SectionKey);
 
             return services;
         }

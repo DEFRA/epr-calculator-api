@@ -28,7 +28,8 @@ builder.Services
     .AddPayCalDataApi(builder.Configuration)
     .AddPayCalBlobStorage()
     .AddPayCalServices()
-    .AddPayCalBackgroundServices();
+    .AddPayCalBackgroundServices()
+    .AddPayCalFeatureFlags();
 
 var corsPolicyName = builder.Services.AddPayCalCorsPolicy();
 

@@ -76,5 +76,9 @@
 
   "CalculatorDataApi": {
     "LateSubmissionsAfterMonth": 12
+  },
+
+  "FeatureFlags": {
+    "UploadFssBillingFileToBlobStorage": true
   }
 }

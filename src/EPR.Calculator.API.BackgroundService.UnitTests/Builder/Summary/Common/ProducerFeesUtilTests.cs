@@ -29,7 +29,7 @@ public class ProducerFeesUtilTests
             CalcResultLaDisposalCostData       = TestDataHelper.GetCalcResultLaDisposalCostData(),
             CalcResultLapcapData               = TestDataHelper.GetCalcResultLapcapData(),
             CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
-            ProducerFees                       = TestDataHelper.GetProducerFees(),
+            ProducerFeesTotal                  = TestDataHelper.GetProducerFees().Total,
             CalcResultCommsCostReportDetail    = TestDataHelper.GetCalcResultCommsCostReportDetail(),
             CalcResultLateReportingTonnageData = GetCalcResultLateReportingTonnage(),
             CalcResultProjectedProducers       = new CalcResultProjectedProducers(){

@@ -16,12 +16,13 @@ using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Builder;
 
 public interface IResultBuilder
 {
-    Task<CalcResult> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken);
+    Task<(CalcResult Result, IReadOnlyList<FeeDetail> ProducerFeeDetails)> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken);
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -47,7 +48,7 @@ public class ResultBuilder(
 )  : IResultBuilder
 {
     [ActivityMetric(nameof(Metrics.CalcDuration), threshold: "00:00:30")]
-    public async Task<CalcResult> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    public async Task<(CalcResult Result, IReadOnlyList<FeeDetail> ProducerFeeDetails)> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
         var result = CalcResult.Empty;
         var materials = await materialService.GetMaterials();
@@ -103,11 +104,12 @@ public class ResultBuilder(
             await calcResultWriter.StoreModulationResult(runContext.RunId, result.CalcResultModulation, cancellationToken);
         }
 
-        result.ProducerFees = await producerFeesBuilder.ConstructAsync(runContext, materials, result, result.Smcw);
-        await calcResultWriter.StoreProducerFees(runContext.RunId, result.ProducerFees, cancellationToken);
+        var (producerFeesTotal, producerFeeDetails) = await producerFeesBuilder.ConstructAsync(runContext, materials, result, result.Smcw);
+        result.ProducerFeesTotal = producerFeesTotal;
+        await calcResultWriter.StoreProducerFees(runContext.RunId, producerFeesTotal, producerFeeDetails, cancellationToken);
 
         result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
 
-        return result;
+        return (result, producerFeeDetails);
     }
 }

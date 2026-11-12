@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task StoreScaledData(int runId, IReadOnlyList<CalcResultScaledupProducer> scaled, CancellationToken cancellationToken);
         Task StorePartialData(int runId, IReadOnlyList<CalcResultPartialObligation> partial, CancellationToken cancellationToken);
         Task StoreProducerMaterialPackaging(List<L1Producer> producerDetails, CancellationToken cancellationToken);
-        Task StoreProducerFees(int runId, ProducerFees producerFees, CancellationToken cancellationToken);
+        Task StoreProducerFees(int runId, FeeDetail total, IReadOnlyList<FeeDetail> details, CancellationToken cancellationToken);
         Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken);
         Task StoreModulationResult(int runId, ModulationResult modulation, CancellationToken cancellationToken);
         Task StoreLapcapData(int runId, CalcResultLapcapData lapcapData, CancellationToken cancellationToken);
@@ -106,10 +106,19 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task StoreProducerFees(int runId, ProducerFees producerFees, CancellationToken cancellationToken) =>
+        public async Task StoreProducerFees(int runId, FeeDetail total, IReadOnlyList<FeeDetail> details, CancellationToken cancellationToken)
+        {
+            var producerFees = new ProducerFees
+            {
+                CalculatorRunId = runId,
+                Total = total,
+                Details = details.Select(d => new ProducerFeeDetail { FeeDetail = d }).ToList()
+            };
+
             await SaveWithBatchedChildren(producerFees,
                 f => f.Details, (f, d) => f.Details = d, (d, f) => d.ProducerFeesId = f.Id,
                 cancellationToken);
+        }
 
         [ActivityTrace]
         public async Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken) =>
