@@ -92,4 +92,27 @@ public class CalcResultOnePlusFourApportionmentBuilderTest : CalcResultOnePlusFo
         Assert.AreEqual(1.48167355m, MathUtils.RoundAwayFromZero(apportionmentRow.Scotland, 8));
         Assert.AreEqual(0.78357736m, MathUtils.RoundAwayFromZero(apportionmentRow.NorthernIreland, 8));
     }
+
+    [TestMethod]
+    public void Create_KeepsApportionmentAtFullPrecision()
+    {
+        var onePlusFour = Create(
+            laDisposalCost:   new ByCountryCost { England = 1, Wales = 0.5m, Scotland = 0.5m, NorthernIreland = 2 },
+            laDataPrepCharge: new ByCountryCost { England = 0, Wales = 0.5m, Scotland = 0.5m, NorthernIreland = 1 });
+
+        Assert.AreEqual(new ByCountryCost { England = 1, Wales = 1, Scotland = 1, NorthernIreland = 3 }, onePlusFour.TotalOnePlusFour);
+        Assert.AreEqual(16.666666666666666666666666667m, onePlusFour.OnePlusFourApportionment.England);
+        Assert.AreEqual(16.666666666666666666666666667m, onePlusFour.OnePlusFourApportionment.Wales);
+        Assert.AreEqual(16.666666666666666666666666667m, onePlusFour.OnePlusFourApportionment.Scotland);
+        Assert.AreEqual(50m, onePlusFour.OnePlusFourApportionment.NorthernIreland);
+    }
+
+    [TestMethod]
+    public void Create_ZeroTotal_ReturnsEmptyApportionment()
+    {
+        var onePlusFour = Create(ByCountryCost.Empty, ByCountryCost.Empty);
+
+        Assert.AreEqual(ByCountryCost.Empty, onePlusFour.TotalOnePlusFour);
+        Assert.AreEqual(ByCountryApportionment.Empty, onePlusFour.OnePlusFourApportionment);
+    }
 }

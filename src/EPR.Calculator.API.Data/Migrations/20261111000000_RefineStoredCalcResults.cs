@@ -194,6 +194,50 @@ namespace EPR.Calculator.API.Data.Migrations
                 WHERE JSON_QUERY(x.comms_cost, '$.Total') IS NULL
                 """));
 
+            // Comms stores the same % the run worked out, so it is copied exactly where a comms row exists.
+            migrationBuilder.Sql(Exec($"""
+                UPDATE x
+                SET one_plus_four_apppointment = JSON_MODIFY(JSON_MODIFY(x.one_plus_four_apppointment,
+                    '$.TotalOnePlusFour', JSON_QUERY(t.total_json)),
+                    '$.OnePlusFourApportionment', JSON_QUERY(COALESCE(c.apportionment_json, a.apportionment_json)))
+                FROM dbo.calc_result_one_plus_four_apportionment x
+                CROSS APPLY OPENJSON(x.one_plus_four_apppointment) WITH (
+                    LaEngland           {Money} '$.LaDisposalCost.England',
+                    LaWales             {Money} '$.LaDisposalCost.Wales',
+                    LaScotland          {Money} '$.LaDisposalCost.Scotland',
+                    LaNorthernIreland   {Money} '$.LaDisposalCost.NorthernIreland',
+                    PrepEngland         {Money} '$.LADataPrepCharge.England',
+                    PrepWales           {Money} '$.LADataPrepCharge.Wales',
+                    PrepScotland        {Money} '$.LADataPrepCharge.Scotland',
+                    PrepNorthernIreland {Money} '$.LADataPrepCharge.NorthernIreland') v
+                CROSS APPLY (
+                    SELECT CAST(v.LaEngland         + v.PrepEngland         AS {Money}) AS England,
+                           CAST(v.LaWales           + v.PrepWales           AS {Money}) AS Wales,
+                           CAST(v.LaScotland        + v.PrepScotland        AS {Money}) AS Scotland,
+                           CAST(v.LaNorthernIreland + v.PrepNorthernIreland AS {Money}) AS NorthernIreland
+                ) s
+                CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS {Money}) AS uk) u
+                CROSS APPLY (
+                    SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+                ) t
+                OUTER APPLY (
+                    SELECT TOP 1 JSON_QUERY(cc.comms_cost, '$.OnePlusFourApportionment') AS apportionment_json
+                    FROM dbo.calc_result_comms_cost cc
+                    WHERE cc.calculator_run_id = x.calculator_run_id
+                    ORDER BY cc.id
+                ) c
+                CROSS APPLY (
+                    SELECT (
+                        SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                               CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ) AS apportionment_json
+                ) a
+                WHERE JSON_QUERY(x.one_plus_four_apppointment, '$.TotalOnePlusFour') IS NULL
+                """));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -253,6 +297,11 @@ namespace EPR.Calculator.API.Data.Migrations
                                 WITHIN GROUP (ORDER BY CAST(m.[key] AS int)), '') + ']' AS materials_json
                     FROM OPENJSON(x.comms_cost, '$.MaterialCosts') m
                 ) a
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE dbo.calc_result_one_plus_four_apportionment
+                SET one_plus_four_apppointment = JSON_MODIFY(JSON_MODIFY(one_plus_four_apppointment, '$.TotalOnePlusFour', NULL), '$.OnePlusFourApportionment', NULL)
                 """));
         }
 

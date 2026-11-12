@@ -9642,6 +9642,53 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'UPDATE x
+    SET one_plus_four_apppointment = JSON_MODIFY(JSON_MODIFY(x.one_plus_four_apppointment,
+        ''$.TotalOnePlusFour'', JSON_QUERY(t.total_json)),
+        ''$.OnePlusFourApportionment'', JSON_QUERY(COALESCE(c.apportionment_json, a.apportionment_json)))
+    FROM dbo.calc_result_one_plus_four_apportionment x
+    CROSS APPLY OPENJSON(x.one_plus_four_apppointment) WITH (
+        LaEngland           decimal(20, 3) ''$.LaDisposalCost.England'',
+        LaWales             decimal(20, 3) ''$.LaDisposalCost.Wales'',
+        LaScotland          decimal(20, 3) ''$.LaDisposalCost.Scotland'',
+        LaNorthernIreland   decimal(20, 3) ''$.LaDisposalCost.NorthernIreland'',
+        PrepEngland         decimal(20, 3) ''$.LADataPrepCharge.England'',
+        PrepWales           decimal(20, 3) ''$.LADataPrepCharge.Wales'',
+        PrepScotland        decimal(20, 3) ''$.LADataPrepCharge.Scotland'',
+        PrepNorthernIreland decimal(20, 3) ''$.LADataPrepCharge.NorthernIreland'') v
+    CROSS APPLY (
+        SELECT CAST(v.LaEngland         + v.PrepEngland         AS decimal(20, 3)) AS England,
+               CAST(v.LaWales           + v.PrepWales           AS decimal(20, 3)) AS Wales,
+               CAST(v.LaScotland        + v.PrepScotland        AS decimal(20, 3)) AS Scotland,
+               CAST(v.LaNorthernIreland + v.PrepNorthernIreland AS decimal(20, 3)) AS NorthernIreland
+    ) s
+    CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS decimal(20, 3)) AS uk) u
+    CROSS APPLY (
+        SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+    ) t
+    OUTER APPLY (
+        SELECT TOP 1 JSON_QUERY(cc.comms_cost, ''$.OnePlusFourApportionment'') AS apportionment_json
+        FROM dbo.calc_result_comms_cost cc
+        WHERE cc.calculator_run_id = x.calculator_run_id
+        ORDER BY cc.id
+    ) c
+    CROSS APPLY (
+        SELECT (
+            SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS apportionment_json
+    ) a
+    WHERE JSON_QUERY(x.one_plus_four_apppointment, ''$.TotalOnePlusFour'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

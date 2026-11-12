@@ -2,6 +2,7 @@
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 
@@ -32,11 +33,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
             };
 
         public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment { get; set; }
-            = new()
-            {
-                LADataPrepCharge = ByCountryCost.Empty,
-                LaDisposalCost   = ByCountryCost.Empty
-            };
+            = CalcResultOnePlusFourApportionmentBuilder.Create(ByCountryCost.Empty, ByCountryCost.Empty);
 
         public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
             = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>());

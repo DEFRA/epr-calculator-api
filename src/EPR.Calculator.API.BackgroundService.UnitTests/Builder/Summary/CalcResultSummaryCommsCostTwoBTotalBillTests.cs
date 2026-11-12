@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder.Summary;
+﻿using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
@@ -205,16 +206,14 @@ public class CalcResultSummaryCommsCostTwoBTotalBillTests
 
     private static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
     {
-        return new CalcResultOnePlusFourApportionment
-        {
-            LaDisposalCost = new ByCountryCost
+        return CalcResultOnePlusFourApportionmentBuilder.Create(
+            laDisposalCost:   new ByCountryCost
             {
                 England = 40,
                 Wales = 30,
                 Scotland = 15,
                 NorthernIreland = 15
             },
-            LADataPrepCharge = ByCountryCost.Empty
-        };
+            laDataPrepCharge: ByCountryCost.Empty);
     }
 }

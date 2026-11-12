@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -45,17 +46,15 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
         CreateNewRun(runContext);
         CreateProducerDetail(runContext);
 
-        var apportionment = new CalcResultOnePlusFourApportionment
-        {
-            LaDisposalCost = new ByCountryCost
+        var apportionment = CalcResultOnePlusFourApportionmentBuilder.Create(
+            laDisposalCost:   new ByCountryCost
             {
                 England = 40M,
                 Wales = 20M,
                 Scotland = 20M,
                 NorthernIreland = 20M
             },
-            LADataPrepCharge = ByCountryCost.Empty
-        };
+            laDataPrepCharge: ByCountryCost.Empty);
         var result = await testSubject.ConstructAsync(runContext, materialDetails, apportionment, calcResult.CalcResultLateReportingTonnageData);
 
         Assert.IsNotNull(result);

@@ -3707,10 +3707,64 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
                                 });
 
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "OnePlusFourApportionment", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.ToTable("calc_result_one_plus_four_apportionment");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "TotalOnePlusFour", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.ToTable("calc_result_one_plus_four_apportionment");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
+                                });
+
                             b1.Navigation("LADataPrepCharge")
                                 .IsRequired();
 
                             b1.Navigation("LaDisposalCost")
+                                .IsRequired();
+
+                            b1.Navigation("OnePlusFourApportionment")
+                                .IsRequired();
+
+                            b1.Navigation("TotalOnePlusFour")
                                 .IsRequired();
                         });
 

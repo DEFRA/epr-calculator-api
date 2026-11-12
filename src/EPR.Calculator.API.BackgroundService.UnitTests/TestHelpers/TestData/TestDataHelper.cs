@@ -2,6 +2,7 @@ using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -194,11 +195,9 @@ public static partial class TestDataHelper
 
     public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
     {
-        return new CalcResultOnePlusFourApportionment
-        {
-            LaDisposalCost   = new ByCountryCost { England = 30, Wales = 5, Scotland = 15, NorthernIreland = 35 },
-            LADataPrepCharge = new ByCountryCost { England = 10, Wales = 5, Scotland =  0, NorthernIreland =  0 }
-        };
+        return CalcResultOnePlusFourApportionmentBuilder.Create(
+            laDisposalCost:   new ByCountryCost { England = 30, Wales = 5, Scotland = 15, NorthernIreland = 35 },
+            laDataPrepCharge: new ByCountryCost { England = 10, Wales = 5, Scotland =  0, NorthernIreland =  0 });
     }
 
     public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()

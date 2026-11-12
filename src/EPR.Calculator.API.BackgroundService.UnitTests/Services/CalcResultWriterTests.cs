@@ -2,6 +2,7 @@
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -454,11 +455,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultOnePlusFourApportionment MkOnePlusFourApportionment() =>
-            new()
-            {
-                LaDisposalCost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                LADataPrepCharge = new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 }
-            };
+            CalcResultOnePlusFourApportionmentBuilder.Create(
+                laDisposalCost:   new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                laDataPrepCharge: new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 });
 
         private static CalcResultLaDisposalCostData MkLaDisposalCostData() =>
             CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
