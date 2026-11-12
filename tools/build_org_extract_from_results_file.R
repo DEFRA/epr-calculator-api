@@ -24,13 +24,13 @@
 
 MATERIALS <- list(
   c(src = "Aluminium", disp = "Aluminium"),
-  c(src = "Fibre composite", disp = "Fibre Composite"),
+  c(src = "Fibre Composite", disp = "Fibre Composite"),
   c(src = "Glass", disp = "Glass"),
-  c(src = "Paper or card", disp = "Paper / Card"),
+  c(src = "Paper or Card", disp = "Paper / Card"),
   c(src = "Plastic", disp = "Plastic"),
   c(src = "Steel", disp = "Steel"),
   c(src = "Wood", disp = "Wood"),
-  c(src = "Other materials", disp = "Other")
+  c(src = "Other Materials", disp = "Other")
 )
 
 RAG_MAP <- list(
@@ -53,8 +53,15 @@ DEFAULT_NATION <- "England"
 DEFAULT_DATETIME <- "1900-01-01 00:00:00.000"
 DEFAULT_CS_OR_DIRECT <- "DP"
 DEFAULT_SUBMISSION_STATUS <- "GRANTED"
+DEFAULT_PACKAGING_SUBMISSION_STATUS <- "ACCEPTED"
 DEFAULT_SINGLE_FILE_SUBMISSION <- "N"
 DEFAULT_FILENAME <- "N/A"
+
+# Default file locations, used when the corresponding command-line argument
+# (<results.csv> <out.csv> <header.csv>) is omitted. Relative paths are resolved against this script's directory.
+DEFAULT_RESULTS_FILE <- "78-R180smoketest_Results File_20260720.csv"
+DEFAULT_OUTPUT_FILE <- "v_extract_recent_pom_org_data_from_results.csv"
+DEFAULT_HEADER_FILE <- "v_extract_recent_pom_org_data_header.csv"
 
 # Separator used to join (Producer ID, Subsidiary ID) into a single lookup
 # key. Unit Separator (0x1F) can't appear in the source data, so this can't
@@ -115,7 +122,12 @@ find_header_row <- function(lines, after, first_cell = "Producer ID") {
   stop(sprintf("Header row (first cell '%s') not found after row %d", first_cell, after))
 }
 
-forward_fill_group <- function(group_row) {
+# The exporter writes a section's material-group row only as far as the cell
+# naming its LAST group, so that row is shorter than the column-header row
+# beneath it. Pad out to the header row's width so the last group's trailing
+# columns (e.g. Other Materials' Public Bin columns) still get labelled with it.
+forward_fill_group <- function(group_row, width) {
+  if (length(group_row) < width) group_row <- c(group_row, rep("", width - length(group_row)))
   filled <- character(length(group_row))
   last <- ""
   for (i in seq_along(group_row)) {
@@ -130,8 +142,8 @@ forward_fill_group <- function(group_row) {
 build_section <- function(lines, marker_text) {
   marker <- find_marker(lines, marker_text)
   header_idx <- find_header_row(lines, marker + 1)
-  group <- forward_fill_group(parse_csv_line(lines[header_idx - 1]))
   header <- parse_csv_line(lines[header_idx])
+  group <- forward_fill_group(parse_csv_line(lines[header_idx - 1]), length(header))
 
   rows <- list()
   i <- header_idx + 1
@@ -204,8 +216,12 @@ reporting_year <- function(period_code) {
 # Per-material column resolution within a raw H1/H2 section
 # ---------------------------------------------------------------------------
 
+# Sections disagree on material name casing (e.g. "Paper or card" vs
+# "Paper or Card"), so resolve to whichever spelling this section actually uses.
 material_col_idx <- function(group, header, src_material, col_name) {
-  col_index(group, header, paste0(src_material, " Breakdown"), col_name)
+  wanted <- paste0(src_material, " Breakdown")
+  match <- group[tolower(group) == tolower(wanted)]
+  col_index(group, header, if (length(match) > 0) match[1] else wanted, col_name)
 }
 
 populate_material_columns <- function(row_out, row_src, group, header, src_material, target_name,
@@ -262,7 +278,11 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
   # H1/H2 sections. For every other material the target schema has a
   # column for it but the source has nothing - left blank, not 0.
   if (target_name %in% materials_with_drinks) {
-    drinks_total <- num(row_src, material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage"))
+    # Calculation Result names this column "... Tonnage - Glass"; the H1/H2
+    # sections name it without the suffix.
+    drinks_idx <- material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage")
+    if (is.na(drinks_idx)) drinks_idx <- material_col_idx(group, header, src_material, "Household Drinks Containers Tonnage - Glass")
+    drinks_total <- num(row_src, drinks_idx)
     row_out[[sprintf("Household drinks containers-%s (Kg)", target_name)]] <- fmt(drinks_total)
 
     drinks_rag <- setNames(numeric(length(RAG_MAP)), vapply(RAG_MAP, `[[`, character(1), "src"))
@@ -292,23 +312,69 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
   row_out
 }
 
-# For producers with no H1/H2 audit row at all (see design decision 3b):
-# populate just the material's total tonnage from the annual Calculation
-# Result row, same treatment as Self-managed consumer waste. No RAM/RAG
-# breakdown is populated - see module docstring for why.
-populate_totals_only_from_calc <- function(row_out, calc_row, calc_group, calc_header, target_name, src_material) {
-  group_name <- paste0(src_material, " Breakdown")
-  hh_idx <- col_index(calc_group, calc_header, group_name, "Household Tonnage")
-  pb_idx <- col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
+cell <- function(row, idx) {
+  if (!is.na(idx) && idx <= length(row)) trimws(row[idx]) else ""
+}
 
-  row_out[[sprintf("Total Household packaging-%s", target_name)]] <- fmt(num(calc_row, hh_idx))
-  row_out[[sprintf("Public binned-%s", target_name)]] <- fmt(num(calc_row, pb_idx))
-
-  if (target_name == "Glass") {
-    drinks_idx <- col_index(calc_group, calc_header, group_name, "Household Drinks Containers Tonnage - Glass")
-    row_out[["Household drinks containers-Glass (Kg)"]] <- fmt(num(calc_row, drinks_idx))
+# Splits a section into list(l1 = <Level 1 rows>, l2 = <Level 2 rows>), each
+# a section with the same group/header (design decision 11). A section with
+# no Level column is treated as all Level 1.
+split_levels <- function(section) {
+  l1 <- section
+  l2 <- section
+  level_idx <- col_index(section$group, section$header, "", "Level")
+  if (is.na(level_idx)) {
+    l2$rows <- list()
+  } else {
+    levels <- vapply(section$rows, function(r) cell(r, level_idx), character(1))
+    l1$rows <- section$rows[levels == "1"]
+    l2$rows <- section$rows[levels == "2"]
   }
-  row_out
+  list(l1 = l1, l2 = l2)
+}
+
+# Column indices of every annual figure read from a Calculation Result /
+# Partial Obligation row for one material, in a fixed order -- the columns
+# adjusted when rebuilding a group's pre-pro-rating total (decision 12).
+annual_col_idx <- function(group, header, src_material) {
+  idx <- function(name) material_col_idx(group, header, src_material, name)
+  # Calculation Result names this column "... Tonnage - Glass"; the other
+  # sections name it without the suffix.
+  drinks <- idx("Household Drinks Containers Tonnage")
+  if (is.na(drinks)) drinks <- idx("Household Drinks Containers Tonnage - Glass")
+  suffixes <- vapply(c(RAG_MAP, RAG_MEDICAL_MAP), `[[`, character(1), "src")
+  c(idx("Household Tonnage"), idx("Public Bin Tonnage"), drinks,
+    idx("Self-managed Consumer Waste Tonnage"),
+    vapply(suffixes, function(s) idx(paste("Household", s)), integer(1), USE.NAMES = FALSE),
+    vapply(suffixes, function(s) idx(paste("Public Bin", s)), integer(1), USE.NAMES = FALSE),
+    vapply(suffixes, function(s) idx(paste("Household Drinks Containers", s)), integer(1), USE.NAMES = FALSE))
+}
+
+# A group's Level 1 Calculation Result row with each partially-obligated
+# member's pro-rated figures swapped for its pre-pro-rating Partial
+# Obligation figures, i.e.
+#   L1 + sum over partial members of (partial row - Calculation Result row)
+# members is a list of list(partial = <row>, calc = <row>). Returned in the
+# Calculation Result layout.
+group_annual_row <- function(l1_row, calc, members, partial) {
+  out <- l1_row
+  for (m in MATERIALS) {
+    c_idx <- annual_col_idx(calc$group, calc$header, m[["src"]])
+    p_idx <- annual_col_idx(partial$group, partial$header, m[["src"]])
+    for (k in seq_along(c_idx)) {
+      ci <- c_idx[k]
+      pi_ <- p_idx[k]
+      if (is.na(ci) || is.na(pi_)) next
+      values <- num(l1_row, ci)
+      for (mem in members) {
+        values <- c(values, num(mem$partial, pi_), -num(mem$calc, ci))
+      }
+      if (all(is.na(values))) next
+      if (ci > length(out)) out <- c(out, rep("", ci - length(out)))
+      out[ci] <- sprintf("%.17g", sum(values, na.rm = TRUE))
+    }
+  }
+  out
 }
 
 # ---------------------------------------------------------------------------
@@ -347,13 +413,14 @@ script_dir <- function() {
 main <- function() {
   base <- script_dir()
   argv <- commandArgs(trailingOnly = TRUE)
-  results_file <- if (length(argv) >= 1) argv[1] else file.path(base, "78-R180smoketest_Results File_20260720.csv")
-  output_file <- if (length(argv) >= 2) argv[2] else file.path(base, "v_extract_recent_pom_org_data_from_results.csv")
+  results_file <- if (length(argv) >= 1) argv[1] else file.path(base, DEFAULT_RESULTS_FILE)
+  output_file <- if (length(argv) >= 2) argv[2] else file.path(base, DEFAULT_OUTPUT_FILE)
+  header_file <- if (length(argv) >= 3) argv[3] else file.path(base, DEFAULT_HEADER_FILE)
 
   # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
   # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
   # keep this file in sync if that view's columns change.
-  target_header <- colnames(read.csv(file.path(base, "v_extract_recent_pom_org_data_header.csv"),
+  target_header <- colnames(read.csv(header_file,
                                       nrows = 0, check.names = FALSE, encoding = "UTF-8"))
 
   lines <- load_rows(results_file)
@@ -362,21 +429,72 @@ main <- function() {
   h1 <- build_section(lines, "H1 Packaging Data - Submitted and Projected")
   calc <- build_section(lines, "Calculation Result")
 
+  # Design decision 11: only Level 1 rows are output.
+  h2 <- split_levels(h2)$l1
+  h1 <- split_levels(h1)$l1
+  calc_levels <- split_levels(calc)
+  calc <- calc_levels$l1
+  calc_members <- calc_levels$l2
+
+  # Design decision 12. Older Results Files have no such section.
+  partial <- tryCatch(build_section(lines, "Partial Obligation Calculation"),
+                      error = function(e) list(rows = list(), group = character(0), header = character(0)))
+
   calc_lookup <- build_lookup(calc$rows, calc$group, calc$header)
+  calc_member_lookup <- build_lookup(calc_members$rows, calc_members$group, calc_members$header)
   name_idx <- col_index(calc$group, calc$header, "", "Producer / Subsidiary Name")
-  smcw_idx_by_material <- setNames(
-    vapply(MATERIALS, function(m) col_index(calc$group, calc$header, paste0(m[["src"]], " Breakdown"), "Self-managed Consumer Waste Tonnage"), integer(1)),
-    vapply(MATERIALS, `[[`, character(1), "src")
-  )
+
+  # The Partial Obligation section has one row per partially-obligated
+  # producer/subsidiary and no group subtotals, so collect each group's
+  # partial members (paired with their Calculation Result rows) for
+  # group_annual_row. Rows for producers absent from Calculation Result
+  # (e.g. the section's "None" placeholder) are ignored.
+  c_pid_idx <- col_index(calc$group, calc$header, "", "Producer ID")
+  grouped_pids <- unique(vapply(calc_members$rows, function(r) cell(r, c_pid_idx), character(1)))
+  p_pid_idx <- col_index(partial$group, partial$header, "", "Producer ID")
+  p_sid_idx <- col_index(partial$group, partial$header, "", "Subsidiary ID")
+  partial_standalone <- new.env(hash = TRUE, parent = emptyenv())
+  partial_members <- new.env(hash = TRUE, parent = emptyenv())
+  env_get <- function(env, key) if (exists(key, envir = env, inherits = FALSE)) get(key, envir = env) else NULL
+  for (prow in partial$rows) {
+    pid <- cell(prow, p_pid_idx)
+    sid <- cell(prow, p_sid_idx)
+    if (!nzchar(pid) || is.null(lookup_get(calc_lookup, pid, ""))) next
+    if (pid %in% grouped_pids) {
+      calc_row <- lookup_get(calc_member_lookup, pid, sid)
+      member <- list(partial = prow, calc = if (is.null(calc_row)) character(0) else calc_row)
+      assign(pid, c(env_get(partial_members, pid), list(member)), envir = partial_members)
+    } else {
+      assign(pid, prow, envir = partial_standalone)
+    }
+  }
+
+  # The annual (H1+H2) row to take calc-only tonnages and SMCW from, with its
+  # group/header, before partial-obligation pro-rating: a standalone
+  # producer's Partial Obligation row, a group's Level 1 row rebuilt from its
+  # members' Partial Obligation rows, else the Level 1 Calculation Result row
+  # as-is.
+  annual_source <- function(pid) {
+    standalone <- env_get(partial_standalone, pid)
+    if (!is.null(standalone)) {
+      return(list(row = standalone, group = partial$group, header = partial$header))
+    }
+    calc_row <- lookup_get(calc_lookup, pid, "")
+    members <- env_get(partial_members, pid)
+    if (!is.null(members) && !is.null(calc_row)) {
+      calc_row <- group_annual_row(calc_row, calc, members, partial)
+    }
+    list(row = calc_row, group = calc$group, header = calc$header)
+  }
   blank_row <- function() {
     row <- as.list(setNames(rep("", length(target_header)), target_header))
     row
   }
 
-  base_row <- function(pid, sid, period_code, half) {
+  base_row <- function(pid, period_code, half) {
     row <- blank_row()
-    row[["Org_ID"]] <- if (nzchar(sid)) sid else pid
-    calc_row <- lookup_get(calc_lookup, pid, sid)
+    row[["Org_ID"]] <- pid
+    calc_row <- lookup_get(calc_lookup, pid, "")
     if (!is.null(calc_row) && !is.na(name_idx)) {
       row[["Org_name"]] <- trimws(calc_row[name_idx])
     }
@@ -414,11 +532,18 @@ main <- function() {
     row[["fos_cd_filename"]] <- DEFAULT_FILENAME
     row[["los_cd_filename"]] <- DEFAULT_FILENAME
 
+    row[["Packaging_data_first_submission_status"]] <- DEFAULT_PACKAGING_SUBMISSION_STATUS
+    row[["Packaging_data_latest_submission_status"]] <- DEFAULT_PACKAGING_SUBMISSION_STATUS
+    row[["Packaging_data_first_submission_datetime"]] <- DEFAULT_DATETIME
+    row[["Packaging_data_latest_submission_datetime"]] <- DEFAULT_DATETIME
+    row[["Packaging_data_latest_submitted_CS_or_Direct"]] <- DEFAULT_CS_OR_DIRECT
+
     if (half == "H2") {
+      src <- annual_source(pid)
       for (m in MATERIALS) {
-        idx <- smcw_idx_by_material[[m[["src"]]]]
-        if (!is.null(calc_row) && !is.na(idx)) {
-          row[[sprintf("Self-managed consumer waste-%s", m[["disp"]])]] <- fmt(num(calc_row, idx))
+        idx <- material_col_idx(src$group, src$header, m[["src"]], "Self-managed Consumer Waste Tonnage")
+        if (!is.null(src$row) && !is.na(idx)) {
+          row[[sprintf("Self-managed consumer waste-%s", m[["disp"]])]] <- fmt(num(src$row, idx))
         }
       }
     }
@@ -429,14 +554,12 @@ main <- function() {
 
   period_col_idx_h2 <- col_index(h2$group, h2$header, "", "Submission period code")
   pid_idx_h2 <- col_index(h2$group, h2$header, "", "Producer ID")
-  sid_idx_h2 <- col_index(h2$group, h2$header, "", "Subsidiary ID")
   h2_keys <- character(0)
   for (r in h2$rows) {
     pid <- trimws(r[pid_idx_h2])
-    sid <- trimws(r[sid_idx_h2])
     period_code <- trimws(r[period_col_idx_h2])
-    h2_keys <- c(h2_keys, paste(pid, sid, sep = KEY_SEP))
-    row_out <- base_row(pid, sid, period_code, "H2")
+    h2_keys <- c(h2_keys, pid)
+    row_out <- base_row(pid, period_code, "H2")
     for (m in MATERIALS) {
       row_out <- populate_material_columns(row_out, r, h2$group, h2$header, m[["src"]], m[["disp"]])
     }
@@ -445,14 +568,12 @@ main <- function() {
 
   period_col_idx_h1 <- col_index(h1$group, h1$header, "", "Submission period code")
   pid_idx_h1 <- col_index(h1$group, h1$header, "", "Producer ID")
-  sid_idx_h1 <- col_index(h1$group, h1$header, "", "Subsidiary ID")
   h1_keys <- character(0)
   for (r in h1$rows) {
     pid <- trimws(r[pid_idx_h1])
-    sid <- trimws(r[sid_idx_h1])
     period_code <- trimws(r[period_col_idx_h1])
-    h1_keys <- c(h1_keys, paste(pid, sid, sep = KEY_SEP))
-    row_out <- base_row(pid, sid, period_code, "H1")
+    h1_keys <- c(h1_keys, pid)
+    row_out <- base_row(pid, period_code, "H1")
     for (m in MATERIALS) {
       row_out <- populate_material_columns(row_out, r, h1$group, h1$header, m[["src"]], m[["disp"]])
     }
@@ -467,25 +588,22 @@ main <- function() {
   # Design decision 3b: producers present in Calculation Result but never
   # audited in either H1 or H2 section - i.e. every material in both
   # periods was fully RAG-rated, so no "blank" needed inferring. Emit the
-  # same two rows as everyone else, but sourced from the annual total
-  # (100% H2 / 0% H1), with RAM breakdown left blank - see docstring.
+  # same two rows as everyone else, but sourced from the annual totals and
+  # RAM breakdown (100% H2 / 0% H1) - see docstring.
   audited_keys <- unique(c(h1_keys, h2_keys))
-  calc_keys_all <- ls(calc_lookup)
-  calc_only_keys <- sort(setdiff(calc_keys_all, audited_keys), method = "radix")
+  calc_pids_all <- vapply(calc$rows, function(r) cell(r, c_pid_idx), character(1))
+  calc_only_pids <- sort(setdiff(calc_pids_all, audited_keys), method = "radix")
 
-  for (key in calc_only_keys) {
-    parts <- strsplit(key, KEY_SEP, fixed = TRUE)[[1]]
-    pid <- if (length(parts) >= 1) parts[1] else ""
-    sid <- if (length(parts) >= 2) parts[2] else ""
-    calc_row <- get(key, envir = calc_lookup)
+  for (pid in calc_only_pids) {
+    src <- annual_source(pid)
 
-    h2_row_out <- base_row(pid, sid, period_code_h2, "H2")
+    h2_row_out <- base_row(pid, period_code_h2, "H2")
     for (m in MATERIALS) {
-      h2_row_out <- populate_totals_only_from_calc(h2_row_out, calc_row, calc$group, calc$header, m[["disp"]], m[["src"]])
+      h2_row_out <- populate_material_columns(h2_row_out, src$row, src$group, src$header, m[["src"]], m[["disp"]])
     }
     out_rows[[length(out_rows) + 1]] <- h2_row_out
 
-    h1_row_out <- base_row(pid, sid, period_code_h1, "H1")
+    h1_row_out <- base_row(pid, period_code_h1, "H1")
     out_rows[[length(out_rows) + 1]] <- h1_row_out
   }
 

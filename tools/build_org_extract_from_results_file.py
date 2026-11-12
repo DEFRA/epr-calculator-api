@@ -35,7 +35,7 @@ concept of:
 
 KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
 -----------------------------------------------------------
-1. Two output rows per (producer, subsidiary): one for the "H1 Packaging
+1. Two output rows per producer (Level 1 - see decision 11): one for the "H1 Packaging
    Data - Submitted & Projected" section, one for "H2 Packaging Data -
    Submitted & Projected". This is not "splitting" a combined figure - the
    Results File already keeps H1 and H2 as separate per-period tables; we
@@ -71,23 +71,22 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
     rated for every material never appears in either section at all (of
     ~4,300 producers in Calculation Result, only ~1,950 show up in H1/H2 -
     confirmed by set-difference against the Results File used to build
-    this script). For that "calc-only" majority we have no per-period, no
-    per-RAG-category data whatsoever - only the annual Calculation Result
-    total. Per the same "SMCW" principle as (3): the household/public-bin
-    TOTAL tonnage (Total Household packaging-X / Public binned-X /
-    Household drinks containers-Glass) is taken from Calculation Result
-    and attributed 100% to the H2 row, 0 to H1. The RAM/RAM-M/R/G/A
-    breakdown columns are left BLANK (not derived) for these producers -
-    Calculation Result's own Red/Amber/Green figures already have any
-    unrated tonnage defaulted into Red (same "output of blank processing"
-    problem as decision 2), so reusing them here would silently violate
-    the "report the input, not the defaulted output" rule. We simply don't
-    have the input for these producers.
+    this script). For that "calc-only" majority we have no per-period data
+    - only the annual Calculation Result figures. Per the same "SMCW"
+    principle as (3): the household/public-bin/drinks-container totals AND
+    their RAM/RAM-M/R/G/A breakdown are taken from Calculation Result and
+    attributed 100% to the H2 row, 0 to H1. Using Calculation Result's
+    Red/Amber/Green here does not break the "report the input, not the
+    defaulted output" rule of decision 2: these producers had no unrated
+    tonnage (that's why they aren't in the H1/H2 sections), so nothing was
+    defaulted into Red and the figures are the producer's own ratings.
+    Leaving the breakdown blank instead (as an earlier version did) made
+    downstream RAM-gap filling treat each producer's entire tonnage as
+    unrated and default it all to Red.
 
-4. Org_ID = Subsidiary ID when present, else Producer ID (each subsidiary is
-   its own org-data entity). Org_name is looked up from the "Calculation
-   Result" section's "Producer / Subsidiary Name" column for that exact
-   (Producer ID, Subsidiary ID) pair.
+4. Org_ID = Producer ID (only Level 1 rows are output - decision 11).
+   Org_name is looked up from the "Calculation Result" section's
+   "Producer / Subsidiary Name" column for that producer's Level 1 row.
 
 5. organisation_size is assumed 'L' throughout: this Results File / the SQL
    it was built to match is explicitly Large-producer-only
@@ -126,13 +125,41 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
 10. Organisation registration/submission-metadata fields that have no
     signal anywhere in the Results File - CH_number, Nation_of_enrolment,
     Enrolment_date_time, Nation_of_Compliance_Scheme_regulator, the
-    Organisation_data_* first/latest submission metadata columns,
+    Organisation_data_* first/latest submission metadata columns, the
+    Packaging_data_* first/latest submission status, datetime and
+    CS_or_Direct columns,
     Single_File_Submission_* flags, and the fps/lps/fos/los filename
     columns - are hard-coded to a single fixed default value per column
     (see the DEFAULT_* constants), not derived or fabricated per-row. Per
     the user: downstream tooling just needs these columns non-blank: the
     actual value doesn't matter, so a single unvarying constant is used
     rather than inventing plausible-looking per-row data.
+
+11. Only Level 1 rows are output; Level 2 (subsidiary) rows are dropped.
+    For a producer group, the H1/H2 and Calculation Result sections each
+    carry a Level 1 row (blank Subsidiary ID) holding the sum of the
+    group's Level 2 member rows; a standalone producer is a Level 1 row
+    with nothing under it. Profic treats every org-data row as a Level 1
+    producer, so sending the Level 2 rows instead would stop SMCW being
+    shared across members of the same group. (An H1/H2 section always
+    lists every member of a group it lists, so its Level 1 row is the
+    full group total.)
+
+12. Partial-obligation pro-rating is undone. For a producer that joined
+    or left during the year, Calculation Result's tonnages (and its Self-
+    managed consumer waste) have been pro-rated by the producer's obligated
+    days. The "Partial Obligation Calculation" section carries the same
+    annual figures before that pro-rating, so for any producer listed there
+    the calc-only totals/RAM breakdown of decision 3b and the SMCW of
+    decision 3 are taken from it instead - keeping every row of the output
+    as reported, the same as the H1/H2 rows. That section lists individual
+    producers/subsidiaries with no group subtotals, so for a group with
+    partially-obligated members the Level 1 figures are rebuilt as the
+    Level 1 Calculation Result row with each such member's pro-rated
+    figures swapped for its Partial Obligation figures. Scaling-up of part-period
+    submissions is NOT undone (it doesn't apply to 2026 runs), so for a run
+    with scaling the calc-only figures of a scaled-up producer are still
+    post-scaling.
 
 Sections are located by marker text and header text (not hardcoded line
 numbers), so this should keep working against other Results File runs of
@@ -145,13 +172,13 @@ from pathlib import Path
 
 MATERIALS = [
     ("Aluminium", "Aluminium"),
-    ("Fibre composite", "Fibre Composite"),
+    ("Fibre Composite", "Fibre Composite"),
     ("Glass", "Glass"),
-    ("Paper or card", "Paper / Card"),
+    ("Paper or Card", "Paper / Card"),
     ("Plastic", "Plastic"),
     ("Steel", "Steel"),
     ("Wood", "Wood"),
-    ("Other materials", "Other"),
+    ("Other Materials", "Other"),
 ]
 
 RAG_MAP = [
@@ -174,8 +201,15 @@ DEFAULT_NATION = "England"
 DEFAULT_DATETIME = "1900-01-01 00:00:00.000"
 DEFAULT_CS_OR_DIRECT = "DP"
 DEFAULT_SUBMISSION_STATUS = "GRANTED"
+DEFAULT_PACKAGING_SUBMISSION_STATUS = "ACCEPTED"
 DEFAULT_SINGLE_FILE_SUBMISSION = "N"
 DEFAULT_FILENAME = "N/A"
+
+# Default file locations, used when the corresponding command-line argument
+# (<results.csv> <out.csv> <header.csv>) is omitted. Relative paths are resolved against this script's directory.
+DEFAULT_RESULTS_FILE = "78-R180smoketest_Results File_20260720.csv"
+DEFAULT_OUTPUT_FILE = "v_extract_recent_pom_org_data_from_results.csv"
+DEFAULT_HEADER_FILE = "v_extract_recent_pom_org_data_header.csv"
 
 
 def load_rows(path):
@@ -210,10 +244,17 @@ def find_header_row(lines, after, first_cell="Producer ID"):
     raise ValueError(f"Header row (first cell {first_cell!r}) not found after line {after}")
 
 
-def forward_fill_group(group_row):
+def forward_fill_group(group_row, width):
+    """
+    The exporter writes a section's material-group row only as far as the
+    cell naming its LAST group, so that row is shorter than the column-header
+    row beneath it. Pad out to the header row's width so the last group's
+    trailing columns (e.g. Other Materials' Public Bin columns) still get
+    labelled with it.
+    """
     filled = []
     last = ""
-    for cell in group_row:
+    for cell in list(group_row) + [""] * (width - len(group_row)):
         if cell.strip():
             last = cell.strip()
         filled.append(last)
@@ -228,8 +269,8 @@ def build_section(lines, marker_text, id_cols=("Producer ID", "Subsidiary ID")):
     """
     marker = find_marker(lines, marker_text)
     header_idx = find_header_row(lines, marker + 1)
-    group = forward_fill_group(parse_csv_line(lines[header_idx - 1]))
     header = parse_csv_line(lines[header_idx])
+    group = forward_fill_group(parse_csv_line(lines[header_idx - 1]), len(header))
 
     rows = []
     i = header_idx + 1
@@ -298,7 +339,11 @@ class MaterialCols:
     def __init__(self, group, header, src_material):
         self.group = group
         self.header = header
-        self.src_material = f"{src_material} Breakdown"
+        # Sections disagree on material name casing (e.g. Calculation
+        # Result's "Paper or card" vs Partial Obligation's "Paper or Card"),
+        # so resolve to whichever spelling this section actually uses.
+        wanted = f"{src_material} Breakdown"
+        self.src_material = next((g for g in group if g.lower() == wanted.lower()), wanted)
 
     def idx(self, col_name):
         return col_index(self.group, self.header, self.src_material, col_name)
@@ -316,7 +361,10 @@ class MaterialCols:
         return self.idx(f"Public Bin {suffix}")
 
     def drinks_total(self):
-        return self.idx("Household Drinks Containers Tonnage")
+        # Calculation Result names this column "... Tonnage - Glass"; the
+        # H1/H2 sections name it without the suffix.
+        idx = self.idx("Household Drinks Containers Tonnage")
+        return idx if idx is not None else self.idx("Household Drinks Containers Tonnage - Glass")
 
     def drinks_rag(self, suffix):
         return self.idx(f"Household Drinks Containers {suffix}")
@@ -386,34 +434,77 @@ def populate_material_columns(row_out, row_src, mcols, target_name, materials_wi
     # and no drinks-container weight for materials other than Glass.
 
 
-def populate_totals_only_from_calc(row_out, calc_row, calc_group, calc_header, target_name, src_material):
-    """
-    For producers with no H1/H2 audit row at all (see design decision 3b):
-    populate just the material's total tonnage from the annual Calculation
-    Result row, same treatment as Self-managed consumer waste. No RAM/RAG
-    breakdown is populated - see module docstring for why.
-    """
-    group_name = f"{src_material} Breakdown"
-    hh_idx = col_index(calc_group, calc_header, group_name, "Household Tonnage")
-    pb_idx = col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
+def cell(row, idx):
+    return row[idx].strip() if idx is not None and idx < len(row) else ""
 
-    row_out[f"Total Household packaging-{target_name}"] = fmt(num(calc_row, hh_idx))
-    row_out[f"Public binned-{target_name}"] = fmt(num(calc_row, pb_idx))
 
-    if target_name == "Glass":
-        drinks_idx = col_index(calc_group, calc_header, group_name, "Household Drinks Containers Tonnage - Glass")
-        row_out["Household drinks containers-Glass (Kg)"] = fmt(num(calc_row, drinks_idx))
+def split_levels(rows, group, header):
+    """
+    Splits a section's rows into (level_1_rows, level_2_rows) - design
+    decision 11. A section with no Level column is treated as all Level 1.
+    """
+    level_idx = col_index(group, header, "", "Level")
+    if level_idx is None:
+        return rows, []
+    l1 = [row for row in rows if cell(row, level_idx) == "1"]
+    l2 = [row for row in rows if cell(row, level_idx) == "2"]
+    return l1, l2
+
+
+# Every annual figure read from a Calculation Result / Partial Obligation row,
+# as MaterialCols accessors - the columns adjusted when rebuilding a group's
+# pre-pro-rating total (design decision 12).
+ANNUAL_ACCESSORS = (
+    [MaterialCols.household_total, MaterialCols.public_bin_total, MaterialCols.drinks_total,
+     lambda m: m.idx("Self-managed Consumer Waste Tonnage")]
+    + [
+        (lambda s, f: (lambda m: f(m, s)))(s, f)
+        for s, _ in RAG_MAP + RAG_MEDICAL_MAP
+        for f in (MaterialCols.household_rag, MaterialCols.public_bin_rag, MaterialCols.drinks_rag)
+    ]
+)
+
+
+def group_annual_row(l1_row, calc_group, calc_header, members, partial_group, partial_header):
+    """
+    A group's Level 1 Calculation Result row with each partially-obligated
+    member's pro-rated figures swapped for its pre-pro-rating Partial
+    Obligation figures, i.e.
+        L1 + sum over partial members of (partial row - Calculation Result row)
+    members is a list of (partial_row, calc_member_row). Returned in the
+    Calculation Result layout.
+    """
+    out = list(l1_row)
+    for src, _ in MATERIALS:
+        cm = MaterialCols(calc_group, calc_header, src)
+        pm = MaterialCols(partial_group, partial_header, src)
+        for accessor in ANNUAL_ACCESSORS:
+            ci, pi = accessor(cm), accessor(pm)
+            if ci is None or pi is None:
+                continue
+            values = [num(l1_row, ci)]
+            for partial_row, calc_row in members:
+                p, c = num(partial_row, pi), num(calc_row, ci)
+                values.append(p)
+                values.append(-c if c is not None else None)
+            if all(v is None for v in values):
+                continue
+            if ci >= len(out):
+                out.extend([""] * (ci + 1 - len(out)))
+            out[ci] = repr(sum(v for v in values if v is not None))
+    return out
 
 
 def main():
     base = Path(__file__).resolve().parent
-    results_file = Path(sys.argv[1]) if len(sys.argv) > 1 else base / "78-R180smoketest_Results File_20260720.csv"
-    output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else base / "v_extract_recent_pom_org_data_from_results.csv"
+    results_file = Path(sys.argv[1]) if len(sys.argv) > 1 else base / DEFAULT_RESULTS_FILE
+    output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else base / DEFAULT_OUTPUT_FILE
+    header_file = Path(sys.argv[3]) if len(sys.argv) > 3 else base / DEFAULT_HEADER_FILE
 
     # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
     # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
     # keep this file in sync if that view's columns change.
-    with open(base / "v_extract_recent_pom_org_data_header.csv", newline="", encoding="utf-8") as f:
+    with open(header_file, newline="", encoding="utf-8") as f:
         target_header = next(csv.reader(f))
 
     lines = load_rows(results_file)
@@ -422,20 +513,66 @@ def main():
     h1_rows, h1_group, h1_header = build_section(lines, "H1 Packaging Data - Submitted and Projected")
     calc_rows, calc_group, calc_header = build_section(lines, "Calculation Result")
 
+    # Design decision 11: only Level 1 rows are output.
+    h2_rows, _ = split_levels(h2_rows, h2_group, h2_header)
+    h1_rows, _ = split_levels(h1_rows, h1_group, h1_header)
+    calc_rows, calc_member_rows = split_levels(calc_rows, calc_group, calc_header)
+
+    # Design decision 12. Older Results Files have no such section.
+    try:
+        partial_rows, partial_group, partial_header = build_section(lines, "Partial Obligation Calculation")
+    except ValueError:
+        partial_rows, partial_group, partial_header = [], [], []
+
     calc_lookup = build_lookup(calc_rows, calc_group, calc_header)
+    calc_member_lookup = build_lookup(calc_member_rows, calc_group, calc_header)
     name_idx = col_index(calc_group, calc_header, "", "Producer / Subsidiary Name")
-    smcw_idx_by_material = {
-        src: col_index(calc_group, calc_header, f"{src} Breakdown", "Self-managed Consumer Waste Tonnage")
-        for src, _ in MATERIALS
-    }
+
+    # The Partial Obligation section has one row per partially-obligated
+    # producer/subsidiary and no group subtotals, so collect each group's
+    # partial members (paired with their Calculation Result rows) for
+    # group_annual_row. Rows for producers absent from Calculation Result
+    # (e.g. the section's "None" placeholder) are ignored.
+    grouped_pids = {pid for pid, _ in calc_member_lookup}
+    p_pid_idx = col_index(partial_group, partial_header, "", "Producer ID")
+    p_sid_idx = col_index(partial_group, partial_header, "", "Subsidiary ID")
+    partial_standalone = {}
+    partial_members = {}
+    for prow in partial_rows:
+        pid, sid = cell(prow, p_pid_idx), cell(prow, p_sid_idx)
+        if (pid, "") not in calc_lookup:
+            continue
+        if pid in grouped_pids:
+            partial_members.setdefault(pid, []).append((prow, calc_member_lookup.get((pid, sid), [])))
+        else:
+            partial_standalone[pid] = prow
+
+    def annual_source(pid):
+        """
+        The annual (H1+H2) row to take calc-only tonnages and SMCW from, with
+        its group/header, before partial-obligation pro-rating: a standalone
+        producer's Partial Obligation row, a group's Level 1 row rebuilt
+        from its members' Partial Obligation rows, else the Level 1
+        Calculation Result row as-is.
+        """
+        if pid in partial_standalone:
+            return partial_standalone[pid], partial_group, partial_header
+        calc_row = calc_lookup.get((pid, ""))
+        if pid in partial_members and calc_row is not None:
+            return (
+                group_annual_row(calc_row, calc_group, calc_header, partial_members[pid], partial_group, partial_header),
+                calc_group,
+                calc_header,
+            )
+        return calc_row, calc_group, calc_header
 
     def blank_row():
         return {h: "" for h in target_header}
 
-    def base_row(pid, sid, period_code, half):
+    def base_row(pid, period_code, half):
         row = blank_row()
-        row["Org_ID"] = sid if sid else pid
-        calc_row = calc_lookup.get((pid, sid))
+        row["Org_ID"] = pid
+        calc_row = calc_lookup.get((pid, ""))
         if calc_row is not None and name_idx is not None:
             row["Org_name"] = calc_row[name_idx].strip()
 
@@ -472,24 +609,30 @@ def main():
         row["fos_cd_filename"] = DEFAULT_FILENAME
         row["los_cd_filename"] = DEFAULT_FILENAME
 
+        row["Packaging_data_first_submission_status"] = DEFAULT_PACKAGING_SUBMISSION_STATUS
+        row["Packaging_data_latest_submission_status"] = DEFAULT_PACKAGING_SUBMISSION_STATUS
+        row["Packaging_data_first_submission_datetime"] = DEFAULT_DATETIME
+        row["Packaging_data_latest_submission_datetime"] = DEFAULT_DATETIME
+        row["Packaging_data_latest_submitted_CS_or_Direct"] = DEFAULT_CS_OR_DIRECT
+
         if half == "H2":
-            for src, _ in MATERIALS:
-                idx = smcw_idx_by_material[src]
-                if calc_row is not None and idx is not None:
-                    disp = dict(MATERIALS)[src]
-                    row[f"Self-managed consumer waste-{disp}"] = fmt(num(calc_row, idx))
+            src_row, src_group, src_header = annual_source(pid)
+            for src, disp in MATERIALS:
+                idx = MaterialCols(src_group, src_header, src).idx("Self-managed Consumer Waste Tonnage")
+                if src_row is not None and idx is not None:
+                    row[f"Self-managed consumer waste-{disp}"] = fmt(num(src_row, idx))
         return row
 
     out_rows = []
 
     period_col_idx_h2 = col_index(h2_group, h2_header, "", "Submission period code")
     pid_idx_h2 = col_index(h2_group, h2_header, "", "Producer ID")
-    sid_idx_h2 = col_index(h2_group, h2_header, "", "Subsidiary ID")
+    h2_keys = set()
     for r in h2_rows:
         pid = r[pid_idx_h2].strip()
-        sid = r[sid_idx_h2].strip()
         period_code = r[period_col_idx_h2].strip()
-        row_out = base_row(pid, sid, period_code, "H2")
+        h2_keys.add(pid)
+        row_out = base_row(pid, period_code, "H2")
         for src_material, disp in MATERIALS:
             mcols = MaterialCols(h2_group, h2_header, src_material)
             populate_material_columns(row_out, r, mcols, disp)
@@ -497,22 +640,16 @@ def main():
 
     period_col_idx_h1 = col_index(h1_group, h1_header, "", "Submission period code")
     pid_idx_h1 = col_index(h1_group, h1_header, "", "Producer ID")
-    sid_idx_h1 = col_index(h1_group, h1_header, "", "Subsidiary ID")
     h1_keys = set()
     for r in h1_rows:
         pid = r[pid_idx_h1].strip()
-        sid = r[sid_idx_h1].strip()
         period_code = r[period_col_idx_h1].strip()
-        h1_keys.add((pid, sid))
-        row_out = base_row(pid, sid, period_code, "H1")
+        h1_keys.add(pid)
+        row_out = base_row(pid, period_code, "H1")
         for src_material, disp in MATERIALS:
             mcols = MaterialCols(h1_group, h1_header, src_material)
             populate_material_columns(row_out, r, mcols, disp)
         out_rows.append(row_out)
-
-    h2_keys = set()
-    for r in h2_rows:
-        h2_keys.add((r[pid_idx_h2].strip(), r[sid_idx_h2].strip()))
 
     # Both sections cover a single H1/H2 pair per run - confirmed uniform
     # across every row in this Results File.
@@ -522,19 +659,20 @@ def main():
     # Design decision 3b: producers present in Calculation Result but never
     # audited in either H1 or H2 section - i.e. every material in both
     # periods was fully RAG-rated, so no "blank" needed inferring. Emit the
-    # same two rows as everyone else, but sourced from the annual total
-    # (100% H2 / 0% H1), with RAM breakdown left blank - see docstring.
+    # same two rows as everyone else, but sourced from the annual totals and
+    # RAM breakdown (100% H2 / 0% H1) - see docstring.
     audited_keys = h1_keys | h2_keys
-    calc_only_keys = sorted(k for k in calc_lookup if k not in audited_keys)
-    for pid, sid in calc_only_keys:
-        calc_row = calc_lookup[(pid, sid)]
+    calc_only_pids = sorted(pid for pid, _ in calc_lookup if pid not in audited_keys)
+    for pid in calc_only_pids:
+        src_row, src_group, src_header = annual_source(pid)
 
-        h2_row_out = base_row(pid, sid, period_code_h2, "H2")
+        h2_row_out = base_row(pid, period_code_h2, "H2")
         for src_material, disp in MATERIALS:
-            populate_totals_only_from_calc(h2_row_out, calc_row, calc_group, calc_header, disp, src_material)
+            mcols = MaterialCols(src_group, src_header, src_material)
+            populate_material_columns(h2_row_out, src_row, mcols, disp)
         out_rows.append(h2_row_out)
 
-        h1_row_out = base_row(pid, sid, period_code_h1, "H1")
+        h1_row_out = base_row(pid, period_code_h1, "H1")
         out_rows.append(h1_row_out)
 
     with open(output_file, "w", newline="", encoding="utf-8") as f:

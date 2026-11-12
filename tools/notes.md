@@ -3,13 +3,13 @@ Usage:
 `bash
 cd tools
 nix develop                                      # drops into a shell with R + gmp
-Rscript build_org_extract_from_results_file.R <results.csv> <out.csv>
+Rscript build_org_extract_from_results_file.R <results.csv> <out.csv> [<header.csv>]
 Rscript verify_results_csv.R <results.csv> [--verbose]
 `
 
 # or without entering a shell:
 `bash
-nix run .#build-org-extract -- <results.csv> <out.csv>   # must be run from tools/
+nix run .#build-org-extract -- <results.csv> <out.csv> [<header.csv>]   # must be run from tools/
 nix run .#verify-results-csv -- <results.csv> [--verbose]
 `
 
