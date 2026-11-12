@@ -98,20 +98,20 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.PartialOblig
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.TotalTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.SelfManagedConsumerWasteTonnage, DecimalPlaces.Three, DecimalFormats.F3));
 
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialHouseholdTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
-                AppendRam(tonnage.PartialHouseholdRAMTonnage());
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialHouseholdTonnage, DecimalPlaces.Three, DecimalFormats.F3));
+                AppendRam(tonnage.PartialHouseholdRAMTonnage);
 
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialPublicBinTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
-                AppendRam(tonnage.PartialPublicBinRAMTonnage());
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialPublicBinTonnage, DecimalPlaces.Three, DecimalFormats.F3));
+                AppendRam(tonnage.PartialPublicBinRAMTonnage);
 
                 if (materialCode == MaterialCodes.Glass)
                 {
-                    csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialHouseholdDrinksContainersTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
-                    AppendRam(tonnage.PartialHouseholdDrinksContainersRAMTonnage());
+                    csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialHouseholdDrinksContainersTonnage, DecimalPlaces.Three, DecimalFormats.F3));
+                    AppendRam(tonnage.PartialHouseholdDrinksContainersRAMTonnage);
                 }
 
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialTotalTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialSelfManagedConsumerWasteTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialSelfManagedConsumerWasteTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             }
         }
 

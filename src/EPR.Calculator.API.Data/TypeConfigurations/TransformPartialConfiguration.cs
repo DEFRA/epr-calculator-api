@@ -138,5 +138,90 @@ public class TransformPartialConfiguration : IEntityTypeConfiguration<TransformP
         builder.Property(p => p.SMCWTonnage)
             .HasColumnName("smcw_tonnage")
             .HasPrecision(18, 3);
+        builder.Property(p => p.PartialHouseholdTonnage)
+            .HasColumnName("partial_household_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.PartialHouseholdTonnageRed)
+            .HasColumnName("partial_household_tonnage_red")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHouseholdTonnageAmber)
+            .HasColumnName("partial_household_tonnage_amber")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHouseholdTonnageGreen)
+            .HasColumnName("partial_household_tonnage_green")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHouseholdTonnageRedMedical)
+            .HasColumnName("partial_household_tonnage_red_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHouseholdTonnageAmberMedical)
+            .HasColumnName("partial_household_tonnage_amber_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHouseholdTonnageGreenMedical)
+            .HasColumnName("partial_household_tonnage_green_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnage)
+            .HasColumnName("partial_public_bin_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.PartialPublicBinTonnageRed)
+            .HasColumnName("partial_public_bin_tonnage_red")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnageAmber)
+            .HasColumnName("partial_public_bin_tonnage_amber")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnageGreen)
+            .HasColumnName("partial_public_bin_tonnage_green")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnageRedMedical)
+            .HasColumnName("partial_public_bin_tonnage_red_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnageAmberMedical)
+            .HasColumnName("partial_public_bin_tonnage_amber_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialPublicBinTonnageGreenMedical)
+            .HasColumnName("partial_public_bin_tonnage_green_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnage)
+            .HasColumnName("partial_hdc_tonnage")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageRed)
+            .HasColumnName("partial_hdc_tonnage_red")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageAmber)
+            .HasColumnName("partial_hdc_tonnage_amber")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageGreen)
+            .HasColumnName("partial_hdc_tonnage_green")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageRedMedical)
+            .HasColumnName("partial_hdc_tonnage_red_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageAmberMedical)
+            .HasColumnName("partial_hdc_tonnage_amber_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialHDCTonnageGreenMedical)
+            .HasColumnName("partial_hdc_tonnage_green_medical")
+            .HasPrecision(18, 3)
+            .IsRequired(false);
+        builder.Property(p => p.PartialSMCWTonnage)
+            .HasColumnName("partial_smcw_tonnage")
+            .HasPrecision(18, 3);
     }
 }

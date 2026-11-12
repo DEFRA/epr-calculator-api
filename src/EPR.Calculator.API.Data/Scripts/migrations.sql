@@ -9886,6 +9886,273 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_smcw_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE t
+    SET partial_household_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.household, 0) ELSE CASE WHEN t.household_tonnage_red IS NOT NULL THEN ROUND(t.household_tonnage_red * t.obligated_factor, 3) + ROUND(t.household_tonnage_amber * t.obligated_factor, 3) + ROUND(t.household_tonnage_green * t.obligated_factor, 3) + ROUND(t.household_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.household_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.household_tonnage_green_medical * t.obligated_factor, 3) ELSE ROUND(t.household_tonnage * t.obligated_factor, 3) END END,
+        partial_household_tonnage_red = CASE WHEN t.household_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_red, 0) ELSE ROUND(t.household_tonnage_red * t.obligated_factor, 3) END,
+        partial_household_tonnage_amber = CASE WHEN t.household_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_amber, 0) ELSE ROUND(t.household_tonnage_amber * t.obligated_factor, 3) END,
+        partial_household_tonnage_green = CASE WHEN t.household_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_green, 0) ELSE ROUND(t.household_tonnage_green * t.obligated_factor, 3) END,
+        partial_household_tonnage_red_medical = CASE WHEN t.household_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_red_medical, 0) ELSE ROUND(t.household_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_household_tonnage_amber_medical = CASE WHEN t.household_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_amber_medical, 0) ELSE ROUND(t.household_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_household_tonnage_green_medical = CASE WHEN t.household_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_green_medical, 0) ELSE ROUND(t.household_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin, 0) ELSE CASE WHEN t.public_bin_tonnage_red IS NOT NULL THEN ROUND(t.public_bin_tonnage_red * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_amber * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_green * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_green_medical * t.obligated_factor, 3) ELSE ROUND(t.public_bin_tonnage * t.obligated_factor, 3) END END,
+        partial_public_bin_tonnage_red = CASE WHEN t.public_bin_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_red, 0) ELSE ROUND(t.public_bin_tonnage_red * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_amber = CASE WHEN t.public_bin_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_amber, 0) ELSE ROUND(t.public_bin_tonnage_amber * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_green = CASE WHEN t.public_bin_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_green, 0) ELSE ROUND(t.public_bin_tonnage_green * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_red_medical = CASE WHEN t.public_bin_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_red_medical, 0) ELSE ROUND(t.public_bin_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_amber_medical = CASE WHEN t.public_bin_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_amber_medical, 0) ELSE ROUND(t.public_bin_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_green_medical = CASE WHEN t.public_bin_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_green_medical, 0) ELSE ROUND(t.public_bin_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage = CASE WHEN fees.has_rows = 1 THEN CASE WHEN t.hdc_tonnage IS NULL THEN NULL ELSE ISNULL(f.hdc, 0) END ELSE CASE WHEN t.hdc_tonnage_red IS NOT NULL THEN ROUND(t.hdc_tonnage_red * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_amber * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_green * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_green_medical * t.obligated_factor, 3) WHEN t.hdc_tonnage IS NULL THEN NULL ELSE ROUND(t.hdc_tonnage * t.obligated_factor, 3) END END,
+        partial_hdc_tonnage_red = CASE WHEN t.hdc_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_red, 0) ELSE ROUND(t.hdc_tonnage_red * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_amber = CASE WHEN t.hdc_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_amber, 0) ELSE ROUND(t.hdc_tonnage_amber * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_green = CASE WHEN t.hdc_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_green, 0) ELSE ROUND(t.hdc_tonnage_green * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_red_medical = CASE WHEN t.hdc_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_red_medical, 0) ELSE ROUND(t.hdc_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_amber_medical = CASE WHEN t.hdc_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_amber_medical, 0) ELSE ROUND(t.hdc_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_green_medical = CASE WHEN t.hdc_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_green_medical, 0) ELSE ROUND(t.hdc_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_smcw_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.smcw, 0) ELSE ROUND(t.smcw_tonnage * t.obligated_factor, 3) END
+    FROM dbo.transform_partial t
+    OUTER APPLY (
+        SELECT MIN(pd.id) AS producer_detail_id
+        FROM dbo.producer_detail pd
+        WHERE pd.calculator_run_id = t.calculator_run_id AND pd.producer_id = t.producer_id
+          AND ISNULL(pd.subsidiary_id, '''') = ISNULL(t.subsidiary_id, '''')
+    ) d
+    OUTER APPLY (
+        SELECT CASE WHEN EXISTS (SELECT 1 FROM dbo.producer_material_packaging x WHERE x.producer_detail_id = d.producer_detail_id) THEN 1 ELSE 0 END AS has_rows
+    ) fees
+    OUTER APPLY (
+        SELECT SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage END) AS household,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_red END) AS household_red,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_amber END) AS household_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_green END) AS household_green,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_red_medical END) AS household_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_amber_medical END) AS household_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_green_medical END) AS household_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage END) AS public_bin,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_red END) AS public_bin_red,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_amber END) AS public_bin_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_green END) AS public_bin_green,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_red_medical END) AS public_bin_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_amber_medical END) AS public_bin_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_green_medical END) AS public_bin_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage END) AS hdc,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_red END) AS hdc_red,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_amber END) AS hdc_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_green END) AS hdc_green,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_red_medical END) AS hdc_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_amber_medical END) AS hdc_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_green_medical END) AS hdc_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''CW'' THEN pmp.packaging_tonnage END) AS smcw
+        FROM dbo.producer_material_packaging pmp
+        JOIN dbo.material m ON m.id = pmp.material_id
+        WHERE pmp.producer_detail_id = d.producer_detail_id AND m.code = t.material_code
+    ) f');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_household_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_public_bin_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_smcw_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

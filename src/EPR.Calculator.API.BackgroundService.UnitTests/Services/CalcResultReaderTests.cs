@@ -156,6 +156,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             result.First(p => p.ProducerId == 1 && p.SubsidiaryId == null).PartialObligationTonnageByMaterial.Count.ShouldBe(2);
             result.First(p => p.ProducerId == 1 && p.SubsidiaryId == "A").PartialObligationTonnageByMaterial.Count.ShouldBe(2);
             result.First(p => p.ProducerId == 2 && p.SubsidiaryId == "B").PartialObligationTonnageByMaterial.Count.ShouldBe(2);
+            var glass = result.First(p => p.ProducerId == 1 && p.SubsidiaryId == null).PartialObligationTonnageByMaterial[MaterialCodes.Glass];
+            glass.PartialHouseholdTonnage.ShouldBe(25);
+            glass.PartialHouseholdRAMTonnage!.Red.ShouldBe(25);
+            glass.PartialHouseholdDrinksContainersTonnage.ShouldBe(75);
+            glass.PartialHouseholdDrinksContainersRAMTonnage!.Red.ShouldBe(75);
+            glass.PartialSelfManagedConsumerWasteTonnage.ShouldBe(25);
         }
 
         [TestMethod]
@@ -632,7 +638,29 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 HDCTonnageRedMedical = isModulated && isGlass ? 0 : null,
                 HDCTonnageAmberMedical = isModulated && isGlass ? 0 : null,
                 HDCTonnageGreenMedical = isModulated && isGlass ? 0 : null,
-                SMCWTonnage = 50
+                SMCWTonnage = 50,
+                PartialHouseholdTonnage = 25,
+                PartialHouseholdTonnageRed = isModulated ? 25 : null,
+                PartialHouseholdTonnageAmber = isModulated ? 0 : null,
+                PartialHouseholdTonnageGreen = isModulated ? 0 : null,
+                PartialHouseholdTonnageRedMedical = isModulated ? 0 : null,
+                PartialHouseholdTonnageAmberMedical = isModulated ? 0 : null,
+                PartialHouseholdTonnageGreenMedical = isModulated ? 0 : null,
+                PartialPublicBinTonnage = 50,
+                PartialPublicBinTonnageRed = isModulated ? 50 : null,
+                PartialPublicBinTonnageAmber = isModulated ? 0 : null,
+                PartialPublicBinTonnageGreen = isModulated ? 0 : null,
+                PartialPublicBinTonnageRedMedical = isModulated ? 0 : null,
+                PartialPublicBinTonnageAmberMedical = isModulated ? 0 : null,
+                PartialPublicBinTonnageGreenMedical = isModulated ? 0 : null,
+                PartialHDCTonnage = isGlass ? 75 : null,
+                PartialHDCTonnageRed = isModulated && isGlass ? 75 : null,
+                PartialHDCTonnageAmber = isModulated && isGlass ? 0 : null,
+                PartialHDCTonnageGreen = isModulated && isGlass ? 0 : null,
+                PartialHDCTonnageRedMedical = isModulated && isGlass ? 0 : null,
+                PartialHDCTonnageAmberMedical = isModulated && isGlass ? 0 : null,
+                PartialHDCTonnageGreenMedical = isModulated && isGlass ? 0 : null,
+                PartialSMCWTonnage = 25
             };
         }
     }

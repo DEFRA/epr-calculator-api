@@ -697,7 +697,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                     AmberMedical = 0,
                     GreenMedical = 0
                 } : null,
-                SelfManagedConsumerWasteTonnage = 50
+                SelfManagedConsumerWasteTonnage = 50,
+                PartialHouseholdTonnage = MathUtils.RoundAwayFromZero((isModulated ? 50 : 100) * obligatedFactor, 3),
+                PartialHouseholdRAMTonnage = isModulated ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(50 * obligatedFactor, 3) } : null,
+                PartialPublicBinTonnage = MathUtils.RoundAwayFromZero((isModulated ? 100 : 200) * obligatedFactor, 3),
+                PartialPublicBinRAMTonnage = isModulated ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(100 * obligatedFactor, 3) } : null,
+                PartialHouseholdDrinksContainersTonnage = MathUtils.RoundAwayFromZero((isModulated && isGlass ? 150 : isGlass ? 300 : 0) * obligatedFactor, 3),
+                PartialHouseholdDrinksContainersRAMTonnage = isModulated && isGlass ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(150 * obligatedFactor, 3) } : null,
+                PartialSelfManagedConsumerWasteTonnage = MathUtils.RoundAwayFromZero(50 * obligatedFactor, 3)
             };
         }
     }

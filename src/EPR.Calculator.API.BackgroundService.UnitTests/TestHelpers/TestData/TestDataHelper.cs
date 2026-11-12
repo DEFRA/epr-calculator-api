@@ -1031,7 +1031,12 @@ public static partial class TestDataHelper
                                 HouseholdRAMTonnage = new RamTonnage(),
                                 PublicBinTonnage = 20,
                                 PublicBinRAMTonnage = new RamTonnage(),
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 0m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialPublicBinTonnage = 0m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -1045,7 +1050,14 @@ public static partial class TestDataHelper
                                 PublicBinRAMTonnage = new RamTonnage(),
                                 HouseholdDrinksContainersTonnage = 70,
                                 HouseholdDrinksContainersRAMTonnage = new RamTonnage(),
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 0m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialPublicBinTonnage = 0m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialHouseholdDrinksContainersTonnage = 0m,
+                                PartialHouseholdDrinksContainersRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         }
                     }

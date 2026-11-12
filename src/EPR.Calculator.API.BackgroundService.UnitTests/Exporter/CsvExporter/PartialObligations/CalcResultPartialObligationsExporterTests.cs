@@ -333,7 +333,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 {
                                     Red = 7, Amber = 8, Green = 9, RedMedical = 10, AmberMedical = 11, GreenMedical = 12
                                 },
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 10.5m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0.5m, Amber = 1m, Green = 1.5m, RedMedical = 2m, AmberMedical = 2.5m, GreenMedical = 3m },
+                                PartialPublicBinTonnage = 28.5m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 3.5m, Amber = 4m, Green = 4.5m, RedMedical = 5m, AmberMedical = 5.5m, GreenMedical = 6m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -353,7 +358,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 HouseholdDrinksContainersRAMTonnage = new RamTonnage(){
                                     Red = 13, Amber = 14, Green = 15, RedMedical = 16, AmberMedical = 17, GreenMedical = 18
                                 },
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 10.5m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0.5m, Amber = 1m, Green = 1.5m, RedMedical = 2m, AmberMedical = 2.5m, GreenMedical = 3m },
+                                PartialPublicBinTonnage = 28.5m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 3.5m, Amber = 4m, Green = 4.5m, RedMedical = 5m, AmberMedical = 5.5m, GreenMedical = 6m },
+                                PartialHouseholdDrinksContainersTonnage = 46.5m,
+                                PartialHouseholdDrinksContainersRAMTonnage = new RamTonnage { Red = 6.5m, Amber = 7m, Green = 7.5m, RedMedical = 8m, AmberMedical = 8.5m, GreenMedical = 9m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -369,7 +381,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 PublicBinRAMTonnage = new RamTonnage(){
                                     Red = 1, Amber = 2, Green = 3, RedMedical = 4, AmberMedical = 5, GreenMedical = 6
                                 },
-                                SelfManagedConsumerWasteTonnage = 20
+                                SelfManagedConsumerWasteTonnage = 20,
+                                PartialHouseholdTonnage = 10.5m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0.5m, Amber = 1m, Green = 1.5m, RedMedical = 2m, AmberMedical = 2.5m, GreenMedical = 3m },
+                                PartialPublicBinTonnage = 10.5m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 0.5m, Amber = 1m, Green = 1.5m, RedMedical = 2m, AmberMedical = 2.5m, GreenMedical = 3m },
+                                PartialSelfManagedConsumerWasteTonnage = 10m
                             }
                         }
                     }
@@ -401,7 +418,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 ObligatedFactor = 0.5m,
                                 HouseholdTonnage = 100,
                                 PublicBinTonnage = 20,
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 50m,
+                                PartialPublicBinTonnage = 10m,
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -412,7 +432,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 HouseholdTonnage = 100,
                                 PublicBinTonnage = 20,
                                 HouseholdDrinksContainersTonnage = 70,
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 50m,
+                                PartialPublicBinTonnage = 10m,
+                                PartialHouseholdDrinksContainersTonnage = 35m,
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -422,7 +446,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
                                 ObligatedFactor = 0.5m,
                                 HouseholdTonnage = 50,
                                 PublicBinTonnage = 10,
-                                SelfManagedConsumerWasteTonnage = 20
+                                SelfManagedConsumerWasteTonnage = 20,
+                                PartialHouseholdTonnage = 25m,
+                                PartialPublicBinTonnage = 5m,
+                                PartialSelfManagedConsumerWasteTonnage = 10m
                             }
                         }
                     }

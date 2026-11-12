@@ -385,7 +385,29 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 HDCTonnageRedMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.RedMedical,
                 HDCTonnageAmberMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.AmberMedical,
                 HDCTonnageGreenMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.GreenMedical,
-                SMCWTonnage = tonnage.SelfManagedConsumerWasteTonnage
+                SMCWTonnage = tonnage.SelfManagedConsumerWasteTonnage,
+                PartialHouseholdTonnage = tonnage.PartialHouseholdTonnage,
+                PartialHouseholdTonnageRed = tonnage.PartialHouseholdRAMTonnage?.Red,
+                PartialHouseholdTonnageAmber = tonnage.PartialHouseholdRAMTonnage?.Amber,
+                PartialHouseholdTonnageGreen = tonnage.PartialHouseholdRAMTonnage?.Green,
+                PartialHouseholdTonnageRedMedical = tonnage.PartialHouseholdRAMTonnage?.RedMedical,
+                PartialHouseholdTonnageAmberMedical = tonnage.PartialHouseholdRAMTonnage?.AmberMedical,
+                PartialHouseholdTonnageGreenMedical = tonnage.PartialHouseholdRAMTonnage?.GreenMedical,
+                PartialPublicBinTonnage = tonnage.PartialPublicBinTonnage,
+                PartialPublicBinTonnageRed = tonnage.PartialPublicBinRAMTonnage?.Red,
+                PartialPublicBinTonnageAmber = tonnage.PartialPublicBinRAMTonnage?.Amber,
+                PartialPublicBinTonnageGreen = tonnage.PartialPublicBinRAMTonnage?.Green,
+                PartialPublicBinTonnageRedMedical = tonnage.PartialPublicBinRAMTonnage?.RedMedical,
+                PartialPublicBinTonnageAmberMedical = tonnage.PartialPublicBinRAMTonnage?.AmberMedical,
+                PartialPublicBinTonnageGreenMedical = tonnage.PartialPublicBinRAMTonnage?.GreenMedical,
+                PartialHDCTonnage = tonnage.PartialHouseholdDrinksContainersTonnage,
+                PartialHDCTonnageRed = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Red,
+                PartialHDCTonnageAmber = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Amber,
+                PartialHDCTonnageGreen = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Green,
+                PartialHDCTonnageRedMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.RedMedical,
+                PartialHDCTonnageAmberMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.AmberMedical,
+                PartialHDCTonnageGreenMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.GreenMedical,
+                PartialSMCWTonnage = tonnage.PartialSelfManagedConsumerWasteTonnage
             };
         }
     }

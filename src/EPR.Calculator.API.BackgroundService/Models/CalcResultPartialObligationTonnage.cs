@@ -1,5 +1,4 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Utils;
 
 namespace EPR.Calculator.API.BackgroundService.Models
 {
@@ -13,61 +12,20 @@ namespace EPR.Calculator.API.BackgroundService.Models
         public decimal? HouseholdDrinksContainersTonnage { get; set; }
         public RamTonnage? HouseholdDrinksContainersRAMTonnage { get; set; }
         public required decimal SelfManagedConsumerWasteTonnage { get; set; }
-        public decimal PartialHouseholdTonnage()
-        {
-            var partialRam = PartialHouseholdRAMTonnage();
-            return partialRam != null ? partialRam.TotalRamTonnage() : MathUtils.RoundAwayFromZero(HouseholdTonnage * ObligatedFactor, 3);
-        }
-        public RamTonnage? PartialHouseholdRAMTonnage()
-        {
-            return HouseholdRAMTonnage != null ? ToPartialRam(HouseholdRAMTonnage, ObligatedFactor) : null;
-        }
-        public decimal PartialPublicBinTonnage()
-        {
-            var partialRam = PartialPublicBinRAMTonnage();
-            return partialRam != null ? partialRam.TotalRamTonnage() : MathUtils.RoundAwayFromZero(PublicBinTonnage * ObligatedFactor, 3);
-        }
-        public RamTonnage? PartialPublicBinRAMTonnage()
-        {
-            return PublicBinRAMTonnage != null ? ToPartialRam(PublicBinRAMTonnage, ObligatedFactor) : null;
-        }
-        public decimal? PartialHouseholdDrinksContainersTonnage()
-        {
-            var partialRam = PartialHouseholdDrinksContainersRAMTonnage();
-            if (partialRam != null)
-            {
-                return partialRam.TotalRamTonnage();
-            }
-            return HouseholdDrinksContainersTonnage != null ? MathUtils.RoundAwayFromZero(HouseholdDrinksContainersTonnage.Value * ObligatedFactor, 3) : null;
-        }
-        public RamTonnage? PartialHouseholdDrinksContainersRAMTonnage()
-        {
-            return HouseholdDrinksContainersRAMTonnage != null ? ToPartialRam(HouseholdDrinksContainersRAMTonnage, ObligatedFactor) : null;
-        }
-        public decimal PartialSelfManagedConsumerWasteTonnage()
-        {
-            return MathUtils.RoundAwayFromZero(SelfManagedConsumerWasteTonnage * ObligatedFactor, 3);
-        }
+        public required decimal PartialHouseholdTonnage { get; init; }
+        public RamTonnage? PartialHouseholdRAMTonnage { get; init; }
+        public required decimal PartialPublicBinTonnage { get; init; }
+        public RamTonnage? PartialPublicBinRAMTonnage { get; init; }
+        public decimal? PartialHouseholdDrinksContainersTonnage { get; init; }
+        public RamTonnage? PartialHouseholdDrinksContainersRAMTonnage { get; init; }
+        public required decimal PartialSelfManagedConsumerWasteTonnage { get; init; }
         public decimal TotalTonnage()
         {
             return HouseholdTonnage + PublicBinTonnage + (HouseholdDrinksContainersTonnage ?? 0);
         }
         public decimal PartialTotalTonnage()
         {
-            return PartialHouseholdTonnage() + PartialPublicBinTonnage() + (PartialHouseholdDrinksContainersTonnage() ?? 0);
-        }
-
-        private static RamTonnage ToPartialRam(RamTonnage ram, decimal partialAmount)
-        {
-            return new RamTonnage
-            {
-                Red        = MathUtils.RoundAwayFromZero(ram.Red * partialAmount, 3),
-                Amber      = MathUtils.RoundAwayFromZero(ram.Amber * partialAmount, 3),
-                Green      = MathUtils.RoundAwayFromZero(ram.Green * partialAmount, 3),
-                RedMedical = MathUtils.RoundAwayFromZero(ram.RedMedical * partialAmount, 3),
-                AmberMedical = MathUtils.RoundAwayFromZero(ram.AmberMedical * partialAmount, 3),
-                GreenMedical = MathUtils.RoundAwayFromZero(ram.GreenMedical * partialAmount, 3)
-            };
+            return PartialHouseholdTonnage + PartialPublicBinTonnage + (PartialHouseholdDrinksContainersTonnage ?? 0);
         }
     }
 }

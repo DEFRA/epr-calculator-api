@@ -234,12 +234,12 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             Assert.IsNull(aluResult.PublicBinRAMTonnage);
             Assert.AreEqual(20, aluResult.SelfManagedConsumerWasteTonnage);
             Assert.AreEqual(100, aluResult.TotalTonnage());
-            Assert.AreEqual(50.137m, aluResult.PartialHouseholdTonnage());
-            Assert.IsNull(aluResult.PartialHouseholdRAMTonnage());
-            Assert.AreEqual(0, aluResult.PartialPublicBinTonnage());
-            Assert.IsNull(aluResult.PartialPublicBinRAMTonnage());
-            Assert.AreEqual(10.027m, aluResult.PartialSelfManagedConsumerWasteTonnage());
-            Assert.AreEqual(50.137m, aluResult.PartialTotalTonnage());
+            Assert.AreEqual(50.136m, aluResult.PartialHouseholdTonnage); // 25.068 per submission period, as the fees use
+            Assert.IsNull(aluResult.PartialHouseholdRAMTonnage);
+            Assert.AreEqual(0, aluResult.PartialPublicBinTonnage);
+            Assert.IsNull(aluResult.PartialPublicBinRAMTonnage);
+            Assert.AreEqual(10.028m, aluResult.PartialSelfManagedConsumerWasteTonnage);
+            Assert.AreEqual(50.136m, aluResult.PartialTotalTonnage());
             var glResult = parOrgMats.First(mat => mat.Key == MaterialCodes.Glass).Value;
             Assert.AreEqual(0, glResult.HouseholdTonnage);
             Assert.IsNull(glResult.HouseholdRAMTonnage);
@@ -249,13 +249,13 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             Assert.AreEqual(0, glResult.HouseholdDrinksContainersTonnage);
             Assert.IsNull(glResult.HouseholdDrinksContainersRAMTonnage);
             Assert.AreEqual(0, glResult.TotalTonnage());
-            Assert.AreEqual(0, glResult.PartialHouseholdTonnage());
-            Assert.IsNull(glResult.PartialHouseholdRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialPublicBinTonnage());
-            Assert.IsNull(glResult.PartialPublicBinRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialHouseholdDrinksContainersTonnage());
-            Assert.IsNull(glResult.PartialHouseholdDrinksContainersRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialSelfManagedConsumerWasteTonnage());
+            Assert.AreEqual(0, glResult.PartialHouseholdTonnage);
+            Assert.IsNull(glResult.PartialHouseholdRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialPublicBinTonnage);
+            Assert.IsNull(glResult.PartialPublicBinRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialHouseholdDrinksContainersTonnage);
+            Assert.IsNull(glResult.PartialHouseholdDrinksContainersRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialSelfManagedConsumerWasteTonnage);
             Assert.AreEqual(0, glResult.PartialTotalTonnage());
         }
 
@@ -326,14 +326,14 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             Assert.AreEqual(new RamTonnage(), aluResult.PublicBinRAMTonnage);
             Assert.AreEqual(20, aluResult.SelfManagedConsumerWasteTonnage);
             Assert.AreEqual(100, aluResult.TotalTonnage());
-            Assert.AreEqual(50.136m, aluResult.PartialHouseholdTonnage());
+            Assert.AreEqual(50.138m, aluResult.PartialHouseholdTonnage); // each colour rounded per submission period, as the fees use
             Assert.AreEqual(new RamTonnage {
-                 Red = 10.027m, Amber = 10.027m, Green = 0, RedMedical = 0, AmberMedical = 0, GreenMedical = 30.082m
-            }, aluResult.PartialHouseholdRAMTonnage());
-            Assert.AreEqual(0, aluResult.PartialPublicBinTonnage());
-            Assert.AreEqual(new RamTonnage(), aluResult.PartialPublicBinRAMTonnage());
-            Assert.AreEqual(10.027m, aluResult.PartialSelfManagedConsumerWasteTonnage());
-            Assert.AreEqual(50.136m, aluResult.PartialTotalTonnage());
+                 Red = 10.028m, Amber = 10.028m, Green = 0, RedMedical = 0, AmberMedical = 0, GreenMedical = 30.082m
+            }, aluResult.PartialHouseholdRAMTonnage);
+            Assert.AreEqual(0, aluResult.PartialPublicBinTonnage);
+            Assert.AreEqual(new RamTonnage(), aluResult.PartialPublicBinRAMTonnage);
+            Assert.AreEqual(10.028m, aluResult.PartialSelfManagedConsumerWasteTonnage);
+            Assert.AreEqual(50.138m, aluResult.PartialTotalTonnage());
             var glResult = parOrgMats.First(mat => mat.Key == MaterialCodes.Glass).Value;
             Assert.AreEqual(0, glResult.HouseholdTonnage);
             Assert.AreEqual(new RamTonnage(), glResult.HouseholdRAMTonnage);
@@ -343,13 +343,13 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             Assert.AreEqual(0, glResult.HouseholdDrinksContainersTonnage);
             Assert.AreEqual(new RamTonnage(), glResult.HouseholdDrinksContainersRAMTonnage);
             Assert.AreEqual(0, glResult.TotalTonnage());
-            Assert.AreEqual(0, glResult.PartialHouseholdTonnage());
-            Assert.AreEqual(new RamTonnage(), glResult.PartialHouseholdRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialPublicBinTonnage());
-            Assert.AreEqual(new RamTonnage(), glResult.PartialPublicBinRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialHouseholdDrinksContainersTonnage());
-            Assert.AreEqual(new RamTonnage(), glResult.PartialHouseholdDrinksContainersRAMTonnage());
-            Assert.AreEqual(0, glResult.PartialSelfManagedConsumerWasteTonnage());
+            Assert.AreEqual(0, glResult.PartialHouseholdTonnage);
+            Assert.AreEqual(new RamTonnage(), glResult.PartialHouseholdRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialPublicBinTonnage);
+            Assert.AreEqual(new RamTonnage(), glResult.PartialPublicBinRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialHouseholdDrinksContainersTonnage);
+            Assert.AreEqual(new RamTonnage(), glResult.PartialHouseholdDrinksContainersRAMTonnage);
+            Assert.AreEqual(0, glResult.PartialSelfManagedConsumerWasteTonnage);
             Assert.AreEqual(0, glResult.PartialTotalTonnage());
         }
 

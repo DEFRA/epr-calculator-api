@@ -537,7 +537,35 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         t.HDCTonnageAmberMedical,
                         t.HDCTonnageGreenMedical
                     ) : null,
-                    SelfManagedConsumerWasteTonnage = t.SMCWTonnage
+                    SelfManagedConsumerWasteTonnage = t.SMCWTonnage,
+                    PartialHouseholdTonnage = t.PartialHouseholdTonnage,
+                    PartialHouseholdRAMTonnage = ToMaybeRamTonnage(
+                        t.PartialHouseholdTonnageRed,
+                        t.PartialHouseholdTonnageAmber,
+                        t.PartialHouseholdTonnageGreen,
+                        t.PartialHouseholdTonnageRedMedical,
+                        t.PartialHouseholdTonnageAmberMedical,
+                        t.PartialHouseholdTonnageGreenMedical
+                    ),
+                    PartialPublicBinTonnage = t.PartialPublicBinTonnage,
+                    PartialPublicBinRAMTonnage = ToMaybeRamTonnage(
+                        t.PartialPublicBinTonnageRed,
+                        t.PartialPublicBinTonnageAmber,
+                        t.PartialPublicBinTonnageGreen,
+                        t.PartialPublicBinTonnageRedMedical,
+                        t.PartialPublicBinTonnageAmberMedical,
+                        t.PartialPublicBinTonnageGreenMedical
+                    ),
+                    PartialHouseholdDrinksContainersTonnage = t.PartialHDCTonnage,
+                    PartialHouseholdDrinksContainersRAMTonnage = t.MaterialCode == MaterialCodes.Glass ? ToMaybeRamTonnage(
+                        t.PartialHDCTonnageRed,
+                        t.PartialHDCTonnageAmber,
+                        t.PartialHDCTonnageGreen,
+                        t.PartialHDCTonnageRedMedical,
+                        t.PartialHDCTonnageAmberMedical,
+                        t.PartialHDCTonnageGreenMedical
+                    ) : null,
+                    PartialSelfManagedConsumerWasteTonnage = t.PartialSMCWTonnage
                 }
             );
         }

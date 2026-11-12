@@ -2171,6 +2171,116 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("decimal(16,12)")
                         .HasColumnName("obligated_factor");
 
+                    b.Property<decimal?>("PartialHDCTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage");
+
+                    b.Property<decimal?>("PartialHDCTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_amber");
+
+                    b.Property<decimal?>("PartialHDCTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialHDCTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_green");
+
+                    b.Property<decimal?>("PartialHDCTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialHDCTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_red");
+
+                    b.Property<decimal?>("PartialHDCTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialHouseholdTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_amber");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_green");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_red");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_amber");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_green");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_red");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialSMCWTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_smcw_tonnage");
+
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
                         .HasColumnName("producer_id");
