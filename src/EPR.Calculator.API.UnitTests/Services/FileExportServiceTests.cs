@@ -296,7 +296,7 @@ public class FileExportServiceTests
         AddProducerFeeRow(RunId);
 
         var scaledUpData = new Mock<List<CalcResultScaledupProducer>>().Object;
-        calcResultReaderMock.Setup(x => x.ReadScaledData(RunId, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        calcResultReaderMock.Setup(x => x.ReadScaledData(RunId, It.IsAny<CancellationToken>())).ReturnsAsync(new CalcResultScaledupProducers { ScaledupProducers = [] });
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock

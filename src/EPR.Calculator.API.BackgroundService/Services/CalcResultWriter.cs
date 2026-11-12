@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
     {
         Task StoreProjectedH1Data(int runId, IReadOnlyList<CalcResultH1ProjectedProducer> projectedProducers, CancellationToken cancellationToken);
         Task StoreProjectedH2Data(int runId, IReadOnlyList<CalcResultH2ProjectedProducer> projectedProducers, CancellationToken cancellationToken);
-        Task StoreScaledData(int runId, IReadOnlyList<CalcResultScaledupProducer> scaled, CancellationToken cancellationToken);
+        Task StoreScaledData(int runId, CalcResultScaledupProducers scaled, CancellationToken cancellationToken);
         Task StorePartialData(int runId, IReadOnlyList<CalcResultPartialObligation> partial, CancellationToken cancellationToken);
         Task StoreProducerMaterialPackaging(List<L1Producer> producerDetails, CancellationToken cancellationToken);
         Task StoreProducerFees(int runId, FeeDetail total, IReadOnlyList<FeeDetail> details, CancellationToken cancellationToken);
@@ -45,30 +45,49 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task StoreScaledData(int runId, IReadOnlyList<CalcResultScaledupProducer> scaled, CancellationToken cancellationToken)
+        public async Task StoreScaledData(int runId, CalcResultScaledupProducers scaled, CancellationToken cancellationToken)
         {
-             await bulkOps.BulkInsertAsync(dbContext, scaled.SelectMany(p =>
-                p.PomData.Select(m =>
-                    new TransformScaled
-                    {
-                        CalculatorRunId = runId,
-                        ProducerId = p.ProducerId,
-                        SubsidiaryId = p.SubsidiaryId,
-                        ProducerName = p.ProducerName,
-                        TradingName = p.TradingName,
-                        SubmissionPeriodCode = p.SubmissionPeriodCode,
-                        Level = p.Level,
-                        IsSubTotal = p.IsSubtotalRow,
-                        DaysInSubmissionPeriod = p.DaysInSubmissionPeriod,
-                        DaysInWholePeriod = p.DaysInWholePeriod,
-                        ScaleupFactor = p.ScaleupFactor,
-                        MaterialId = m.MaterialId,
-                        PackagingType = m.PackagingType,
-                        Tonnage = m.Tonnage,
-                        ScaledTonnage = m.ScaledTonnage
-                    }
+            var rows = scaled.ScaledupProducers.Select(p => (Producer: p, IsTotal: false));
+            if (scaled.Total is not null)
+                rows = rows.Append((scaled.Total, true));
+
+            await bulkOps.BulkInsertAsync(dbContext, rows.SelectMany(r =>
+                r.Producer.ScaledupProducerTonnageByMaterial.Select(m =>
+                    MapToTransformScaled(runId, r.Producer, r.IsTotal, m.Key, m.Value)
                 )
             ), cancellationToken);
+        }
+
+        private static TransformScaled MapToTransformScaled(int runId, CalcResultScaledupProducer p, bool isTotal, string materialCode, CalcResultScaledupProducerTonnage t)
+        {
+            return new TransformScaled
+            {
+                CalculatorRunId                                 = runId,
+                ProducerId                                      = p.ProducerId,
+                SubsidiaryId                                    = p.SubsidiaryId,
+                ProducerName                                    = p.ProducerName,
+                TradingName                                     = p.TradingName,
+                SubmissionPeriodCode                            = p.SubmissionPeriodCode,
+                Level                                           = p.Level,
+                IsSubTotal                                      = p.IsSubtotalRow,
+                IsTotal                                         = isTotal,
+                DaysInSubmissionPeriod                          = p.DaysInSubmissionPeriod,
+                DaysInWholePeriod                               = p.DaysInWholePeriod,
+                ScaleupFactor                                   = p.ScaleupFactor,
+                MaterialCode                                    = materialCode,
+                ReportedHouseholdPackagingWasteTonnage          = t.ReportedHouseholdPackagingWasteTonnage,
+                ReportedPublicBinTonnage                        = t.ReportedPublicBinTonnage,
+                HouseholdDrinksContainersTonnageGlass           = t.HouseholdDrinksContainersTonnageGlass,
+                TotalReportedTonnage                            = t.TotalReportedTonnage,
+                ReportedSelfManagedConsumerWasteTonnage         = t.ReportedSelfManagedConsumerWasteTonnage,
+                NetReportedTonnage                              = t.NetReportedTonnage,
+                ScaledupReportedHouseholdPackagingWasteTonnage  = t.ScaledupReportedHouseholdPackagingWasteTonnage,
+                ScaledupReportedPublicBinTonnage                = t.ScaledupReportedPublicBinTonnage,
+                ScaledupHouseholdDrinksContainersTonnageGlass   = t.ScaledupHouseholdDrinksContainersTonnageGlass,
+                ScaledupTotalReportedTonnage                    = t.ScaledupTotalReportedTonnage,
+                ScaledupReportedSelfManagedConsumerWasteTonnage = t.ScaledupReportedSelfManagedConsumerWasteTonnage,
+                ScaledupNetReportedTonnage                      = t.ScaledupNetReportedTonnage
+            };
         }
 
         [ActivityTrace]

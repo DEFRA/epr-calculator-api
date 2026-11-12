@@ -4,6 +4,7 @@ using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -165,36 +166,50 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task StoreScaledData_WorksAsExpected()
         {
-            var scaled = ImmutableList.Create(
-                new CalcResultScaledupProducer
-                {
-                    ProducerId = 101001,
-                    SubsidiaryId = null,
-                    ProducerName = "Allied Packaging",
-                    Level = "1",
-                    SubmissionPeriodCode = "2024-P2",
-                    DaysInSubmissionPeriod = 91,
-                    DaysInWholePeriod = 91,
-                    ScaleupFactor = 2,
-                    PomData = new List<ScaledupPomEntry>
-                    {
-                        new ScaledupPomEntry(1, PackagingTypes.Household, 1000, 2000),
-                        new ScaledupPomEntry(1, PackagingTypes.PublicBin, 100, 200),
-                        new ScaledupPomEntry(1, PackagingTypes.ConsumerWaste, 500, 1000),
-                        new ScaledupPomEntry(2, PackagingTypes.Household, 1000, 2000),
-                        new ScaledupPomEntry(2, PackagingTypes.PublicBin, 100, 200),
-                        new ScaledupPomEntry(2, PackagingTypes.HouseholdDrinksContainers, 120, 240),
-                        new ScaledupPomEntry(2, PackagingTypes.ConsumerWaste, 500, 1000),
-                    },
-                }
-            );
+            var materials = ImmutableList.Create(
+                new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" },
+                new MaterialDetail { Id = 2, Code = MaterialCodes.Glass, Name = "Glass" });
+            var producer = new CalcResultScaledupProducer
+            {
+                ProducerId = 101001,
+                SubsidiaryId = null,
+                ProducerName = "Allied Packaging",
+                Level = "1",
+                SubmissionPeriodCode = "2024-P2",
+                DaysInSubmissionPeriod = 91,
+                DaysInWholePeriod = 91,
+                ScaleupFactor = 2,
+            };
+            producer.ScaledupProducerTonnageByMaterial = CalcResultScaledupProducersBuilder.GetTonnages(
+            [
+                new ScaledupPomEntry(1, PackagingTypes.Household, 1000, 2000),
+                new ScaledupPomEntry(1, PackagingTypes.PublicBin, 100, 200),
+                new ScaledupPomEntry(1, PackagingTypes.ConsumerWaste, 500, 1000),
+                new ScaledupPomEntry(2, PackagingTypes.Household, 1000, 2000),
+                new ScaledupPomEntry(2, PackagingTypes.PublicBin, 100, 200),
+                new ScaledupPomEntry(2, PackagingTypes.HouseholdDrinksContainers, 120, 240),
+                new ScaledupPomEntry(2, PackagingTypes.ConsumerWaste, 500, 1000),
+            ], materials);
+            var scaled = new CalcResultScaledupProducers
+            {
+                ScaledupProducers = [producer],
+                Total = CalcResultScaledupProducersBuilder.GetOverallTotalRow([producer], materials)
+            };
+
             await _sut.StoreScaledData(1, scaled, CancellationToken.None);
 
             var storedScaled = await _dbContext.TransformScaled.ToImmutableListAsync();
-            storedScaled.Count.ShouldBe(7);
-            storedScaled.Any(p => p.MaterialId == 1 && p.PackagingType == PackagingTypes.Household && p.Tonnage == 1000 & p.ScaledTonnage == 2000);
-            storedScaled.Any(p => p.MaterialId == 1 && p.PackagingType == PackagingTypes.ConsumerWaste && p.Tonnage == 500 & p.ScaledTonnage == 1000);
-            storedScaled.Any(p => p.MaterialId == 2 && p.PackagingType == PackagingTypes.HouseholdDrinksContainers && p.Tonnage == 120 & p.ScaledTonnage == 240);
+            storedScaled.Count.ShouldBe(4);
+            storedScaled.Count(p => p.IsTotal).ShouldBe(2);
+            var glass = storedScaled.Single(p => !p.IsTotal && p.MaterialCode == MaterialCodes.Glass);
+            glass.ProducerId.ShouldBe(101001);
+            glass.ReportedHouseholdPackagingWasteTonnage.ShouldBe(1000);
+            glass.HouseholdDrinksContainersTonnageGlass.ShouldBe(120);
+            glass.TotalReportedTonnage.ShouldBe(1220);
+            glass.NetReportedTonnage.ShouldBe(720);
+            glass.ScaledupTotalReportedTonnage.ShouldBe(2440);
+            glass.ScaledupNetReportedTonnage.ShouldBe(1440);
+            storedScaled.Single(p => p.IsTotal && p.MaterialCode == MaterialCodes.Aluminium).NetReportedTonnage.ShouldBe(600);
         }
 
         [TestMethod]

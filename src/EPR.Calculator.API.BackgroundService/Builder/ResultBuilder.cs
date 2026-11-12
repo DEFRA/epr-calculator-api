@@ -82,7 +82,7 @@ public class ResultBuilder(
         if (runContext.RequiresScaling)
         {
             (producers, result.CalcResultScaledupProducers) = await scaledUpProducersBuilder.ConstructAsync(runContext, materials, producers);
-            await calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers.ScaledupProducers, cancellationToken);
+            await calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers, cancellationToken);
         }
 
         (producers, result.CalcResultPartialObligations) = await partialObligationsBuilder.ConstructAsync(runContext, materials, producers);

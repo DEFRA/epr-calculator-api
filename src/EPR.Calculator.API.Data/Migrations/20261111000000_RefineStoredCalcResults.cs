@@ -284,6 +284,102 @@ namespace EPR.Calculator.API.Data.Migrations
 
             migrationBuilder.Sql(Exec($"ALTER TABLE dbo.calc_result_modulation ALTER COLUMN total {Utf8Varchar} NOT NULL"));
 
+            migrationBuilder.Sql(Exec("EXEC sp_rename N'dbo.PK_transform_scaled', N'PK_transform_scaled_bk', N'OBJECT'"));
+
+            migrationBuilder.RenameIndex(
+                name: "IX_transform_scaled_calculator_run_id",
+                table: "transform_scaled",
+                newName: "IX_transform_scaled_bk_calculator_run_id");
+
+            migrationBuilder.RenameTable(
+                name: "transform_scaled",
+                newName: "transform_scaled_bk");
+
+            migrationBuilder.CreateTable(
+                name: "transform_scaled",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    calculator_run_id = table.Column<int>(type: "int", nullable: false),
+                    producer_id = table.Column<int>(type: "int", nullable: false),
+                    subsidiary_id = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    producer_name = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
+                    trading_name = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
+                    submission_period = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    level = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    is_subtotal = table.Column<bool>(type: "bit", nullable: false),
+                    is_total = table.Column<bool>(type: "bit", nullable: false),
+                    days_in_submission_period = table.Column<int>(type: "int", nullable: false),
+                    days_in_whole_period = table.Column<int>(type: "int", nullable: false),
+                    scaled_factor = table.Column<decimal>(type: "decimal(16,12)", precision: 16, scale: 12, nullable: false),
+                    material_code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    household_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    public_bin_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    hdc_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    total_reported_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    smcw_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    net_reported_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_household_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_public_bin_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_hdc_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_total_reported_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_smcw_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    scaled_net_reported_tonnage = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_transform_scaled", x => x.id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_transform_scaled_calculator_run_id",
+                table: "transform_scaled",
+                column: "calculator_run_id");
+
+            migrationBuilder.Sql(Exec("""
+                INSERT INTO dbo.transform_scaled (
+                    calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+                    is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+                    household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+                    scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+                SELECT p.calculator_run_id, p.producer_id, p.subsidiary_id, p.producer_name, p.trading_name, p.submission_period, p.level,
+                       p.is_subtotal, 0, p.days_in_submission_period, p.days_in_whole_period, p.scaled_factor, p.material_code,
+                       p.hh, p.pb, p.hdc, p.hh + p.pb + p.hdc, p.cw, p.hh + p.pb + p.hdc - p.cw,
+                       p.scaled_hh, p.scaled_pb, p.scaled_hdc, p.scaled_hh + p.scaled_pb + p.scaled_hdc, p.scaled_cw, p.scaled_hh + p.scaled_pb + p.scaled_hdc - p.scaled_cw
+                FROM (
+                    SELECT b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+                           b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code AS material_code,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'HH' THEN b.tonnage END), 0)                         AS hh,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'PB' THEN b.tonnage END), 0)                         AS pb,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'HDC' AND m.code = 'GL' THEN b.tonnage END), 0)        AS hdc,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'CW' THEN b.tonnage END), 0)                         AS cw,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'HH' THEN b.scaled_tonnage END), 0)                  AS scaled_hh,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'PB' THEN b.scaled_tonnage END), 0)                  AS scaled_pb,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'HDC' AND m.code = 'GL' THEN b.scaled_tonnage END), 0) AS scaled_hdc,
+                           ISNULL(SUM(CASE WHEN b.packaging_type = 'CW' THEN b.scaled_tonnage END), 0)                  AS scaled_cw
+                    FROM dbo.transform_scaled_bk b
+                    JOIN dbo.material m ON m.id = b.material_id
+                    GROUP BY b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+                             b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code
+                ) p
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                INSERT INTO dbo.transform_scaled (
+                    calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+                    is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+                    household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+                    scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+                SELECT calculator_run_id, 0, NULL, NULL, NULL, '', '',
+                       0, 1, 0, 0, 0, material_code,
+                       SUM(household_tonnage), SUM(public_bin_tonnage), SUM(hdc_tonnage), SUM(total_reported_tonnage), SUM(smcw_tonnage), SUM(net_reported_tonnage),
+                       SUM(scaled_household_tonnage), SUM(scaled_public_bin_tonnage), SUM(scaled_hdc_tonnage), SUM(scaled_total_reported_tonnage), SUM(scaled_smcw_tonnage), SUM(scaled_net_reported_tonnage)
+                FROM dbo.transform_scaled
+                WHERE is_subtotal = 0 AND is_total = 0
+                GROUP BY calculator_run_id, material_code
+                """));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -304,6 +400,20 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer_bk",
                 newName: "calc_result_smcw_producer");
+
+            migrationBuilder.DropTable(
+                name: "transform_scaled");
+
+            migrationBuilder.RenameTable(
+                name: "transform_scaled_bk",
+                newName: "transform_scaled");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_transform_scaled_bk_calculator_run_id",
+                table: "transform_scaled",
+                newName: "IX_transform_scaled_calculator_run_id");
+
+            migrationBuilder.Sql(Exec("EXEC sp_rename N'dbo.PK_transform_scaled_bk', N'PK_transform_scaled', N'OBJECT'"));
 
             migrationBuilder.Sql(Exec("""
                 UPDATE dbo.calc_result_lapcap_data

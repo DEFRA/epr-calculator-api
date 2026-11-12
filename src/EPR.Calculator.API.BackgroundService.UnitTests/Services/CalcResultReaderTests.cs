@@ -109,22 +109,30 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         {
             _dbContext.AddRange(new List<TransformScaled>
             {
-                MkTransformScaled(1, 1, null, 1, "HH"),
-                MkTransformScaled(1, 1, null, 1, "PB"),
-                MkTransformScaled(1, 1, "A", 2, "HH"),
-                MkTransformScaled(1, 1, "A", 2, "PB"),
-                MkTransformScaled(1, 2, "B", 3, "CW"),
-                MkTransformScaled(1, 2, "B", 4, "HDC"),
-                MkTransformScaled(2, 2, "B", 3, "CW"),
-                MkTransformScaled(2, 2, "B", 4, "HDC"),
+                MkTransformScaled(1, 1, null, MaterialCodes.Aluminium),
+                MkTransformScaled(1, 1, null, MaterialCodes.Glass),
+                MkTransformScaled(1, 1, "A", MaterialCodes.Aluminium),
+                MkTransformScaled(1, 2, "B", MaterialCodes.Steel),
+                MkTransformScaled(1, 0, null, MaterialCodes.Aluminium, isTotal: true),
+                MkTransformScaled(2, 2, "B", MaterialCodes.Steel),
             });
             await _dbContext.SaveChangesAsync();
+            var materials = TestDataHelper.GetMaterialDetails();
+            var materialService = new Mock<IMaterialService>();
+            materialService.Setup(m => m.GetMaterials()).ReturnsAsync(materials);
+            var sut = new CalcResultReader(_dbContext, materialService.Object);
 
-            var result = await _sut.ReadScaledData(1, CancellationToken.None);
-            result.Count.ShouldBe(3);
-            result.First(p => p.ProducerId == 1 && p.SubsidiaryId == null).PomData.Count.ShouldBe(2);
-            result.First(p => p.ProducerId == 1 && p.SubsidiaryId == "A").PomData.Count.ShouldBe(2);
-            result.First(p => p.ProducerId == 2 && p.SubsidiaryId == "B").PomData.Count.ShouldBe(2);
+            var result = await sut.ReadScaledData(1, CancellationToken.None);
+
+            result.ScaledupProducers.Count.ShouldBe(3);
+            result.ScaledupProducers.ShouldAllBe(p => p.ScaledupProducerTonnageByMaterial.Keys.SequenceEqual(materials.Select(m => m.Code)));
+            var producer = result.ScaledupProducers.First(p => p.ProducerId == 1 && p.SubsidiaryId == null);
+            producer.ScaledupProducerTonnageByMaterial[MaterialCodes.Aluminium].NetReportedTonnage.ShouldBe(6);
+            producer.ScaledupProducerTonnageByMaterial[MaterialCodes.Aluminium].ScaledupNetReportedTonnage.ShouldBe(12);
+            producer.ScaledupProducerTonnageByMaterial[MaterialCodes.Steel].TotalReportedTonnage.ShouldBe(0);
+            result.Total.ShouldNotBeNull();
+            result.Total.ScaledupProducerTonnageByMaterial[MaterialCodes.Aluminium].TotalReportedTonnage.ShouldBe(7);
+            result.Total.ScaledupProducerTonnageByMaterial[MaterialCodes.Glass].TotalReportedTonnage.ShouldBe(0);
         }
 
         [TestMethod]
@@ -556,7 +564,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private static TransformScaled MkTransformScaled(int runId, int producerId, string? subId, int materialId, string packagingType)
+        private static TransformScaled MkTransformScaled(int runId, int producerId, string? subId, string materialCode, bool isTotal = false)
         {
             return new TransformScaled()
             {
@@ -568,13 +576,23 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 SubmissionPeriodCode = "2024-P2",
                 Level = "1",
                 IsSubTotal = false,
+                IsTotal = isTotal,
                 DaysInSubmissionPeriod = 180,
                 DaysInWholePeriod = 365,
                 ScaleupFactor = 2,
-                MaterialId = materialId,
-                PackagingType = packagingType,
-                Tonnage = 10,
-                ScaledTonnage = 20
+                MaterialCode = materialCode,
+                ReportedHouseholdPackagingWasteTonnage = 4,
+                ReportedPublicBinTonnage = 3,
+                HouseholdDrinksContainersTonnageGlass = 0,
+                TotalReportedTonnage = 7,
+                ReportedSelfManagedConsumerWasteTonnage = 1,
+                NetReportedTonnage = 6,
+                ScaledupReportedHouseholdPackagingWasteTonnage = 8,
+                ScaledupReportedPublicBinTonnage = 6,
+                ScaledupHouseholdDrinksContainersTonnageGlass = 0,
+                ScaledupTotalReportedTonnage = 14,
+                ScaledupReportedSelfManagedConsumerWasteTonnage = 2,
+                ScaledupNetReportedTonnage = 12
             };
         }
 

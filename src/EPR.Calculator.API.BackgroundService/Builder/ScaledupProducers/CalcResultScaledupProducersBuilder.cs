@@ -195,7 +195,11 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         foreach (var row in orderedRows)
             row.ScaledupProducerTonnageByMaterial = GetTonnages(row.PomData, materialDetails);
 
-        var scaledupProducersSummary = new CalcResultScaledupProducers {  ScaledupProducers = orderedRows.ToImmutableList() };
+        var scaledupProducersSummary = new CalcResultScaledupProducers
+        {
+            ScaledupProducers = orderedRows.ToImmutableList(),
+            Total             = GetOverallTotalRow(orderedRows, materialDetails)
+        };
         return (updatedL1Producers, scaledupProducersSummary);
     }
 
@@ -276,6 +280,54 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         }).ToList();
 
         return (producers, parentOrganisations);
+    }
+
+    public static CalcResultScaledupProducer GetOverallTotalRow(
+        IEnumerable<CalcResultScaledupProducer> producers,
+        IEnumerable<MaterialDetail> materials
+    )
+    {
+        var overallTotalRow = new CalcResultScaledupProducer
+        {
+            Level = string.Empty,
+            SubmissionPeriodCode = string.Empty,
+            ScaledupProducerTonnageByMaterial = new Dictionary<string, CalcResultScaledupProducerTonnage>(),
+        };
+
+        var allMaterialDict = producers
+            .Where(x => !x.IsSubtotalRow)
+            .Select(x => x.ScaledupProducerTonnageByMaterial)
+            .ToImmutableList();
+
+        foreach (var materialCode in materials.Select(m => m.Code))
+        {
+            var totalRow = new CalcResultScaledupProducerTonnage();
+            var materialValues = allMaterialDict.Where(x => x.ContainsKey(materialCode)).Select(x => x[materialCode]).ToList();
+            totalRow.ReportedHouseholdPackagingWasteTonnage = materialValues.Sum(x => x.ReportedHouseholdPackagingWasteTonnage);
+            totalRow.ReportedPublicBinTonnage = materialValues.Sum(x => x.ReportedPublicBinTonnage);
+            if (materialCode == MaterialCodes.Glass)
+            {
+                totalRow.HouseholdDrinksContainersTonnageGlass = materialValues.Sum(x => x.HouseholdDrinksContainersTonnageGlass);
+            }
+
+            totalRow.TotalReportedTonnage = materialValues.Sum(x => x.TotalReportedTonnage);
+            totalRow.ReportedSelfManagedConsumerWasteTonnage = materialValues.Sum(x => x.ReportedSelfManagedConsumerWasteTonnage);
+            totalRow.NetReportedTonnage = materialValues.Sum(x => x.NetReportedTonnage);
+            totalRow.ScaledupReportedHouseholdPackagingWasteTonnage = materialValues.Sum(x => x.ScaledupReportedHouseholdPackagingWasteTonnage);
+            totalRow.ScaledupReportedPublicBinTonnage = materialValues.Sum(x => x.ScaledupReportedPublicBinTonnage);
+            if (materialCode == MaterialCodes.Glass)
+            {
+                totalRow.ScaledupHouseholdDrinksContainersTonnageGlass = materialValues.Sum(x => x.ScaledupHouseholdDrinksContainersTonnageGlass);
+            }
+
+            totalRow.ScaledupTotalReportedTonnage = materialValues.Sum(x => x.ScaledupTotalReportedTonnage);
+            totalRow.ScaledupReportedSelfManagedConsumerWasteTonnage = materialValues.Sum(x => x.ScaledupReportedSelfManagedConsumerWasteTonnage);
+            totalRow.ScaledupNetReportedTonnage = materialValues.Sum(x => x.ScaledupNetReportedTonnage);
+
+            overallTotalRow.ScaledupProducerTonnageByMaterial.Add(materialCode, totalRow);
+        }
+
+        return overallTotalRow;
     }
 
     public static Dictionary<string, CalcResultScaledupProducerTonnage> GetTonnages(

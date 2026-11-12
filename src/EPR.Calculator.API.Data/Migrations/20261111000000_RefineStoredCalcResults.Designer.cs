@@ -2836,9 +2836,18 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("days_in_whole_period");
 
+                    b.Property<decimal>("HouseholdDrinksContainersTonnageGlass")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("hdc_tonnage");
+
                     b.Property<bool>("IsSubTotal")
                         .HasColumnType("bit")
                         .HasColumnName("is_subtotal");
+
+                    b.Property<bool>("IsTotal")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_total");
 
                     b.Property<string>("Level")
                         .IsRequired()
@@ -2846,15 +2855,16 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(5)")
                         .HasColumnName("level");
 
-                    b.Property<int>("MaterialId")
-                        .HasColumnType("int")
-                        .HasColumnName("material_id");
-
-                    b.Property<string>("PackagingType")
+                    b.Property<string>("MaterialCode")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("packaging_type");
+                        .HasColumnName("material_code");
+
+                    b.Property<decimal>("NetReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("net_reported_tonnage");
 
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
@@ -2865,10 +2875,50 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("producer_name");
 
-                    b.Property<decimal>("ScaledTonnage")
+                    b.Property<decimal>("ReportedHouseholdPackagingWasteTonnage")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
-                        .HasColumnName("scaled_tonnage");
+                        .HasColumnName("household_tonnage");
+
+                    b.Property<decimal>("ReportedPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("public_bin_tonnage");
+
+                    b.Property<decimal>("ReportedSelfManagedConsumerWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("smcw_tonnage");
+
+                    b.Property<decimal>("ScaledupHouseholdDrinksContainersTonnageGlass")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_hdc_tonnage");
+
+                    b.Property<decimal>("ScaledupNetReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_net_reported_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedHouseholdPackagingWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_household_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_public_bin_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedSelfManagedConsumerWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_smcw_tonnage");
+
+                    b.Property<decimal>("ScaledupTotalReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_total_reported_tonnage");
 
                     b.Property<decimal>("ScaleupFactor")
                         .HasPrecision(16, 12)
@@ -2886,10 +2936,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
 
-                    b.Property<decimal>("Tonnage")
+                    b.Property<decimal>("TotalReportedTonnage")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
-                        .HasColumnName("tonnage");
+                        .HasColumnName("total_reported_tonnage");
 
                     b.Property<string>("TradingName")
                         .HasMaxLength(400)

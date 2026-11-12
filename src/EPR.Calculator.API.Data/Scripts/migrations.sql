@@ -9746,6 +9746,125 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'EXEC sp_rename N''dbo.PK_transform_scaled'', N''PK_transform_scaled_bk'', N''OBJECT''');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[transform_scaled].[IX_transform_scaled_calculator_run_id]', N'IX_transform_scaled_bk_calculator_run_id', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[transform_scaled]', N'transform_scaled_bk', 'OBJECT';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    CREATE TABLE [transform_scaled] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [producer_name] nvarchar(400) NULL,
+        [trading_name] nvarchar(400) NULL,
+        [submission_period] nvarchar(50) NOT NULL,
+        [level] nvarchar(5) NOT NULL,
+        [is_subtotal] bit NOT NULL,
+        [is_total] bit NOT NULL,
+        [days_in_submission_period] int NOT NULL,
+        [days_in_whole_period] int NOT NULL,
+        [scaled_factor] decimal(16,12) NOT NULL,
+        [material_code] nvarchar(50) NOT NULL,
+        [household_tonnage] decimal(18,3) NOT NULL,
+        [public_bin_tonnage] decimal(18,3) NOT NULL,
+        [hdc_tonnage] decimal(18,3) NOT NULL,
+        [total_reported_tonnage] decimal(18,3) NOT NULL,
+        [smcw_tonnage] decimal(18,3) NOT NULL,
+        [net_reported_tonnage] decimal(18,3) NOT NULL,
+        [scaled_household_tonnage] decimal(18,3) NOT NULL,
+        [scaled_public_bin_tonnage] decimal(18,3) NOT NULL,
+        [scaled_hdc_tonnage] decimal(18,3) NOT NULL,
+        [scaled_total_reported_tonnage] decimal(18,3) NOT NULL,
+        [scaled_smcw_tonnage] decimal(18,3) NOT NULL,
+        [scaled_net_reported_tonnage] decimal(18,3) NOT NULL,
+        CONSTRAINT [PK_transform_scaled] PRIMARY KEY ([id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    CREATE INDEX [IX_transform_scaled_calculator_run_id] ON [transform_scaled] ([calculator_run_id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'INSERT INTO dbo.transform_scaled (
+        calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+        is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+        household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+        scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+    SELECT p.calculator_run_id, p.producer_id, p.subsidiary_id, p.producer_name, p.trading_name, p.submission_period, p.level,
+           p.is_subtotal, 0, p.days_in_submission_period, p.days_in_whole_period, p.scaled_factor, p.material_code,
+           p.hh, p.pb, p.hdc, p.hh + p.pb + p.hdc, p.cw, p.hh + p.pb + p.hdc - p.cw,
+           p.scaled_hh, p.scaled_pb, p.scaled_hdc, p.scaled_hh + p.scaled_pb + p.scaled_hdc, p.scaled_cw, p.scaled_hh + p.scaled_pb + p.scaled_hdc - p.scaled_cw
+    FROM (
+        SELECT b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+               b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code AS material_code,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HH'' THEN b.tonnage END), 0)                         AS hh,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''PB'' THEN b.tonnage END), 0)                         AS pb,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HDC'' AND m.code = ''GL'' THEN b.tonnage END), 0)        AS hdc,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''CW'' THEN b.tonnage END), 0)                         AS cw,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HH'' THEN b.scaled_tonnage END), 0)                  AS scaled_hh,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''PB'' THEN b.scaled_tonnage END), 0)                  AS scaled_pb,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HDC'' AND m.code = ''GL'' THEN b.scaled_tonnage END), 0) AS scaled_hdc,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''CW'' THEN b.scaled_tonnage END), 0)                  AS scaled_cw
+        FROM dbo.transform_scaled_bk b
+        JOIN dbo.material m ON m.id = b.material_id
+        GROUP BY b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+                 b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code
+    ) p');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'INSERT INTO dbo.transform_scaled (
+        calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+        is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+        household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+        scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+    SELECT calculator_run_id, 0, NULL, NULL, NULL, '''', '''',
+           0, 1, 0, 0, 0, material_code,
+           SUM(household_tonnage), SUM(public_bin_tonnage), SUM(hdc_tonnage), SUM(total_reported_tonnage), SUM(smcw_tonnage), SUM(net_reported_tonnage),
+           SUM(scaled_household_tonnage), SUM(scaled_public_bin_tonnage), SUM(scaled_hdc_tonnage), SUM(scaled_total_reported_tonnage), SUM(scaled_smcw_tonnage), SUM(scaled_net_reported_tonnage)
+    FROM dbo.transform_scaled
+    WHERE is_subtotal = 0 AND is_total = 0
+    GROUP BY calculator_run_id, material_code');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

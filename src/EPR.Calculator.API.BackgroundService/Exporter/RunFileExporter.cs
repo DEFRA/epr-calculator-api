@@ -169,7 +169,7 @@ public class RunFileExporter(
         }
 
         if (runContext.RequiresScaling)
-            result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
+            result.CalcResultScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
         if (fileType is not FileType.BillingJson)
             result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
