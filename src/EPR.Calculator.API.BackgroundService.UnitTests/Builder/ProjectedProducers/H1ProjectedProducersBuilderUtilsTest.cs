@@ -435,6 +435,45 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.ProjectedProduc
         }
 
         [TestMethod]
+        public void WithLevelOneProportions_CopiesLevelOneProportionsToTheProducersOtherRows()
+        {
+            var l1Proportions = new RAMProportions { Red = 0.25m, Amber = 0.75m };
+            CalcResultH1ProjectedProducerMaterialTonnage Tonnage(RAMProportions proportions) => new()
+            {
+                HouseholdTonnage             = 0,
+                HouseholdRAMTonnage          = RamTonnage.Empty,
+                PublicBinTonnage             = 0,
+                PublicBinRAMTonnage          = RamTonnage.Empty,
+                HouseholdTonnageWithoutRAM   = 0,
+                PublicBinTonnageWithoutRAM   = 0,
+                H2RamProportions             = proportions,
+                ProjectedHouseholdTonnage    = 0,
+                ProjectedHouseholdRAMTonnage = RamTonnage.Empty,
+                ProjectedPublicBinTonnage    = 0,
+                ProjectedPublicBinRAMTonnage = RamTonnage.Empty
+            };
+            CalcResultH1ProjectedProducer Row(int producerId, string? subsidiaryId, string level, RAMProportions proportions) => new()
+            {
+                ProducerId                   = producerId,
+                SubsidiaryId                 = subsidiaryId,
+                Level                        = level,
+                SubmissionPeriodCode         = "2025-H1",
+                H1ProjectedTonnageByMaterial = new Dictionary<string, CalcResultH1ProjectedProducerMaterialTonnage> { ["AL"] = Tonnage(proportions) }
+            };
+
+            var result = H1ProjectedProducersBuilderUtils.WithLevelOneProportions(
+            [
+                Row(1, null, "1", l1Proportions),
+                Row(1, "A", "2", RAMProportions.Empty),
+                Row(2, "B", "2", RAMProportions.Empty)
+            ]);
+
+            Assert.AreEqual(l1Proportions, result[0].H1ProjectedTonnageByMaterial["AL"].H2RamProportions);
+            Assert.AreEqual(l1Proportions, result[1].H1ProjectedTonnageByMaterial["AL"].H2RamProportions);
+            Assert.AreEqual(RAMProportions.Empty, result[2].H1ProjectedTonnageByMaterial["AL"].H2RamProportions);
+        }
+
+        [TestMethod]
         public void ReconcileRoundingDifference_NoMissingRam()
         {
             var tonnage = 200;

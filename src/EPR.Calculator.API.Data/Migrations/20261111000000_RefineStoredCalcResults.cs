@@ -380,6 +380,24 @@ namespace EPR.Calculator.API.Data.Migrations
                 GROUP BY calculator_run_id, material_code
                 """));
 
+            // Down leaves these: the previous exporter always shows the level 1 row's proportions instead.
+            migrationBuilder.Sql(Exec("""
+                UPDATE c
+                SET h2_ram_proportions_red           = p.h2_ram_proportions_red,
+                    h2_ram_proportions_amber         = p.h2_ram_proportions_amber,
+                    h2_ram_proportions_green         = p.h2_ram_proportions_green,
+                    h2_ram_proportions_red_medical   = p.h2_ram_proportions_red_medical,
+                    h2_ram_proportions_amber_medical = p.h2_ram_proportions_amber_medical,
+                    h2_ram_proportions_green_medical = p.h2_ram_proportions_green_medical
+                FROM dbo.transform_projected_h1 c
+                JOIN dbo.transform_projected_h1 p
+                  ON p.calculator_run_id = c.calculator_run_id
+                 AND p.producer_id = c.producer_id
+                 AND p.material_code = c.material_code
+                 AND p.level = '1'
+                WHERE c.level <> '1'
+                """));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",

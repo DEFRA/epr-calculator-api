@@ -9865,6 +9865,27 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'UPDATE c
+    SET h2_ram_proportions_red           = p.h2_ram_proportions_red,
+        h2_ram_proportions_amber         = p.h2_ram_proportions_amber,
+        h2_ram_proportions_green         = p.h2_ram_proportions_green,
+        h2_ram_proportions_red_medical   = p.h2_ram_proportions_red_medical,
+        h2_ram_proportions_amber_medical = p.h2_ram_proportions_amber_medical,
+        h2_ram_proportions_green_medical = p.h2_ram_proportions_green_medical
+    FROM dbo.transform_projected_h1 c
+    JOIN dbo.transform_projected_h1 p
+      ON p.calculator_run_id = c.calculator_run_id
+     AND p.producer_id = c.producer_id
+     AND p.material_code = c.material_code
+     AND p.level = ''1''
+    WHERE c.level <> ''1''');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 
