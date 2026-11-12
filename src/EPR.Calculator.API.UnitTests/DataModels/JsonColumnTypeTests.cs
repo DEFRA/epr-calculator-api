@@ -22,7 +22,7 @@ public class JsonColumnTypeTests
             .Select(e => relationalModel.FindTable(e.GetTableName()!, e.GetSchema())!.FindColumn(e.GetContainerColumnName()!)!)
             .ToList();
 
-        jsonColumns.Count.ShouldBe(10);
+        jsonColumns.Count.ShouldBe(11);
         jsonColumns.ShouldAllBe(c => c.StoreType == "nvarchar(max)");
     }
 }

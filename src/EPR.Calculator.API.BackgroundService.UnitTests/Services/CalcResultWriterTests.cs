@@ -2,6 +2,7 @@
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -477,12 +478,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         {
             var material = new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" };
 
-            return new ModulationResult
-            {
-                CalculatorRunId = runId,
-                GreenFactor = 1.5m,
-                RedFactor = 2.5m,
-                ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>
+            return CalcResultModulationBuilder.Create(
+                calculatorRunId: runId,
+                greenFactor: 1.5m,
+                redFactor: 2.5m,
+                byMaterial: new Dictionary<MaterialDetail, ModulationDetail>
                 {
                     [material] = new ModulationDetail
                     {
@@ -495,8 +495,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                         TotalRedMaterialAtAmberDisposalCost = 400,
                         TotalGreenMaterialAtAmberDisposalCost = 500
                     }
-                }
-            };
+                });
         }
 
         private static CalcResultH2ProjectedProducerMaterialTonnage MkH2MaterialTonnage(bool isGlass = false)

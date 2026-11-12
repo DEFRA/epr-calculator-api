@@ -61,7 +61,8 @@ public class CalcResultModulationBuilderTest
             AmberMaterialTonnages = at,
             GreenMaterialTonnages = gt,
             TotalRedMaterialAtAmberDisposalCost = rAtAdc,
-            TotalGreenMaterialAtAmberDisposalCost = gAtAdc
+            TotalGreenMaterialAtAmberDisposalCost = gAtAdc,
+            TotalMaterialTonnages = rt + at + gt
         };
     }
 
@@ -172,6 +173,32 @@ public class CalcResultModulationBuilderTest
 
         foreach (var kvp in expected)
             Assert.AreEqual(kvp.Value, modulationResults.ModulationByMaterial[kvp.Key], $"Value mismatch for key: {kvp.Key}");
+
+        Assert.AreEqual(new ModulationTotal
+        {
+            RedMaterialTonnages                   = 3491,
+            AmberMaterialTonnages                 = 1986,
+            GreenMaterialTonnages                 = 3593,
+            TotalMaterialTonnages                 = 9070,
+            TotalRedMaterialAtAmberDisposalCost   = 750830,
+            TotalGreenMaterialAtAmberDisposalCost = 660265
+        }, modulationResults.Total);
+    }
+
+    [TestMethod]
+    public void Create_EmptyMaterials_ReturnsZeroTotal()
+    {
+        var modulation = CalcResultModulationBuilder.Create(1, 1.2m, 1, new Dictionary<MaterialDetail, ModulationDetail>());
+
+        Assert.AreEqual(new ModulationTotal
+        {
+            RedMaterialTonnages                   = 0,
+            AmberMaterialTonnages                 = 0,
+            GreenMaterialTonnages                 = 0,
+            TotalMaterialTonnages                 = 0,
+            TotalRedMaterialAtAmberDisposalCost   = 0,
+            TotalGreenMaterialAtAmberDisposalCost = 0
+        }, modulation.Total);
     }
 
     [TestMethod]

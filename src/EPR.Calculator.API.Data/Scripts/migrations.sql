@@ -9689,6 +9689,63 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    ALTER TABLE [calc_result_modulation] ADD [total] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET material_modulations = a.materials_json,
+        total = t.total_json
+    FROM dbo.calc_result_modulation x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(m.value,
+                    ''$.ModulationDetail.TotalMaterialTonnages'', v.Red + v.Amber + v.Green) AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY m.ord), '''') + '']'' AS materials_json,
+               ISNULL(SUM(v.Red), 0)                  AS Red,
+               ISNULL(SUM(v.Amber), 0)                AS Amber,
+               ISNULL(SUM(v.Green), 0)                AS Green,
+               ISNULL(SUM(v.Red + v.Amber + v.Green), 0) AS Total,
+               ISNULL(SUM(v.RedAtAmber), 0)           AS RedAtAmber,
+               ISNULL(SUM(v.GreenAtAmber), 0)         AS GreenAtAmber
+        FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.material_modulations)) m
+        CROSS APPLY OPENJSON(m.value, ''$.ModulationDetail'') WITH (
+            Red          decimal(24, 6) ''$.RedMaterialTonnages'',
+            Amber        decimal(24, 6) ''$.AmberMaterialTonnages'',
+            Green        decimal(24, 6) ''$.GreenMaterialTonnages'',
+            RedAtAmber   decimal(20, 3)   ''$.TotalRedMaterialAtAmberDisposalCost'',
+            GreenAtAmber decimal(20, 3)   ''$.TotalGreenMaterialAtAmberDisposalCost'') v
+    ) a
+    CROSS APPLY (
+        SELECT (
+            SELECT a.Red          AS RedMaterialTonnages,
+                   a.Amber        AS AmberMaterialTonnages,
+                   a.Green        AS GreenMaterialTonnages,
+                   a.Total        AS TotalMaterialTonnages,
+                   a.RedAtAmber   AS TotalRedMaterialAtAmberDisposalCost,
+                   a.GreenAtAmber AS TotalGreenMaterialAtAmberDisposalCost
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE x.total IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.calc_result_modulation ALTER COLUMN total varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
 END;
 

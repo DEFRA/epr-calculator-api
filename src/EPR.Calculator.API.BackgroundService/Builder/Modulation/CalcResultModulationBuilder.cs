@@ -81,13 +81,36 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Modulation
                     };
                 });
 
-            return Task.FromResult(new ModulationResult
+            return Task.FromResult(Create(smcw.CalculatorRunId, redFactor, greenFactor, materialModulations));
+        }
+
+        public static ModulationResult Create(
+            int calculatorRunId,
+            decimal redFactor,
+            decimal greenFactor,
+            IReadOnlyDictionary<MaterialDetail, ModulationDetail> byMaterial
+        )
+        {
+            var withTotals = byMaterial.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value with { TotalMaterialTonnages = kvp.Value.RedMaterialTonnages + kvp.Value.AmberMaterialTonnages + kvp.Value.GreenMaterialTonnages });
+
+            return new ModulationResult
             {
-                CalculatorRunId      = smcw.CalculatorRunId,
+                CalculatorRunId      = calculatorRunId,
                 GreenFactor          = greenFactor,
                 RedFactor            = redFactor,
-                ModulationByMaterial = materialModulations
-            });
+                ModulationByMaterial = withTotals,
+                Total                = new ModulationTotal
+                {
+                    RedMaterialTonnages                   = withTotals.Values.Sum(m => m.RedMaterialTonnages),
+                    AmberMaterialTonnages                 = withTotals.Values.Sum(m => m.AmberMaterialTonnages),
+                    GreenMaterialTonnages                 = withTotals.Values.Sum(m => m.GreenMaterialTonnages),
+                    TotalMaterialTonnages                 = withTotals.Values.Sum(m => m.TotalMaterialTonnages),
+                    TotalRedMaterialAtAmberDisposalCost   = withTotals.Values.Sum(m => m.TotalRedMaterialAtAmberDisposalCost),
+                    TotalGreenMaterialAtAmberDisposalCost = withTotals.Values.Sum(m => m.TotalGreenMaterialAtAmberDisposalCost)
+                }
+            };
         }
     }
 }

@@ -4208,6 +4208,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("TotalGreenMaterialAtAmberDisposalCost")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("TotalMaterialTonnages")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("TotalRedMaterialAtAmberDisposalCost")
                                         .HasPrecision(18, 6);
 
@@ -4226,7 +4229,44 @@ namespace EPR.Calculator.API.Data.Migrations
                                 .IsRequired();
                         });
 
+                    b.OwnsOne("EPR.Calculator.API.Data.DataModels.ModulationTotal", "Total", b1 =>
+                        {
+                            b1.Property<int>("ModulationResultId");
+
+                            b1.Property<decimal>("AmberMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("GreenMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("RedMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalGreenMaterialAtAmberDisposalCost")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalRedMaterialAtAmberDisposalCost")
+                                .HasPrecision(18, 6);
+
+                            b1.HasKey("ModulationResultId");
+
+                            b1.ToTable("calc_result_modulation");
+
+                            b1
+                                .ToJson("total")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ModulationResultId");
+                        });
+
                     b.Navigation("MaterialModulations");
+
+                    b.Navigation("Total")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>

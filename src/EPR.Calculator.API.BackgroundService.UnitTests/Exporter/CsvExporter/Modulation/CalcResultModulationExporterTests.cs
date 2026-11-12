@@ -1,4 +1,5 @@
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Modulation;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -45,12 +46,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
                 }
             });
 
-            var modulationResult = new ModulationResult
-            {
-                CalculatorRunId = 1,
-                RedFactor = 1.2m,
-                GreenFactor = 0.751106m,
-                ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>
+            var modulationResult = CalcResultModulationBuilder.Create(
+                calculatorRunId: 1,
+                redFactor: 1.2m,
+                greenFactor: 0.751106m,
+                byMaterial: new Dictionary<MaterialDetail, ModulationDetail>
                 {
                     [al] = new ModulationDetail
                     {
@@ -74,8 +74,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
                         TotalRedMaterialAtAmberDisposalCost   = 14817325.23m,
                         TotalGreenMaterialAtAmberDisposalCost = 11697888.16m
                     }
-                }
-            };
+                });
 
             var csvContent = new StringBuilder();
 

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Validation;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.Data.DataModels;
@@ -53,12 +54,10 @@ public class ModulationResultValidatorTests : TestsFor<ModulationResultValidator
 
     private static ModulationResult CreateModulationResult(decimal greenFactor)
     {
-        return new ModulationResult
-        {
-            CalculatorRunId = 1,
-            GreenFactor = greenFactor,
-            RedFactor = 1.5m,
-            ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>()
-        };
+        return CalcResultModulationBuilder.Create(
+            calculatorRunId: 1,
+            greenFactor: greenFactor,
+            redFactor: 1.5m,
+            byMaterial: new Dictionary<MaterialDetail, ModulationDetail>());
     }
 }

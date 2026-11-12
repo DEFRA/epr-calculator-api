@@ -19,6 +19,8 @@ public record ModulationResult
             new MaterialModulation{ MaterialDetail = kvp.Key, ModulationDetail = kvp.Value }
         )];
     }
+
+    public required ModulationTotal Total { get; init; }
 }
 
 internal record MaterialModulation
@@ -35,6 +37,17 @@ public record ModulationDetail
     public required decimal RedMaterialTonnages { get; init; }
     public required decimal AmberMaterialTonnages { get; init; }
     public required decimal GreenMaterialTonnages { get; init; }
+    public required decimal TotalRedMaterialAtAmberDisposalCost { get; init; }
+    public required decimal TotalGreenMaterialAtAmberDisposalCost { get; init; }
+    public decimal TotalMaterialTonnages { get; init; }
+}
+
+public record ModulationTotal
+{
+    public required decimal RedMaterialTonnages { get; init; }
+    public required decimal AmberMaterialTonnages { get; init; }
+    public required decimal GreenMaterialTonnages { get; init; }
+    public required decimal TotalMaterialTonnages { get; init; }
     public required decimal TotalRedMaterialAtAmberDisposalCost { get; init; }
     public required decimal TotalGreenMaterialAtAmberDisposalCost { get; init; }
 }

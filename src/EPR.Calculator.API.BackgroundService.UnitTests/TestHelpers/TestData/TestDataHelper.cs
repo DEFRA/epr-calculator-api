@@ -2,6 +2,7 @@ using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
 using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
 using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
@@ -35,13 +36,11 @@ public static partial class TestDataHelper
                 H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty,
             },
             CalcResultModulation               = applyModulation
-                ? new ModulationResult
-                {
-                    CalculatorRunId      = 1,
-                    GreenFactor          = 1,
-                    RedFactor            = 2,
-                    ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>()
-                }
+                ? CalcResultModulationBuilder.Create(
+                    calculatorRunId: 1,
+                    greenFactor:     1,
+                    redFactor:       2,
+                    byMaterial:      new Dictionary<MaterialDetail, ModulationDetail>())
                 : null
         };
     }

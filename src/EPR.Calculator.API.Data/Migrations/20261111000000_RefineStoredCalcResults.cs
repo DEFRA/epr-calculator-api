@@ -10,6 +10,7 @@ namespace EPR.Calculator.API.Data.Migrations
         private const string Money = "decimal(20, 3)";
         private const string Tonnage = "decimal(24, 6)";
         private const string FullPrecisionMoney = "decimal(38, 28)";
+        private const string Utf8Varchar = "varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8";
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -238,6 +239,51 @@ namespace EPR.Calculator.API.Data.Migrations
                 WHERE JSON_QUERY(x.one_plus_four_apppointment, '$.TotalOnePlusFour') IS NULL
                 """));
 
+            migrationBuilder.AddColumn<string>(
+                name: "total",
+                table: "calc_result_modulation",
+                type: Utf8Varchar,
+                nullable: true);
+
+            migrationBuilder.Sql(Exec($"""
+                UPDATE x
+                SET material_modulations = a.materials_json,
+                    total = t.total_json
+                FROM dbo.calc_result_modulation x
+                CROSS APPLY (
+                    SELECT '[' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(m.value,
+                                '$.ModulationDetail.TotalMaterialTonnages', v.Red + v.Amber + v.Green) AS nvarchar(max)), ',')
+                                WITHIN GROUP (ORDER BY m.ord), '') + ']' AS materials_json,
+                           ISNULL(SUM(v.Red), 0)                  AS Red,
+                           ISNULL(SUM(v.Amber), 0)                AS Amber,
+                           ISNULL(SUM(v.Green), 0)                AS Green,
+                           ISNULL(SUM(v.Red + v.Amber + v.Green), 0) AS Total,
+                           ISNULL(SUM(v.RedAtAmber), 0)           AS RedAtAmber,
+                           ISNULL(SUM(v.GreenAtAmber), 0)         AS GreenAtAmber
+                    FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.material_modulations)) m
+                    CROSS APPLY OPENJSON(m.value, '$.ModulationDetail') WITH (
+                        Red          {Tonnage} '$.RedMaterialTonnages',
+                        Amber        {Tonnage} '$.AmberMaterialTonnages',
+                        Green        {Tonnage} '$.GreenMaterialTonnages',
+                        RedAtAmber   {Money}   '$.TotalRedMaterialAtAmberDisposalCost',
+                        GreenAtAmber {Money}   '$.TotalGreenMaterialAtAmberDisposalCost') v
+                ) a
+                CROSS APPLY (
+                    SELECT (
+                        SELECT a.Red          AS RedMaterialTonnages,
+                               a.Amber        AS AmberMaterialTonnages,
+                               a.Green        AS GreenMaterialTonnages,
+                               a.Total        AS TotalMaterialTonnages,
+                               a.RedAtAmber   AS TotalRedMaterialAtAmberDisposalCost,
+                               a.GreenAtAmber AS TotalGreenMaterialAtAmberDisposalCost
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    ) AS total_json
+                ) t
+                WHERE x.total IS NULL
+                """));
+
+            migrationBuilder.Sql(Exec($"ALTER TABLE dbo.calc_result_modulation ALTER COLUMN total {Utf8Varchar} NOT NULL"));
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -302,6 +348,22 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.Sql(Exec("""
                 UPDATE dbo.calc_result_one_plus_four_apportionment
                 SET one_plus_four_apppointment = JSON_MODIFY(JSON_MODIFY(one_plus_four_apppointment, '$.TotalOnePlusFour', NULL), '$.OnePlusFourApportionment', NULL)
+                """));
+
+            migrationBuilder.DropColumn(
+                name: "total",
+                table: "calc_result_modulation");
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE x
+                SET material_modulations = a.materials_json
+                FROM dbo.calc_result_modulation x
+                CROSS APPLY (
+                    SELECT '[' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(m.value,
+                                '$.ModulationDetail.TotalMaterialTonnages', NULL) AS nvarchar(max)), ',')
+                                WITHIN GROUP (ORDER BY CAST(m.[key] AS int)), '') + ']' AS materials_json
+                    FROM OPENJSON(x.material_modulations) m
+                ) a
                 """));
         }
 

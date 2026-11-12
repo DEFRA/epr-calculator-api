@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Builder.Summary.Common;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -180,16 +181,14 @@ public class ProducerFeesUtilTests
     {
         var material = TestDataHelper.GetMaterialDetails().First(m => m.Code == "AL");
 
-        calcResult.CalcResultModulation = new ModulationResult
-        {
-            CalculatorRunId = 1,
-            GreenFactor = 2,
-            RedFactor = 4,
-            ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>
+        calcResult.CalcResultModulation = CalcResultModulationBuilder.Create(
+            calculatorRunId: 1,
+            greenFactor: 2,
+            redFactor: 4,
+            byMaterial: new Dictionary<MaterialDetail, ModulationDetail>
             {
                 [material] = mkModulationDetail(100, 120, 77.1423m, 90, 220, 550, 22000, 55000)
-            }
-        };
+            });
 
         var smcw = new SelfManagedConsumerWasteData
         {
