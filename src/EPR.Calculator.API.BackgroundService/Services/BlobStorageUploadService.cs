@@ -1,5 +1,7 @@
 using System.Text;
+using Azure;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
 
@@ -62,7 +64,13 @@ public class BlobStorageUploadService(
 
         var blobClient = blobContainerClient.GetBlobClient(request.FileName);
 
-        await using (var blobStream = await blobClient.OpenWriteAsync(request.Overwrite, options: null, cancellationToken))
+        // OpenWrite only supports overwriting, so when not overwriting, only allow the write if the blob doesn't exist yet
+        // - it fails (409) if it does, as UploadAsync does with overwrite: false.
+        var options = request.Overwrite
+            ? null
+            : new BlobOpenWriteOptions { OpenConditions = new BlobRequestConditions { IfNoneMatch = ETag.All } };
+
+        await using (var blobStream = await blobClient.OpenWriteAsync(overwrite: true, options, cancellationToken))
         {
             if (request.UseUtf8Bom)
                 await blobStream.WriteAsync(Encoding.UTF8.GetPreamble(), cancellationToken);

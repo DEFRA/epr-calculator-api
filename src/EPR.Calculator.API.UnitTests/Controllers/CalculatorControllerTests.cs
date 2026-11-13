@@ -601,7 +601,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 runStatusValidator ?? Mock.Of<IRunClassificationValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),
-                fileExportService ?? Mock.Of<IFileExportService>())
+                fileExportService ?? Mock.Of<IFileExportService>(),
+                Microsoft.Extensions.Options.Options.Create(new EPR.Calculator.API.Options.FeatureFlagOptions()))
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };

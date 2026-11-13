@@ -1,5 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService;
+using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
+using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
+using EPR.Calculator.API.BackgroundService.Exporter;
 using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Builder.CancelledProducers;
 using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
@@ -71,6 +74,7 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorRunProcessor, CalculatorRunProcessor>();
             services.AddTransient<ICalculatorRunDataInitializer, CalculatorRunDataInitializer>();
             services.AddTransient<ICalculatorRunFinalizer, CalculatorRunFinalizer>();
+            services.AddTransient<ICalculatorFileGenerator, CalculatorFileGenerator>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
             // The load-table stage and its CommonDataApi:DataLoader:Enabled flag live in
@@ -83,6 +87,8 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<IBillingRunContextBuilder, BillingRunContextBuilder>();
             services.AddTransient<IBillingRunProcessor, BillingRunProcessor>();
             services.AddTransient<IBillingRunFinalizer, BillingRunFinalizer>();
+            services.AddTransient<IBillingFileGenerator, BillingFileGenerator>();
+            services.AddTransient<IRunFileExporter, RunFileExporter>();
             services.AddTransient<IBillingFileExporter, BillingFileExporter>();
             services.AddTransient<IBillingFileJsonWriter, BillingFileJsonWriter>();
 
