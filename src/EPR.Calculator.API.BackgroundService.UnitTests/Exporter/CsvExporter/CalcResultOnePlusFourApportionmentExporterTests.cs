@@ -1,4 +1,5 @@
 using System.Text;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.Data.DataModels;
 
@@ -12,11 +13,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
 
         public CalcResultOnePlusFourApportionmentExporterTests()
         {
-            calcResult1Plus4Apportionment = new CalcResultOnePlusFourApportionment
-            {
-                LaDisposalCost   = new() { England = 109800, Wales = 24750, Scotland = 49300, NorthernIreland = 19300 },
-                LADataPrepCharge = new() { England =  16000, Wales =  7000, Scotland =  9000, NorthernIreland =  4500 }
-            };
+            calcResult1Plus4Apportionment = CalcResultOnePlusFourApportionmentBuilder.Create(
+                laDisposalCost:   new() { England = 109800, Wales = 24750, Scotland = 49300, NorthernIreland = 19300 },
+                laDataPrepCharge: new() { England =  16000, Wales =  7000, Scotland =  9000, NorthernIreland =  4500 });
         }
 
         [TestMethod]

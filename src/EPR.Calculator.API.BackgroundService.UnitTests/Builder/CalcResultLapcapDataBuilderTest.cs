@@ -107,6 +107,34 @@ public class CalcResultLapcapDataBuilderTest : TestsFor<CalcResultLapcapDataBuil
         mockService.Verify(x => x.SaveChangesAsync(It.IsAny<CalcCountryApportionmentServiceDto>()));
     }
 
+    [TestMethod]
+    public void Create_KeepsCountryApportionmentAtFullPrecision()
+    {
+        var lapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
+        {
+            ["AL"] = new() { England = 1, Wales = 1, Scotland = 0.5m, NorthernIreland = 0.5m },
+            ["PL"] = new() { England = 0, Wales = 0, Scotland = 0.5m, NorthernIreland = 2.5m }
+        });
+
+        Assert.AreEqual(new ByCountryCost { England = 1, Wales = 1, Scotland = 1, NorthernIreland = 3 }, lapcapData.Total);
+        Assert.AreEqual(16.666666666666666666666666670m, lapcapData.CountryApportionment.England);
+        Assert.AreEqual(16.666666666666666666666666670m, lapcapData.CountryApportionment.Wales);
+        Assert.AreEqual(16.666666666666666666666666670m, lapcapData.CountryApportionment.Scotland);
+        Assert.AreEqual(50m, lapcapData.CountryApportionment.NorthernIreland);
+    }
+
+    [TestMethod]
+    public void Create_ZeroTotal_ReturnsEmptyCountryApportionment()
+    {
+        var lapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
+        {
+            ["AL"] = ByCountryCost.Empty
+        });
+
+        Assert.AreEqual(ByCountryCost.Empty, lapcapData.Total);
+        Assert.AreEqual(ByCountryApportionment.Empty, lapcapData.CountryApportionment);
+    }
+
     private static List<LapcapDataDetail> GetLapcapDetails(LapcapDataMaster master)
     {
         List<string> refs =

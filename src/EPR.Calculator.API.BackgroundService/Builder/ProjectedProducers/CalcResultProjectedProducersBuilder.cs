@@ -53,11 +53,11 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
                 updatedProducers.Add(new L1Producer(l1.OrganisationId, updatedPds));
 
                 allH2Rows.AddRange(h2WithGroupSubtotals);
-                allH1Rows.AddRange(AssignLevels(
+                allH1Rows.AddRange(H1ProjectedProducersBuilderUtils.WithLevelOneProportions(AssignLevels(
                     h1Rows,
                     deriveL1: p => H1ProjectedProducersBuilderUtils.CreateParentProducer(p, h2WithGroupSubtotals),
                     sumProducerGroupTonnages: group => H1ProjectedProducersBuilderUtils.SumProducerGroupTonnages(group, h2WithGroupSubtotals)
-                ));
+                )));
             }
 
             // Only the producers the projected producers sections show are stored.

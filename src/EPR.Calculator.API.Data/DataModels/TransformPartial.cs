@@ -37,4 +37,26 @@ public class TransformPartial
     public decimal? HDCTonnageAmberMedical { get; set; }
     public decimal? HDCTonnageGreenMedical { get; set; }
     public required decimal SMCWTonnage { get; set; }
+    public required decimal PartialHouseholdTonnage { get; set; }
+    public decimal? PartialHouseholdTonnageRed { get; set; }
+    public decimal? PartialHouseholdTonnageAmber { get; set; }
+    public decimal? PartialHouseholdTonnageGreen { get; set; }
+    public decimal? PartialHouseholdTonnageRedMedical { get; set; }
+    public decimal? PartialHouseholdTonnageAmberMedical { get; set; }
+    public decimal? PartialHouseholdTonnageGreenMedical { get; set; }
+    public required decimal PartialPublicBinTonnage { get; set; }
+    public decimal? PartialPublicBinTonnageRed { get; set; }
+    public decimal? PartialPublicBinTonnageAmber { get; set; }
+    public decimal? PartialPublicBinTonnageGreen { get; set; }
+    public decimal? PartialPublicBinTonnageRedMedical { get; set; }
+    public decimal? PartialPublicBinTonnageAmberMedical { get; set; }
+    public decimal? PartialPublicBinTonnageGreenMedical { get; set; }
+    public decimal? PartialHDCTonnage { get; set; }
+    public decimal? PartialHDCTonnageRed { get; set; }
+    public decimal? PartialHDCTonnageAmber { get; set; }
+    public decimal? PartialHDCTonnageGreen { get; set; }
+    public decimal? PartialHDCTonnageRedMedical { get; set; }
+    public decimal? PartialHDCTonnageAmberMedical { get; set; }
+    public decimal? PartialHDCTonnageGreenMedical { get; set; }
+    public required decimal PartialSMCWTonnage { get; set; }
 }

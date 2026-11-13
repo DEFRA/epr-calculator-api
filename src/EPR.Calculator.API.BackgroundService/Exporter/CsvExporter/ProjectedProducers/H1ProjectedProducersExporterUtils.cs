@@ -11,13 +11,6 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
     {
         public static void AppendProjectedProducers(IImmutableList<CalcResultH1ProjectedProducer> h1ProjectedProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
-            var l1ProportionsByProducer = h1ProjectedProducers
-                .Where(p => p.Level == CommonConstants.LevelOne.ToString())
-                .ToDictionary(
-                    p => p.ProducerId,
-                    p => (IReadOnlyDictionary<string, RAMProportions>)p.H1ProjectedTonnageByMaterial
-                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.H2RamProportions));
-
             foreach (var producer in h1ProjectedProducers)
             {
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.ProducerId));
@@ -25,25 +18,23 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.Level));
                 csvContent.Append(CsvSanitiser.SanitiseData(producer.SubmissionPeriodCode));
 
-                var l1Proportions = l1ProportionsByProducer.GetValueOrDefault(producer.ProducerId);
-                AppendProjectedProducerTonnageByMaterial(csvContent, materials, producer.H1ProjectedTonnageByMaterial, l1Proportions);
+                AppendProjectedProducerTonnageByMaterial(csvContent, materials, producer.H1ProjectedTonnageByMaterial);
 
                 csvContent.AppendLine();
             }
         }
 
-        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IImmutableList<MaterialDetail> materials, IReadOnlyDictionary<string, CalcResultH1ProjectedProducerMaterialTonnage> h1ProjectedProducerTonnageByMaterial, IReadOnlyDictionary<string, RAMProportions>? l1Proportions)
+        private static void AppendProjectedProducerTonnageByMaterial(StringBuilder csvContent, IImmutableList<MaterialDetail> materials, IReadOnlyDictionary<string, CalcResultH1ProjectedProducerMaterialTonnage> h1ProjectedProducerTonnageByMaterial)
         {
             foreach (var material in materials)
             {
-                var materialL1Proportions = l1Proportions?.GetValueOrDefault(material.Code);
-                AppendMaterialTonnage(csvContent, material.Code, h1ProjectedProducerTonnageByMaterial[material.Code], materialL1Proportions);
+                AppendMaterialTonnage(csvContent, material.Code, h1ProjectedProducerTonnageByMaterial[material.Code]);
             }
         }
 
-        private static void AppendMaterialTonnage(StringBuilder csvContent, string materialCode, CalcResultH1ProjectedProducerMaterialTonnage tonnage, RAMProportions? l1Proportions)
+        private static void AppendMaterialTonnage(StringBuilder csvContent, string materialCode, CalcResultH1ProjectedProducerMaterialTonnage tonnage)
         {
-            var proportions = l1Proportions ?? tonnage.H2RamProportions;
+            var proportions = tonnage.H2RamProportions;
             string GetProportionPercentage(decimal proportion) {
                 var showProportion = tonnage.IsWithoutRamTonnage() && proportions.AnyProportions();
                 return showProportion ? CsvSanitiser.SanitiseData(proportion * 100, DecimalPlaces.Two, DecimalFormats.F2, isPercentage: true) : CsvSanitiser.SanitiseData(CommonConstants.Hyphen);

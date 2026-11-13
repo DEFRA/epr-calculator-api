@@ -9,7 +9,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
 {
@@ -17,14 +16,13 @@ namespace EPR.Calculator.API.BackgroundService.Services
     {
         Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken);
-        Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
+        Task<CalcResultScaledupProducers> ReadScaledData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
         Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken);
 
         // Deferred - the query runs as the caller enumerates, so a downstream consumer streaming
         // straight to a CSV/JSON writer never holds every producer's fee graph in memory at once.
         IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
-        Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
         Task<CalcResultCommsCost> ReadCommsCost(int runId, CancellationToken cancellationToken);
@@ -88,7 +86,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
+        public async Task<CalcResultScaledupProducers> ReadScaledData(int runId, CancellationToken cancellationToken)
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformScaled
@@ -96,7 +94,10 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
+            var materials = await materialService.GetMaterials();
+
             var scaledupProducers = rows
+                        .Where(p => !p.IsTotal)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionPeriodCode, p.Level, p.IsSubTotal, p.DaysInSubmissionPeriod, p.DaysInWholePeriod, p.ScaleupFactor })
                         .Select(g =>
                             new CalcResultScaledupProducer
@@ -111,7 +112,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                                 DaysInSubmissionPeriod = g.Key.DaysInSubmissionPeriod,
                                 DaysInWholePeriod = g.Key.DaysInWholePeriod,
                                 ScaleupFactor = g.Key.ScaleupFactor,
-                                PomData = MapToScaled(g.ToList())
+                                ScaledupProducerTonnageByMaterial = MapToScaledTonnages(g.ToList(), materials)
                             }
                         )
                         .OrderBy(p => p.ProducerId)
@@ -121,11 +122,17 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ThenBy(p => p.SubmissionPeriodCode)
                         .ToImmutableList();
 
-            var materials = await materialService.GetMaterials();
-            foreach (var producer in scaledupProducers)
-                producer.ScaledupProducerTonnageByMaterial = CalcResultScaledupProducersBuilder.GetTonnages(producer.PomData, materials);
+            var totalRows = rows.Where(p => p.IsTotal).ToList();
+            var total = totalRows.Count == 0
+                ? null
+                : new CalcResultScaledupProducer
+                {
+                    Level = string.Empty,
+                    SubmissionPeriodCode = string.Empty,
+                    ScaledupProducerTonnageByMaterial = MapToScaledTonnages(totalRows, materials)
+                };
 
-            return scaledupProducers;
+            return new CalcResultScaledupProducers { ScaledupProducers = scaledupProducers, Total = total };
         }
 
         [ActivityTrace]
@@ -231,17 +238,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             Converters = { new JsonStringEnumConverter() }
         };
-
-        [ActivityTrace]
-        public async Task<IReadOnlyDictionary<string, SelfManagedConsumerWasteData>> ReadSmcwByMaterial(int runId, CancellationToken cancellationToken)
-        {
-            var smcw = await dbContext.SelfManagedConsumerWaste
-                    .AsNoTracking()
-                    .Where(p => p.CalculatorRunId == runId)
-                    .SingleAsync(cancellationToken);
-
-            return smcw.TotalByMaterial;
-        }
 
         [ActivityTrace]
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>
@@ -462,16 +458,28 @@ namespace EPR.Calculator.API.BackgroundService.Services
             );
         }
 
-        private static ImmutableList<ScaledupPomEntry> MapToScaled(List<TransformScaled> scaled)
+        private static Dictionary<string, CalcResultScaledupProducerTonnage> MapToScaledTonnages(List<TransformScaled> rows, IEnumerable<MaterialDetail> materials)
         {
-            return scaled.Select(s =>
-                new ScaledupPomEntry(
-                    MaterialId: s.MaterialId,
-                    PackagingType: s.PackagingType,
-                    Tonnage: s.Tonnage,
-                    ScaledTonnage: s.ScaledTonnage
-                )
-            ).ToImmutableList();
+            var byMaterial = rows.ToDictionary(r => r.MaterialCode);
+            return materials.ToDictionary(
+                m => m.Code,
+                m => byMaterial.TryGetValue(m.Code, out var t)
+                    ? new CalcResultScaledupProducerTonnage
+                    {
+                        ReportedHouseholdPackagingWasteTonnage          = t.ReportedHouseholdPackagingWasteTonnage,
+                        ReportedPublicBinTonnage                        = t.ReportedPublicBinTonnage,
+                        HouseholdDrinksContainersTonnageGlass           = t.HouseholdDrinksContainersTonnageGlass,
+                        TotalReportedTonnage                            = t.TotalReportedTonnage,
+                        ReportedSelfManagedConsumerWasteTonnage         = t.ReportedSelfManagedConsumerWasteTonnage,
+                        NetReportedTonnage                              = t.NetReportedTonnage,
+                        ScaledupReportedHouseholdPackagingWasteTonnage  = t.ScaledupReportedHouseholdPackagingWasteTonnage,
+                        ScaledupReportedPublicBinTonnage                = t.ScaledupReportedPublicBinTonnage,
+                        ScaledupHouseholdDrinksContainersTonnageGlass   = t.ScaledupHouseholdDrinksContainersTonnageGlass,
+                        ScaledupTotalReportedTonnage                    = t.ScaledupTotalReportedTonnage,
+                        ScaledupReportedSelfManagedConsumerWasteTonnage = t.ScaledupReportedSelfManagedConsumerWasteTonnage,
+                        ScaledupNetReportedTonnage                      = t.ScaledupNetReportedTonnage
+                    }
+                    : new CalcResultScaledupProducerTonnage());
         }
 
         private static Dictionary<string, CalcResultPartialObligationTonnage> MapToPartial(List<TransformPartial> partial)
@@ -529,7 +537,35 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         t.HDCTonnageAmberMedical,
                         t.HDCTonnageGreenMedical
                     ) : null,
-                    SelfManagedConsumerWasteTonnage = t.SMCWTonnage
+                    SelfManagedConsumerWasteTonnage = t.SMCWTonnage,
+                    PartialHouseholdTonnage = t.PartialHouseholdTonnage,
+                    PartialHouseholdRAMTonnage = ToMaybeRamTonnage(
+                        t.PartialHouseholdTonnageRed,
+                        t.PartialHouseholdTonnageAmber,
+                        t.PartialHouseholdTonnageGreen,
+                        t.PartialHouseholdTonnageRedMedical,
+                        t.PartialHouseholdTonnageAmberMedical,
+                        t.PartialHouseholdTonnageGreenMedical
+                    ),
+                    PartialPublicBinTonnage = t.PartialPublicBinTonnage,
+                    PartialPublicBinRAMTonnage = ToMaybeRamTonnage(
+                        t.PartialPublicBinTonnageRed,
+                        t.PartialPublicBinTonnageAmber,
+                        t.PartialPublicBinTonnageGreen,
+                        t.PartialPublicBinTonnageRedMedical,
+                        t.PartialPublicBinTonnageAmberMedical,
+                        t.PartialPublicBinTonnageGreenMedical
+                    ),
+                    PartialHouseholdDrinksContainersTonnage = t.PartialHDCTonnage,
+                    PartialHouseholdDrinksContainersRAMTonnage = t.MaterialCode == MaterialCodes.Glass ? ToMaybeRamTonnage(
+                        t.PartialHDCTonnageRed,
+                        t.PartialHDCTonnageAmber,
+                        t.PartialHDCTonnageGreen,
+                        t.PartialHDCTonnageRedMedical,
+                        t.PartialHDCTonnageAmberMedical,
+                        t.PartialHDCTonnageGreenMedical
+                    ) : null,
+                    PartialSelfManagedConsumerWasteTonnage = t.PartialSMCWTonnage
                 }
             );
         }

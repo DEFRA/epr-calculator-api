@@ -1,55 +1,20 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.Data.DataModels;
+namespace EPR.Calculator.API.BackgroundService.Models;
 
 public record SelfManagedConsumerWaste
 {
-    public int Id { get; init; }
-
     public required int CalculatorRunId { get; init; }
-    
-    internal ICollection<MaterialSelfManagedConsumerWasteData> MaterialTotals { get; set; } = [];
-
-    [NotMapped]
-    public required IReadOnlyDictionary<string, SelfManagedConsumerWasteData> TotalByMaterial
-    {
-        get => MaterialTotals.ToDictionary(s => s.MaterialCode, v => v.Smcw);
-        init => MaterialTotals = [..value.Select(kvp =>
-            new MaterialSelfManagedConsumerWasteData { MaterialCode = kvp.Key, Smcw = kvp.Value }
-        )];
-    }
-
-    #region EF navigational properties
-
-    public virtual ICollection<ProducerSelfManagedConsumerWaste> ProducerTotals { get; set; } = new List<ProducerSelfManagedConsumerWaste>();
-    
-    #endregion
+    public required IReadOnlyDictionary<string, SelfManagedConsumerWasteData> TotalByMaterial { get; init; }
+    public IReadOnlyList<ProducerSelfManagedConsumerWaste> ProducerTotals { get; init; } = [];
 }
 
 public record ProducerSelfManagedConsumerWaste
 {
-    public int Id { get; set; }
-    public int SmcwId { get; set; }
-    public int ProducerId { get; set; }
-    public string? SubsidiaryId { get; set; }
-    public required int Level {get; init; }
-
-    internal ICollection<MaterialSelfManagedConsumerWasteData> SmcwMaterialData { get; set; } = [];
-
-    [NotMapped]
-    public required IReadOnlyDictionary<string, SelfManagedConsumerWasteData> SmcwByMaterial
-    {
-        get => SmcwMaterialData.ToDictionary(s => s.MaterialCode, v => v.Smcw);
-        init => SmcwMaterialData = [..value.Select(kvp =>
-            new MaterialSelfManagedConsumerWasteData { MaterialCode = kvp.Key, Smcw = kvp.Value }
-        )];
-    }
-}
-
-internal record MaterialSelfManagedConsumerWasteData
-{
-    public required string MaterialCode { get; init; }
-    public required SelfManagedConsumerWasteData Smcw { get; init; }
+    public int ProducerId { get; init; }
+    public string? SubsidiaryId { get; init; }
+    public required int Level { get; init; }
+    public required IReadOnlyDictionary<string, SelfManagedConsumerWasteData> SmcwByMaterial { get; init; }
 }
 
 public record SelfManagedConsumerWasteData

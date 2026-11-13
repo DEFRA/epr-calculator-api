@@ -24,7 +24,7 @@ public class CalcResultLaDisposalCostDataConfiguration : IEntityTypeConfiguratio
                 a.OwnsOne(x => x.Detail, c => c.OwnsOne(x => x.Cost, d => d.Ignore(p => p.Total)));
             });
 
-            o.Ignore(x => x.Total);
+            o.OwnsOne(x => x.Total, c => c.OwnsOne(x => x.Cost, d => d.Ignore(p => p.Total)));
         });
 
     }

@@ -19,8 +19,8 @@ public class CalcResultOnePlusFourApportionmentConfiguration : IEntityTypeConfig
             o.ToJson("one_plus_four_apppointment");
             o.OwnsOne(x => x.LaDisposalCost, a => a.Ignore(p => p.Total));
             o.OwnsOne(x => x.LADataPrepCharge, a => a.Ignore(p => p.Total));
-            o.Ignore(x => x.TotalOnePlusFour);
-            o.Ignore(x => x.OnePlusFourApportionment);
+            o.OwnsOne(x => x.TotalOnePlusFour, a => a.Ignore(p => p.Total));
+            o.OwnsOne(x => x.OnePlusFourApportionment, a => a.Ignore(p => p.Total));
         });
     }
 }

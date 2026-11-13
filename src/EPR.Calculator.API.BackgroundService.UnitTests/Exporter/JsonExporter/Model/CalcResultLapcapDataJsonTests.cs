@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using System.Text.Json;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -12,14 +13,11 @@ public class CalcResultLapcapDataJsonTests
     public void CalcResultLapcapDataJsonTests_CanCallFrom_WithValidData()
     {
         // Arrange
-        var data = new CalcResultLapcapData
+        var data = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
         {
-            ByMaterial = new Dictionary<string, ByCountryCost>
-            {
-                ["PC"] = new() { England = 50,  Wales = 60,  Scotland = 70,  NorthernIreland =  80 },
-                ["PL"] = new() { England = 100, Wales = 200, Scotland = 300, NorthernIreland = 400 }
-            }
-        };
+            ["PC"] = new() { England = 50,  Wales = 60,  Scotland = 70,  NorthernIreland =  80 },
+            ["PL"] = new() { England = 100, Wales = 200, Scotland = 300, NorthernIreland = 400 }
+        });
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act

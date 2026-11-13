@@ -24,8 +24,8 @@ public class CalcResultLapcapDataConfiguration : IEntityTypeConfiguration<CalcRe
                 a.OwnsOne(x => x.Cost, c => c.Ignore(p => p.Total));
             });
 
-            o.Ignore(x => x.Total);
-            o.Ignore(x => x.CountryApportionment);
+            o.OwnsOne(x => x.Total, c => c.Ignore(p => p.Total));
+            o.OwnsOne(x => x.CountryApportionment, c => c.Ignore(p => p.Total));
         });
     }
 }

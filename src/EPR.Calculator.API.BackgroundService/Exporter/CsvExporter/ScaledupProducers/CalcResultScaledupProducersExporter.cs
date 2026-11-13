@@ -41,9 +41,9 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProd
             if (calcResultScaledupProducers.ScaledupProducers?.Any() == true)
             {
                 AppendScaledupProducers(calcResultScaledupProducers.ScaledupProducers, stringBuilder);
-                if (showTotal)
+                if (showTotal && calcResultScaledupProducers.Total is not null)
                 {
-                    AppendOverallTotalRow(GetOverallTotalRow(calcResultScaledupProducers.ScaledupProducers, materials), stringBuilder);
+                    AppendOverallTotalRow(calcResultScaledupProducers.Total, stringBuilder);
                 }
             }
             else
@@ -110,54 +110,6 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProd
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.ScaledupReportedSelfManagedConsumerWasteTonnage, DecimalPlaces.Three, DecimalFormats.F3));
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.ScaledupNetReportedTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             }
-        }
-
-        public static CalcResultScaledupProducer GetOverallTotalRow(
-            IEnumerable<CalcResultScaledupProducer> producers,
-            IEnumerable<MaterialDetail> materials
-        )
-        {
-            var overallTotalRow = new CalcResultScaledupProducer
-            {
-                Level = string.Empty,
-                SubmissionPeriodCode = string.Empty,
-                ScaledupProducerTonnageByMaterial = new Dictionary<string, CalcResultScaledupProducerTonnage>(),
-            };
-
-            var allMaterialDict = producers
-                .Where(x => !x.IsSubtotalRow)
-                .Select(x => x.ScaledupProducerTonnageByMaterial)
-                .ToImmutableList();
-
-            foreach (var material in materials)
-            {
-                var totalRow = new CalcResultScaledupProducerTonnage();
-                var materialValues = allMaterialDict.Where(x => x.ContainsKey(material.Code)).Select(x => x[material.Code]).ToList();
-                totalRow.ReportedHouseholdPackagingWasteTonnage = materialValues.Sum(x => x.ReportedHouseholdPackagingWasteTonnage);
-                totalRow.ReportedPublicBinTonnage = materialValues.Sum(x => x.ReportedPublicBinTonnage);
-                if (material.Code == MaterialCodes.Glass)
-                {
-                    totalRow.HouseholdDrinksContainersTonnageGlass = materialValues.Sum(x => x.HouseholdDrinksContainersTonnageGlass);
-                }
-
-                totalRow.TotalReportedTonnage = materialValues.Sum(x => x.TotalReportedTonnage);
-                totalRow.ReportedSelfManagedConsumerWasteTonnage = materialValues.Sum(x => x.ReportedSelfManagedConsumerWasteTonnage);
-                totalRow.NetReportedTonnage = materialValues.Sum(x => x.NetReportedTonnage);
-                totalRow.ScaledupReportedHouseholdPackagingWasteTonnage = materialValues.Sum(x => x.ScaledupReportedHouseholdPackagingWasteTonnage);
-                totalRow.ScaledupReportedPublicBinTonnage = materialValues.Sum(x => x.ScaledupReportedPublicBinTonnage);
-                if (material.Code == MaterialCodes.Glass)
-                {
-                    totalRow.ScaledupHouseholdDrinksContainersTonnageGlass = materialValues.Sum(x => x.ScaledupHouseholdDrinksContainersTonnageGlass);
-                }
-
-                totalRow.ScaledupTotalReportedTonnage = materialValues.Sum(x => x.ScaledupTotalReportedTonnage);
-                totalRow.ScaledupReportedSelfManagedConsumerWasteTonnage = materialValues.Sum(x => x.ScaledupReportedSelfManagedConsumerWasteTonnage);
-                totalRow.ScaledupNetReportedTonnage = materialValues.Sum(x => x.ScaledupNetReportedTonnage);
-
-                overallTotalRow.ScaledupProducerTonnageByMaterial.Add(material.Name, totalRow);
-            }
-
-            return overallTotalRow;
         }
 
         private static void PrepareScaledupProducersHeader(IImmutableList<MaterialDetail> materials, StringBuilder csvContent)

@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -22,14 +23,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
         public void CanCallPrepareData()
         {
             // Arrange
-            var calcResultLateReportingData = new CalcResultLateReportingTonnage()
+            var calcResultLateReportingData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>
-                {
-                    ["AL"] = new() { Total = 1.23m, Red = 2.34m, Amber = 3.45m, Green = 4.56m },
-                    ["GL"] = new() { Total = 1.34m, Red = 2.45m, Amber = 3.56m, Green = 4.67m }
-                }
-            };
+                ["AL"] = new() { Total = 1.23m, Red = 2.34m, Amber = 3.45m, Green = 4.56m },
+                ["GL"] = new() { Total = 1.34m, Red = 2.45m, Amber = 3.56m, Green = 4.67m }
+            });
             var materials = TestDataHelper.GetMaterialDetails();
 
 

@@ -41,6 +41,8 @@ public class TransformScaledConfiguration : IEntityTypeConfiguration<TransformSc
             .HasMaxLength(5);
         builder.Property(p => p.IsSubTotal)
             .HasColumnName("is_subtotal");
+        builder.Property(p => p.IsTotal)
+            .HasColumnName("is_total");
         builder.Property(p => p.DaysInSubmissionPeriod)
             .HasColumnName("days_in_submission_period");
         builder.Property(p => p.DaysInWholePeriod)
@@ -48,16 +50,44 @@ public class TransformScaledConfiguration : IEntityTypeConfiguration<TransformSc
         builder.Property(p => p.ScaleupFactor)
             .HasColumnName("scaled_factor")
             .HasPrecision(16, 12);
-        builder.Property(p => p.MaterialId)
-            .HasColumnName("material_id");
-        builder.Property(p => p.PackagingType)
-            .HasColumnName("packaging_type")
+        builder.Property(p => p.MaterialCode)
+            .HasColumnName("material_code")
             .HasMaxLength(50);
-        builder.Property(p => p.Tonnage)
-            .HasColumnName("tonnage")
+        builder.Property(p => p.ReportedHouseholdPackagingWasteTonnage)
+            .HasColumnName("household_tonnage")
             .HasPrecision(18, 3);
-        builder.Property(p => p.ScaledTonnage)
-            .HasColumnName("scaled_tonnage")
+        builder.Property(p => p.ReportedPublicBinTonnage)
+            .HasColumnName("public_bin_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.HouseholdDrinksContainersTonnageGlass)
+            .HasColumnName("hdc_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.TotalReportedTonnage)
+            .HasColumnName("total_reported_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ReportedSelfManagedConsumerWasteTonnage)
+            .HasColumnName("smcw_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.NetReportedTonnage)
+            .HasColumnName("net_reported_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupReportedHouseholdPackagingWasteTonnage)
+            .HasColumnName("scaled_household_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupReportedPublicBinTonnage)
+            .HasColumnName("scaled_public_bin_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupHouseholdDrinksContainersTonnageGlass)
+            .HasColumnName("scaled_hdc_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupTotalReportedTonnage)
+            .HasColumnName("scaled_total_reported_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupReportedSelfManagedConsumerWasteTonnage)
+            .HasColumnName("scaled_smcw_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.ScaledupNetReportedTonnage)
+            .HasColumnName("scaled_net_reported_tonnage")
             .HasPrecision(18, 3);
     }
 }

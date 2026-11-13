@@ -1,4 +1,11 @@
-﻿using EPR.Calculator.API.BackgroundService.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
+using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
@@ -159,36 +166,50 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task StoreScaledData_WorksAsExpected()
         {
-            var scaled = ImmutableList.Create(
-                new CalcResultScaledupProducer
-                {
-                    ProducerId = 101001,
-                    SubsidiaryId = null,
-                    ProducerName = "Allied Packaging",
-                    Level = "1",
-                    SubmissionPeriodCode = "2024-P2",
-                    DaysInSubmissionPeriod = 91,
-                    DaysInWholePeriod = 91,
-                    ScaleupFactor = 2,
-                    PomData = new List<ScaledupPomEntry>
-                    {
-                        new ScaledupPomEntry(1, PackagingTypes.Household, 1000, 2000),
-                        new ScaledupPomEntry(1, PackagingTypes.PublicBin, 100, 200),
-                        new ScaledupPomEntry(1, PackagingTypes.ConsumerWaste, 500, 1000),
-                        new ScaledupPomEntry(2, PackagingTypes.Household, 1000, 2000),
-                        new ScaledupPomEntry(2, PackagingTypes.PublicBin, 100, 200),
-                        new ScaledupPomEntry(2, PackagingTypes.HouseholdDrinksContainers, 120, 240),
-                        new ScaledupPomEntry(2, PackagingTypes.ConsumerWaste, 500, 1000),
-                    },
-                }
-            );
+            var materials = ImmutableList.Create(
+                new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" },
+                new MaterialDetail { Id = 2, Code = MaterialCodes.Glass, Name = "Glass" });
+            var producer = new CalcResultScaledupProducer
+            {
+                ProducerId = 101001,
+                SubsidiaryId = null,
+                ProducerName = "Allied Packaging",
+                Level = "1",
+                SubmissionPeriodCode = "2024-P2",
+                DaysInSubmissionPeriod = 91,
+                DaysInWholePeriod = 91,
+                ScaleupFactor = 2,
+            };
+            producer.ScaledupProducerTonnageByMaterial = CalcResultScaledupProducersBuilder.GetTonnages(
+            [
+                new ScaledupPomEntry(1, PackagingTypes.Household, 1000, 2000),
+                new ScaledupPomEntry(1, PackagingTypes.PublicBin, 100, 200),
+                new ScaledupPomEntry(1, PackagingTypes.ConsumerWaste, 500, 1000),
+                new ScaledupPomEntry(2, PackagingTypes.Household, 1000, 2000),
+                new ScaledupPomEntry(2, PackagingTypes.PublicBin, 100, 200),
+                new ScaledupPomEntry(2, PackagingTypes.HouseholdDrinksContainers, 120, 240),
+                new ScaledupPomEntry(2, PackagingTypes.ConsumerWaste, 500, 1000),
+            ], materials);
+            var scaled = new CalcResultScaledupProducers
+            {
+                ScaledupProducers = [producer],
+                Total = CalcResultScaledupProducersBuilder.GetOverallTotalRow([producer], materials)
+            };
+
             await _sut.StoreScaledData(1, scaled, CancellationToken.None);
 
             var storedScaled = await _dbContext.TransformScaled.ToImmutableListAsync();
-            storedScaled.Count.ShouldBe(7);
-            storedScaled.Any(p => p.MaterialId == 1 && p.PackagingType == PackagingTypes.Household && p.Tonnage == 1000 & p.ScaledTonnage == 2000);
-            storedScaled.Any(p => p.MaterialId == 1 && p.PackagingType == PackagingTypes.ConsumerWaste && p.Tonnage == 500 & p.ScaledTonnage == 1000);
-            storedScaled.Any(p => p.MaterialId == 2 && p.PackagingType == PackagingTypes.HouseholdDrinksContainers && p.Tonnage == 120 & p.ScaledTonnage == 240);
+            storedScaled.Count.ShouldBe(4);
+            storedScaled.Count(p => p.IsTotal).ShouldBe(2);
+            var glass = storedScaled.Single(p => !p.IsTotal && p.MaterialCode == MaterialCodes.Glass);
+            glass.ProducerId.ShouldBe(101001);
+            glass.ReportedHouseholdPackagingWasteTonnage.ShouldBe(1000);
+            glass.HouseholdDrinksContainersTonnageGlass.ShouldBe(120);
+            glass.TotalReportedTonnage.ShouldBe(1220);
+            glass.NetReportedTonnage.ShouldBe(720);
+            glass.ScaledupTotalReportedTonnage.ShouldBe(2440);
+            glass.ScaledupNetReportedTonnage.ShouldBe(1440);
+            storedScaled.Single(p => p.IsTotal && p.MaterialCode == MaterialCodes.Aluminium).NetReportedTonnage.ShouldBe(600);
         }
 
         [TestMethod]
@@ -303,32 +324,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task StoreSmcw_WorksAsExpected()
-        {
-            var smcw = MkSelfManagedConsumerWaste(1);
-            var expectedProducer = smcw.ProducerTotals.Single();
-
-            await _sut.StoreSmcw(1, smcw, CancellationToken.None);
-
-            var stored = await _dbContext.SelfManagedConsumerWaste
-                .AsNoTracking()
-                .Include(s => s.ProducerTotals)
-                .SingleAsync();
-
-            stored.CalculatorRunId.ShouldBe(1);
-            stored.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage
-                .ShouldBe(smcw.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
-
-            // The producer rows are batch-inserted; confirm the nested owned-JSON round-trips.
-            var storedProducer = stored.ProducerTotals.Single();
-            storedProducer.ProducerId.ShouldBe(expectedProducer.ProducerId);
-            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage
-                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
-            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red
-                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red);
-        }
-
-        [TestMethod]
         public async Task StoreModulationResult_WorksAsExpected()
         {
             var modulation = MkModulationResult(1);
@@ -432,19 +427,15 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultLapcapData MkLapcapData() =>
-            new()
+            CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
             {
-                ByMaterial = new Dictionary<string, ByCountryCost>
-                {
-                    [MaterialCodes.Aluminium] = new ByCountryCost { England = 10, Wales = 20, Scotland = 30, NorthernIreland = 40 }
-                }
-            };
+                [MaterialCodes.Aluminium] = new ByCountryCost { England = 10, Wales = 20, Scotland = 30, NorthernIreland = 40 }
+            });
 
         private static CalcResultCommsCost MkCommsCost() =>
-            new()
-            {
-                OnePlusFourApportionment = new ByCountryApportionment { England = 25, Wales = 25, Scotland = 25, NorthernIreland = 25 },
-                ByMaterial = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
+            CalcResultCommsCostBuilder.Create(
+                onePlusFourApportionment: new ByCountryApportionment { England = 25, Wales = 25, Scotland = 25, NorthernIreland = 25 },
+                byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
                 {
                     [MaterialCodes.Aluminium] = new CalcResultCommsCostCommsCostByMaterial
                     {
@@ -456,18 +447,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                         LateReportingTonnage = 4
                     }
                 },
-                CommsCostUkWide = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                CommsCostByCountry = new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 }
-            };
+                commsCostUkWide:          new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                commsCostByCountry:       new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 });
 
         private static CalcResultLateReportingTonnage MkLateReportingTonnage() =>
-            new()
+            CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>
-                {
-                    [MaterialCodes.Aluminium] = new CalcResultLateReportingTonnageDetail { Total = 10, Red = 2, Amber = 3, Green = 5 }
-                }
-            };
+                [MaterialCodes.Aluminium] = new CalcResultLateReportingTonnageDetail { Total = 10, Red = 2, Amber = 3, Green = 5 }
+            });
 
         private static CalcResultParameterOtherCost MkParameterOtherCost() =>
             new()
@@ -484,72 +471,33 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
 
         private static CalcResultOnePlusFourApportionment MkOnePlusFourApportionment() =>
-            new()
-            {
-                LaDisposalCost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                LADataPrepCharge = new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 }
-            };
+            CalcResultOnePlusFourApportionmentBuilder.Create(
+                laDisposalCost:   new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                laDataPrepCharge: new ByCountryCost { England = 5, Wales = 6, Scotland = 7, NorthernIreland = 8 });
 
         private static CalcResultLaDisposalCostData MkLaDisposalCostData() =>
-            new()
+            CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
             {
-                ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
+                [MaterialCodes.Aluminium] = new CalcResultLaDisposalCostDataDetail
                 {
-                    [MaterialCodes.Aluminium] = new CalcResultLaDisposalCostDataDetail
-                    {
-                        Cost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
-                        HouseholdPackagingWasteTonnage = 10,
-                        PublicBinTonnage = 20,
-                        HouseholdDrinkContainersTonnage = 30,
-                        LateReportingTonnage = 5,
-                        ActionedSelfManagedConsumerWasteTonnage = 2
-                    }
+                    Cost = new ByCountryCost { England = 1, Wales = 2, Scotland = 3, NorthernIreland = 4 },
+                    HouseholdPackagingWasteTonnage = 10,
+                    PublicBinTonnage = 20,
+                    HouseholdDrinkContainersTonnage = 30,
+                    LateReportingTonnage = 5,
+                    ActionedSelfManagedConsumerWasteTonnage = 2
                 }
-            };
-
-        private static SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
-        {
-            var smcwData = new SelfManagedConsumerWasteData
-            {
-                SmcwTonnage = 100,
-                ActionedSmcwTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 },
-                ResidualSmcwTonnage = 20,
-                NetTonnage = new RamTonnageGroup { Total = 80, Red = 20, Amber = 30, Green = 30 }
-            };
-
-            return new SelfManagedConsumerWaste
-            {
-                CalculatorRunId = runId,
-                ProducerTotals = new List<ProducerSelfManagedConsumerWaste>
-                {
-                    new()
-                    {
-                        ProducerId = 1,
-                        SubsidiaryId = "A",
-                        Level = 1,
-                        SmcwByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                        {
-                            [MaterialCodes.Aluminium] = smcwData
-                        }
-                    }
-                },
-                TotalByMaterial = new Dictionary<string, SelfManagedConsumerWasteData>
-                {
-                    [MaterialCodes.Aluminium] = smcwData
-                }
-            };
-        }
+            });
 
         private static ModulationResult MkModulationResult(int runId)
         {
             var material = new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" };
 
-            return new ModulationResult
-            {
-                CalculatorRunId = runId,
-                GreenFactor = 1.5m,
-                RedFactor = 2.5m,
-                ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>
+            return CalcResultModulationBuilder.Create(
+                calculatorRunId: runId,
+                greenFactor: 1.5m,
+                redFactor: 2.5m,
+                byMaterial: new Dictionary<MaterialDetail, ModulationDetail>
                 {
                     [material] = new ModulationDetail
                     {
@@ -562,8 +510,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                         TotalRedMaterialAtAmberDisposalCost = 400,
                         TotalGreenMaterialAtAmberDisposalCost = 500
                     }
-                }
-            };
+                });
         }
 
         private static CalcResultH2ProjectedProducerMaterialTonnage MkH2MaterialTonnage(bool isGlass = false)
@@ -750,7 +697,14 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                     AmberMedical = 0,
                     GreenMedical = 0
                 } : null,
-                SelfManagedConsumerWasteTonnage = 50
+                SelfManagedConsumerWasteTonnage = 50,
+                PartialHouseholdTonnage = MathUtils.RoundAwayFromZero((isModulated ? 50 : 100) * obligatedFactor, 3),
+                PartialHouseholdRAMTonnage = isModulated ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(50 * obligatedFactor, 3) } : null,
+                PartialPublicBinTonnage = MathUtils.RoundAwayFromZero((isModulated ? 100 : 200) * obligatedFactor, 3),
+                PartialPublicBinRAMTonnage = isModulated ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(100 * obligatedFactor, 3) } : null,
+                PartialHouseholdDrinksContainersTonnage = MathUtils.RoundAwayFromZero((isModulated && isGlass ? 150 : isGlass ? 300 : 0) * obligatedFactor, 3),
+                PartialHouseholdDrinksContainersRAMTonnage = isModulated && isGlass ? new RamTonnage { Red = MathUtils.RoundAwayFromZero(150 * obligatedFactor, 3) } : null,
+                PartialSelfManagedConsumerWasteTonnage = MathUtils.RoundAwayFromZero(50 * obligatedFactor, 3)
             };
         }
     }

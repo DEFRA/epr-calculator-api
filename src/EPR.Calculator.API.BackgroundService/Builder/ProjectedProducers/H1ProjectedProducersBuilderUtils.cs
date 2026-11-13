@@ -146,6 +146,27 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
             return projectedTonnage;
         }
 
+        public static List<CalcResultH1ProjectedProducer> WithLevelOneProportions(IReadOnlyCollection<CalcResultH1ProjectedProducer> producers)
+        {
+            var levelOne = CommonConstants.LevelOne.ToString();
+            var l1ProportionsByProducer = producers
+                .Where(p => p.Level == levelOne)
+                .ToDictionary(
+                    p => p.ProducerId,
+                    p => p.H1ProjectedTonnageByMaterial.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.H2RamProportions));
+
+            return producers
+                .Select(p => p.Level != levelOne && l1ProportionsByProducer.TryGetValue(p.ProducerId, out var l1Proportions)
+                    ? p with
+                    {
+                        H1ProjectedTonnageByMaterial = p.H1ProjectedTonnageByMaterial.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => l1Proportions.TryGetValue(kvp.Key, out var proportions) ? kvp.Value with { H2RamProportions = proportions } : kvp.Value)
+                    }
+                    : p)
+                .ToList();
+        }
+
         public static CalcResultH1ProjectedProducer CreateParentProducer(CalcResultH1ProjectedProducer p, List<CalcResultH2ProjectedProducer> h2Producers)
         {
             var h2Subtotal = h2Producers.FirstOrDefault(h2 => h2.IsSubtotal) ?? h2Producers.FirstOrDefault();

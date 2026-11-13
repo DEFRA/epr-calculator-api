@@ -1,7 +1,9 @@
 ﻿using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost
@@ -74,9 +76,37 @@ namespace EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost
                     return (detail.Key, laDisposalDetail);
                 }).ToDictionary();
 
-            return new CalcResultLaDisposalCostData
+            return Create(lapcapDetailsByMaterial);
+        }
+
+        public static CalcResultLaDisposalCostData Create(IReadOnlyDictionary<string, CalcResultLaDisposalCostDataDetail> byMaterial) =>
+            new()
             {
-                ByMaterial = lapcapDetailsByMaterial
+                ByMaterial = byMaterial.ToDictionary(kvp => kvp.Key, kvp => WithTotalTonnageAndPricePerTonne(kvp.Value)),
+                Total = WithTotalTonnageAndPricePerTonne(new CalcResultLaDisposalCostDataDetail
+                {
+                    Cost                                    = ByCountryCost.Sum([.. byMaterial.Values.Select(v => v.Cost)]),
+                    HouseholdPackagingWasteTonnage          = byMaterial.Values.Sum(v => v.HouseholdPackagingWasteTonnage),
+                    PublicBinTonnage                        = byMaterial.Values.Sum(v => v.PublicBinTonnage),
+                    HouseholdDrinkContainersTonnage         = byMaterial.Values.Sum(v => v.HouseholdDrinkContainersTonnage),
+                    LateReportingTonnage                    = byMaterial.Values.Sum(v => v.LateReportingTonnage),
+                    ActionedSelfManagedConsumerWasteTonnage = byMaterial.Values.Sum(v => v.ActionedSelfManagedConsumerWasteTonnage ?? 0)
+                })
+            };
+
+        private static CalcResultLaDisposalCostDataDetail WithTotalTonnageAndPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
+        {
+            var totalTonnage =
+                detail.LateReportingTonnage
+                + detail.HouseholdPackagingWasteTonnage
+                + detail.PublicBinTonnage
+                + detail.HouseholdDrinkContainersTonnage
+                - (detail.ActionedSelfManagedConsumerWasteTonnage ?? 0);
+
+            return detail with
+            {
+                TotalTonnage              = totalTonnage,
+                DisposalCostPricePerTonne = totalTonnage == 0 ? null : MathUtils.RoundAwayFromZero(detail.Cost.Total / totalTonnage, 4)
             };
         }
 

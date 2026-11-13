@@ -169,13 +169,10 @@ public class RunFileExporter(
         }
 
         if (runContext.RequiresScaling)
-            result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
+            result.CalcResultScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
         if (fileType is not FileType.BillingJson)
-        {
             result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
-            result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
-        }
 
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
         result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);

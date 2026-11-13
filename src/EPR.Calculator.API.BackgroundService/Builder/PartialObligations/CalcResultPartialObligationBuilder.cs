@@ -101,13 +101,13 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
                     if (!obligationsLookup.TryGetValue((pd.ProducerId, pd.SubsidiaryId), out var obligation))
                         return pd;
 
-                    obligation.PartialObligationTonnageByMaterial =
-                        ComputeTonnageByMaterial(pd.ProducerReportedMaterials, materialDetails, obligation.ObligatedFactor, runContext.RequiresModulation);
+                    var reportedMaterials = pd.ProducerReportedMaterials.ToList();
+                    var scaledMaterials   = reportedMaterials.Select(rm => Scale(runContext.RequiresModulation, rm, obligation)).ToList();
 
-                    return UpdateReportedMaterials(
-                        pd,
-                        reportedMaterials => reportedMaterials.Select(rm => Scale(runContext.RequiresModulation, rm, obligation)).ToList()
-                    );
+                    obligation.PartialObligationTonnageByMaterial =
+                        ComputeTonnageByMaterial(reportedMaterials, scaledMaterials, materialDetails, obligation.ObligatedFactor, runContext.RequiresModulation);
+
+                    return UpdateReportedMaterials(pd, _ => scaledMaterials);
                 }).ToList()
             )).ToList();
 
@@ -150,95 +150,87 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
             ).ToListAsync();
         }
 
+        // The partial figures are summed from the same scaled rows the fees use, so the section shows what the fees were worked out on.
         private static Dictionary<string, CalcResultPartialObligationTonnage> ComputeTonnageByMaterial(
-            ICollection<ProducerReportedMaterial> reportedMaterials,
-            IEnumerable<MaterialDetail> materials,
+            IReadOnlyCollection<ProducerReportedMaterial> reportedMaterials,
+            IReadOnlyCollection<ProducerReportedMaterial> scaledMaterials,
+            IReadOnlyCollection<MaterialDetail> materials,
             decimal partialAmount,
             bool applyModulation)
         {
-            CalcResultPartialObligationTonnage ToTonnage(IEnumerable<ProducerReportedMaterial> mats, string materialCode)
-            {
-                var isGlass = materialCode == MaterialCodes.Glass;
-                var matList = mats.ToList();
-                decimal hh, pb;
-                decimal? hdc = null;
-                RamTonnage? hhRam = null, pbRam = null, hdcRam = null;
+            Dictionary<string, MaterialTotals> TotalsByMaterialCode(IEnumerable<ProducerReportedMaterial> rows) =>
+                rows.GroupBy(rm => rm.MaterialId)
+                    .ToDictionary(
+                        g => materials.First(m => m.Id == g.Key).Code,
+                        g => MaterialTotals.From(g.ToList(), materials.First(m => m.Id == g.Key).Code, applyModulation));
 
-                if (applyModulation)
-                {
-                    hhRam = RamTonnage.ToRamTonnage(matList, PackagingTypes.Household);
-                    hh    = hhRam.TotalRamTonnage();
-                    pbRam = RamTonnage.ToRamTonnage(matList, PackagingTypes.PublicBin);
-                    pb    = pbRam.TotalRamTonnage();
-
-                    if (isGlass)
-                    {
-                        hdcRam = RamTonnage.ToRamTonnage(matList, PackagingTypes.HouseholdDrinksContainers);
-                        hdc = hdcRam.TotalRamTonnage();
-                    }
-                }
-                else
-                {
-                    hh = RamTonnage.GetReportedTonnage(matList, PackagingTypes.Household, rm => rm.PackagingTonnage);
-                    pb = RamTonnage.GetReportedTonnage(matList, PackagingTypes.PublicBin, rm => rm.PackagingTonnage);
-                    hdc = isGlass ? RamTonnage.GetReportedTonnage(matList, PackagingTypes.HouseholdDrinksContainers, rm => rm.PackagingTonnage) : null;
-                }
-
-                var smcw = RamTonnage.GetReportedTonnage(matList, PackagingTypes.ConsumerWaste, rm => rm.PackagingTonnage);
-
-                return new CalcResultPartialObligationTonnage
-                {
-                    ObligatedFactor                     = partialAmount,
-                    HouseholdTonnage                    = hh,
-                    HouseholdRAMTonnage                 = hhRam,
-                    PublicBinTonnage                    = pb,
-                    PublicBinRAMTonnage                 = pbRam,
-                    HouseholdDrinksContainersTonnage    = hdc,
-                    HouseholdDrinksContainersRAMTonnage = hdcRam,
-                    SelfManagedConsumerWasteTonnage     = smcw
-                };
-            }
-
-            var byMaterialCode = reportedMaterials
-                .GroupBy(rm => rm.MaterialId)
-                .ToDictionary(
-                    g => materials.First(m => m.Id == g.Key).Code,
-                    g => ToTonnage(g, materials.First(m => m.Id == g.Key).Code)
-                );
+            var reported = TotalsByMaterialCode(reportedMaterials);
+            var partial  = TotalsByMaterialCode(scaledMaterials);
 
             return materials.ToDictionary(
                 m => m.Code,
-                m => byMaterialCode.TryGetValue(m.Code, out var val) ? val : EmptyPartialTonnage(applyModulation, m.Code, partialAmount)
-            );
+                m =>
+                {
+                    var r = reported.GetValueOrDefault(m.Code) ?? MaterialTotals.Empty(m.Code, applyModulation);
+                    var p = partial.GetValueOrDefault(m.Code) ?? MaterialTotals.Empty(m.Code, applyModulation);
+                    return new CalcResultPartialObligationTonnage
+                    {
+                        ObligatedFactor                            = partialAmount,
+                        HouseholdTonnage                           = r.Household,
+                        HouseholdRAMTonnage                        = r.HouseholdRam,
+                        PublicBinTonnage                           = r.PublicBin,
+                        PublicBinRAMTonnage                        = r.PublicBinRam,
+                        HouseholdDrinksContainersTonnage           = r.DrinksContainers,
+                        HouseholdDrinksContainersRAMTonnage        = r.DrinksContainersRam,
+                        SelfManagedConsumerWasteTonnage            = r.SelfManagedConsumerWaste,
+                        PartialHouseholdTonnage                    = p.Household,
+                        PartialHouseholdRAMTonnage                 = p.HouseholdRam,
+                        PartialPublicBinTonnage                    = p.PublicBin,
+                        PartialPublicBinRAMTonnage                 = p.PublicBinRam,
+                        PartialHouseholdDrinksContainersTonnage    = p.DrinksContainers,
+                        PartialHouseholdDrinksContainersRAMTonnage = p.DrinksContainersRam,
+                        PartialSelfManagedConsumerWasteTonnage     = p.SelfManagedConsumerWaste
+                    };
+                });
         }
 
-        private static CalcResultPartialObligationTonnage EmptyPartialTonnage(bool applyModulation, string materialCode, decimal partialAmount)
+        private sealed record MaterialTotals(
+            decimal Household,
+            RamTonnage? HouseholdRam,
+            decimal PublicBin,
+            RamTonnage? PublicBinRam,
+            decimal? DrinksContainers,
+            RamTonnage? DrinksContainersRam,
+            decimal SelfManagedConsumerWaste)
         {
-            var isGlass = materialCode == MaterialCodes.Glass;
-            if (applyModulation)
+            public static MaterialTotals From(List<ProducerReportedMaterial> rows, string materialCode, bool applyModulation)
             {
-                return new CalcResultPartialObligationTonnage()
-                {
-                    ObligatedFactor                     = partialAmount,
-                    HouseholdTonnage                    = 0m,
-                    HouseholdRAMTonnage                 = RamTonnage.Empty,
-                    PublicBinTonnage                    = 0m,
-                    PublicBinRAMTonnage                 = RamTonnage.Empty,
-                    HouseholdDrinksContainersTonnage    = isGlass ? 0m : null,
-                    HouseholdDrinksContainersRAMTonnage = isGlass ? RamTonnage.Empty : null,
-                    SelfManagedConsumerWasteTonnage     = 0m
+                var isGlass = materialCode == MaterialCodes.Glass;
+                var smcw    = RamTonnage.GetReportedTonnage(rows, PackagingTypes.ConsumerWaste, rm => rm.PackagingTonnage);
 
-                };
-            } else
-            {
-                return new CalcResultPartialObligationTonnage()
+                if (applyModulation)
                 {
-                    ObligatedFactor                  = partialAmount,
-                    HouseholdTonnage                 = 0m,
-                    PublicBinTonnage                 = 0m,
-                    HouseholdDrinksContainersTonnage = isGlass ? 0m : null,
-                    SelfManagedConsumerWasteTonnage  = 0m
-                };
+                    var hhRam  = RamTonnage.ToRamTonnage(rows, PackagingTypes.Household);
+                    var pbRam  = RamTonnage.ToRamTonnage(rows, PackagingTypes.PublicBin);
+                    var hdcRam = isGlass ? RamTonnage.ToRamTonnage(rows, PackagingTypes.HouseholdDrinksContainers) : null;
+                    return new MaterialTotals(hhRam.TotalRamTonnage(), hhRam, pbRam.TotalRamTonnage(), pbRam, hdcRam?.TotalRamTonnage(), hdcRam, smcw);
+                }
+
+                return new MaterialTotals(
+                    RamTonnage.GetReportedTonnage(rows, PackagingTypes.Household, rm => rm.PackagingTonnage), null,
+                    RamTonnage.GetReportedTonnage(rows, PackagingTypes.PublicBin, rm => rm.PackagingTonnage), null,
+                    isGlass ? RamTonnage.GetReportedTonnage(rows, PackagingTypes.HouseholdDrinksContainers, rm => rm.PackagingTonnage) : null, null,
+                    smcw);
+            }
+
+            public static MaterialTotals Empty(string materialCode, bool applyModulation)
+            {
+                decimal? drinksContainers = materialCode == MaterialCodes.Glass ? 0m : null;
+                if (!applyModulation)
+                    return new MaterialTotals(0m, null, 0m, null, drinksContainers, null, 0m);
+
+                var drinksContainersRam = drinksContainers is null ? null : RamTonnage.Empty;
+                return new MaterialTotals(0m, RamTonnage.Empty, 0m, RamTonnage.Empty, drinksContainers, drinksContainersRam, 0m);
             }
         }
     }

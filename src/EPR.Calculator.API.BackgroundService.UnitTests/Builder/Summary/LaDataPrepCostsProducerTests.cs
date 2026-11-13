@@ -1,3 +1,6 @@
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -28,13 +31,11 @@ public class LaDataPrepCostsProducerTests
             SchemeSetupCost = new ByCountryCost { England = 40, Wales = 30, Scotland = 20, NorthernIreland = 10 }
         },
         CalcResultDetail = new CalcResultDetail { RunId = 1, RelativeYear = new RelativeYear(2024) },
-        CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData { ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>() },
-        CalcResultLapcapData = new CalcResultLapcapData { ByMaterial = new Dictionary<string, ByCountryCost>() },
-        CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment
-        {
-            LaDisposalCost = new ByCountryCost { England = 0.10M, Wales = 20M, Scotland = 0.15M, NorthernIreland = 0.15M },
-            LADataPrepCharge = new ByCountryCost { England = 0.10M, Wales = 20M, Scotland = 0.15M, NorthernIreland = 0.15M }
-        },
+        CalcResultLaDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>()),
+        CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
+        CalcResultOnePlusFourApportionment = CalcResultOnePlusFourApportionmentBuilder.Create(
+            laDisposalCost:   new ByCountryCost { England = 0.10M, Wales = 20M, Scotland = 0.15M, NorthernIreland = 0.15M },
+            laDataPrepCharge: new ByCountryCost { England = 0.10M, Wales = 20M, Scotland = 0.15M, NorthernIreland = 0.15M }),
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
         CalcResultLateReportingTonnageData = TestDataHelper.GetCalcResultLateReportingTonnage(),
         CalcResultProjectedProducers = new CalcResultProjectedProducers(){

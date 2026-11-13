@@ -8,11 +8,10 @@ namespace EPR.Calculator.API.BackgroundService.Services
     {
         Task StoreProjectedH1Data(int runId, IReadOnlyList<CalcResultH1ProjectedProducer> projectedProducers, CancellationToken cancellationToken);
         Task StoreProjectedH2Data(int runId, IReadOnlyList<CalcResultH2ProjectedProducer> projectedProducers, CancellationToken cancellationToken);
-        Task StoreScaledData(int runId, IReadOnlyList<CalcResultScaledupProducer> scaled, CancellationToken cancellationToken);
+        Task StoreScaledData(int runId, CalcResultScaledupProducers scaled, CancellationToken cancellationToken);
         Task StorePartialData(int runId, IReadOnlyList<CalcResultPartialObligation> partial, CancellationToken cancellationToken);
         Task StoreProducerMaterialPackaging(List<L1Producer> producerDetails, CancellationToken cancellationToken);
         Task StoreProducerFees(int runId, FeeDetail total, IReadOnlyList<FeeDetail> details, CancellationToken cancellationToken);
-        Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken);
         Task StoreModulationResult(int runId, ModulationResult modulation, CancellationToken cancellationToken);
         Task StoreLapcapData(int runId, CalcResultLapcapData lapcapData, CancellationToken cancellationToken);
         Task StoreCommsCost(int runId, CalcResultCommsCost commsCost, CancellationToken cancellationToken);
@@ -46,30 +45,49 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task StoreScaledData(int runId, IReadOnlyList<CalcResultScaledupProducer> scaled, CancellationToken cancellationToken)
+        public async Task StoreScaledData(int runId, CalcResultScaledupProducers scaled, CancellationToken cancellationToken)
         {
-             await bulkOps.BulkInsertAsync(dbContext, scaled.SelectMany(p =>
-                p.PomData.Select(m =>
-                    new TransformScaled
-                    {
-                        CalculatorRunId = runId,
-                        ProducerId = p.ProducerId,
-                        SubsidiaryId = p.SubsidiaryId,
-                        ProducerName = p.ProducerName,
-                        TradingName = p.TradingName,
-                        SubmissionPeriodCode = p.SubmissionPeriodCode,
-                        Level = p.Level,
-                        IsSubTotal = p.IsSubtotalRow,
-                        DaysInSubmissionPeriod = p.DaysInSubmissionPeriod,
-                        DaysInWholePeriod = p.DaysInWholePeriod,
-                        ScaleupFactor = p.ScaleupFactor,
-                        MaterialId = m.MaterialId,
-                        PackagingType = m.PackagingType,
-                        Tonnage = m.Tonnage,
-                        ScaledTonnage = m.ScaledTonnage
-                    }
+            var rows = scaled.ScaledupProducers.Select(p => (Producer: p, IsTotal: false));
+            if (scaled.Total is not null)
+                rows = rows.Append((scaled.Total, true));
+
+            await bulkOps.BulkInsertAsync(dbContext, rows.SelectMany(r =>
+                r.Producer.ScaledupProducerTonnageByMaterial.Select(m =>
+                    MapToTransformScaled(runId, r.Producer, r.IsTotal, m.Key, m.Value)
                 )
             ), cancellationToken);
+        }
+
+        private static TransformScaled MapToTransformScaled(int runId, CalcResultScaledupProducer p, bool isTotal, string materialCode, CalcResultScaledupProducerTonnage t)
+        {
+            return new TransformScaled
+            {
+                CalculatorRunId                                 = runId,
+                ProducerId                                      = p.ProducerId,
+                SubsidiaryId                                    = p.SubsidiaryId,
+                ProducerName                                    = p.ProducerName,
+                TradingName                                     = p.TradingName,
+                SubmissionPeriodCode                            = p.SubmissionPeriodCode,
+                Level                                           = p.Level,
+                IsSubTotal                                      = p.IsSubtotalRow,
+                IsTotal                                         = isTotal,
+                DaysInSubmissionPeriod                          = p.DaysInSubmissionPeriod,
+                DaysInWholePeriod                               = p.DaysInWholePeriod,
+                ScaleupFactor                                   = p.ScaleupFactor,
+                MaterialCode                                    = materialCode,
+                ReportedHouseholdPackagingWasteTonnage          = t.ReportedHouseholdPackagingWasteTonnage,
+                ReportedPublicBinTonnage                        = t.ReportedPublicBinTonnage,
+                HouseholdDrinksContainersTonnageGlass           = t.HouseholdDrinksContainersTonnageGlass,
+                TotalReportedTonnage                            = t.TotalReportedTonnage,
+                ReportedSelfManagedConsumerWasteTonnage         = t.ReportedSelfManagedConsumerWasteTonnage,
+                NetReportedTonnage                              = t.NetReportedTonnage,
+                ScaledupReportedHouseholdPackagingWasteTonnage  = t.ScaledupReportedHouseholdPackagingWasteTonnage,
+                ScaledupReportedPublicBinTonnage                = t.ScaledupReportedPublicBinTonnage,
+                ScaledupHouseholdDrinksContainersTonnageGlass   = t.ScaledupHouseholdDrinksContainersTonnageGlass,
+                ScaledupTotalReportedTonnage                    = t.ScaledupTotalReportedTonnage,
+                ScaledupReportedSelfManagedConsumerWasteTonnage = t.ScaledupReportedSelfManagedConsumerWasteTonnage,
+                ScaledupNetReportedTonnage                      = t.ScaledupNetReportedTonnage
+            };
         }
 
         [ActivityTrace]
@@ -119,12 +137,6 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 f => f.Details, (f, d) => f.Details = d, (d, f) => d.ProducerFeesId = f.Id,
                 cancellationToken);
         }
-
-        [ActivityTrace]
-        public async Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken) =>
-            await SaveWithBatchedChildren(smcw,
-                s => s.ProducerTotals, (s, p) => s.ProducerTotals = p, (p, s) => p.SmcwId = s.Id,
-                cancellationToken);
 
         // EFCore.BulkExtensions' SqlBulkCopy path can't serialize the owned-JSON columns on SQL Server.
         // Inserts the parent alone, then the children through SaveChanges in bounded batches, clearing the change tracker between each.
@@ -373,7 +385,29 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 HDCTonnageRedMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.RedMedical,
                 HDCTonnageAmberMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.AmberMedical,
                 HDCTonnageGreenMedical = tonnage.HouseholdDrinksContainersRAMTonnage?.GreenMedical,
-                SMCWTonnage = tonnage.SelfManagedConsumerWasteTonnage
+                SMCWTonnage = tonnage.SelfManagedConsumerWasteTonnage,
+                PartialHouseholdTonnage = tonnage.PartialHouseholdTonnage,
+                PartialHouseholdTonnageRed = tonnage.PartialHouseholdRAMTonnage?.Red,
+                PartialHouseholdTonnageAmber = tonnage.PartialHouseholdRAMTonnage?.Amber,
+                PartialHouseholdTonnageGreen = tonnage.PartialHouseholdRAMTonnage?.Green,
+                PartialHouseholdTonnageRedMedical = tonnage.PartialHouseholdRAMTonnage?.RedMedical,
+                PartialHouseholdTonnageAmberMedical = tonnage.PartialHouseholdRAMTonnage?.AmberMedical,
+                PartialHouseholdTonnageGreenMedical = tonnage.PartialHouseholdRAMTonnage?.GreenMedical,
+                PartialPublicBinTonnage = tonnage.PartialPublicBinTonnage,
+                PartialPublicBinTonnageRed = tonnage.PartialPublicBinRAMTonnage?.Red,
+                PartialPublicBinTonnageAmber = tonnage.PartialPublicBinRAMTonnage?.Amber,
+                PartialPublicBinTonnageGreen = tonnage.PartialPublicBinRAMTonnage?.Green,
+                PartialPublicBinTonnageRedMedical = tonnage.PartialPublicBinRAMTonnage?.RedMedical,
+                PartialPublicBinTonnageAmberMedical = tonnage.PartialPublicBinRAMTonnage?.AmberMedical,
+                PartialPublicBinTonnageGreenMedical = tonnage.PartialPublicBinRAMTonnage?.GreenMedical,
+                PartialHDCTonnage = tonnage.PartialHouseholdDrinksContainersTonnage,
+                PartialHDCTonnageRed = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Red,
+                PartialHDCTonnageAmber = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Amber,
+                PartialHDCTonnageGreen = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.Green,
+                PartialHDCTonnageRedMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.RedMedical,
+                PartialHDCTonnageAmberMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.AmberMedical,
+                PartialHDCTonnageGreenMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.GreenMedical,
+                PartialSMCWTonnage = tonnage.PartialSelfManagedConsumerWasteTonnage
             };
         }
     }

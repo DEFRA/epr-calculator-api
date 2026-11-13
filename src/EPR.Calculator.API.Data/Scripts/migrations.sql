@@ -9441,3 +9441,738 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET lapcap = JSON_MODIFY(JSON_MODIFY(x.lapcap,
+        ''$.Total'', JSON_QUERY(t.total_json)),
+        ''$.CountryApportionment'', JSON_QUERY(a.apportionment_json))
+    FROM dbo.calc_result_lapcap_data x
+    CROSS APPLY (
+        SELECT CAST(ISNULL(SUM(m.England), 0)         AS decimal(20, 3)) AS England,
+               CAST(ISNULL(SUM(m.Wales), 0)           AS decimal(20, 3)) AS Wales,
+               CAST(ISNULL(SUM(m.Scotland), 0)        AS decimal(20, 3)) AS Scotland,
+               CAST(ISNULL(SUM(m.NorthernIreland), 0) AS decimal(20, 3)) AS NorthernIreland
+        FROM OPENJSON(x.lapcap, ''$.MaterialCosts'') WITH (
+            England         decimal(20, 3) ''$.Cost.England'',
+            Wales           decimal(20, 3) ''$.Cost.Wales'',
+            Scotland        decimal(20, 3) ''$.Cost.Scotland'',
+            NorthernIreland decimal(20, 3) ''$.Cost.NorthernIreland'') m
+    ) s
+    CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS decimal(20, 3)) AS uk) u
+    CROSS APPLY (
+        SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+    ) t
+    CROSS APPLY (
+        SELECT (
+            SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS apportionment_json
+    ) a
+    WHERE JSON_QUERY(x.lapcap, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET late_reporting_tonnage = JSON_MODIFY(x.late_reporting_tonnage, ''$.Total'', JSON_QUERY(t.total_json))
+    FROM dbo.calc_result_late_reporting_tonnage x
+    CROSS APPLY (
+        SELECT (
+            SELECT ISNULL(SUM(m.Total), 0) AS Total,
+                   ISNULL(SUM(m.Red), 0)   AS Red,
+                   ISNULL(SUM(m.Amber), 0) AS Amber,
+                   ISNULL(SUM(m.Green), 0) AS Green
+            FROM OPENJSON(x.late_reporting_tonnage, ''$.MaterialTonnages'') WITH (
+                Total decimal(24, 6) ''$.Detail.Total'',
+                Red   decimal(24, 6) ''$.Detail.Red'',
+                Amber decimal(24, 6) ''$.Detail.Amber'',
+                Green decimal(24, 6) ''$.Detail.Green'') m
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE JSON_QUERY(x.late_reporting_tonnage, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET la_disposal_cost = JSON_MODIFY(JSON_MODIFY(x.la_disposal_cost,
+        ''$.MaterialCosts'', JSON_QUERY(a.materials_json)),
+        ''$.Total'', JSON_QUERY(t.total_json))
+    FROM dbo.calc_result_la_disposal_cost x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(JSON_MODIFY(m.value,
+                    ''$.Detail.TotalTonnage'', d.TotalTonnage),
+                    ''$.Detail.DisposalCostPricePerTonne'', d.DisposalCostPricePerTonne) AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY m.ord), '''') + '']'' AS materials_json,
+               ISNULL(SUM(v.England), 0)         AS England,
+               ISNULL(SUM(v.Wales), 0)           AS Wales,
+               ISNULL(SUM(v.Scotland), 0)        AS Scotland,
+               ISNULL(SUM(v.NorthernIreland), 0) AS NorthernIreland,
+               ISNULL(SUM(v.Household), 0)       AS Household,
+               ISNULL(SUM(v.PublicBin), 0)       AS PublicBin,
+               ISNULL(SUM(v.DrinkContainers), 0) AS DrinkContainers,
+               ISNULL(SUM(v.LateReporting), 0)   AS LateReporting,
+               ISNULL(SUM(v.Smcw), 0)            AS Smcw
+        FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.la_disposal_cost, ''$.MaterialCosts'')) m
+        CROSS APPLY OPENJSON(m.value, ''$.Detail'') WITH (
+            England         decimal(20, 3) ''$.Cost.England'',
+            Wales           decimal(20, 3) ''$.Cost.Wales'',
+            Scotland        decimal(20, 3) ''$.Cost.Scotland'',
+            NorthernIreland decimal(20, 3) ''$.Cost.NorthernIreland'',
+            Household       decimal(24, 6) ''$.HouseholdPackagingWasteTonnage'',
+            PublicBin       decimal(24, 6) ''$.PublicBinTonnage'',
+            DrinkContainers decimal(24, 6) ''$.HouseholdDrinkContainersTonnage'',
+            LateReporting   decimal(24, 6) ''$.LateReportingTonnage'',
+            Smcw            decimal(24, 6) ''$.ActionedSelfManagedConsumerWasteTonnage'') v
+        CROSS APPLY (
+            SELECT CAST(v.LateReporting + v.Household + v.PublicBin + v.DrinkContainers - ISNULL(v.Smcw, 0) AS decimal(24, 6)) AS TotalTonnage,
+                   CAST(v.England + v.Wales + v.Scotland + v.NorthernIreland AS decimal(20, 3)) AS Cost
+        ) c
+        CROSS APPLY (
+            SELECT c.TotalTonnage,
+                   CASE WHEN c.TotalTonnage = 0 THEN NULL ELSE ROUND(c.Cost / c.TotalTonnage, 4) END AS DisposalCostPricePerTonne
+        ) d
+    ) a
+    CROSS APPLY (
+        SELECT CAST(a.LateReporting + a.Household + a.PublicBin + a.DrinkContainers - a.Smcw AS decimal(24, 6)) AS TotalTonnage,
+               CAST(a.England + a.Wales + a.Scotland + a.NorthernIreland AS decimal(20, 3)) AS Cost
+    ) tc
+    CROSS APPLY (
+        SELECT (
+            SELECT a.England         AS [Cost.England],
+                   a.Wales           AS [Cost.Wales],
+                   a.Scotland        AS [Cost.Scotland],
+                   a.NorthernIreland AS [Cost.NorthernIreland],
+                   a.Household       AS HouseholdPackagingWasteTonnage,
+                   a.PublicBin       AS PublicBinTonnage,
+                   a.DrinkContainers AS HouseholdDrinkContainersTonnage,
+                   a.LateReporting   AS LateReportingTonnage,
+                   a.Smcw            AS ActionedSelfManagedConsumerWasteTonnage,
+                   tc.TotalTonnage   AS TotalTonnage,
+                   CASE WHEN tc.TotalTonnage = 0 THEN NULL ELSE ROUND(tc.Cost / tc.TotalTonnage, 4) END AS DisposalCostPricePerTonne
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE JSON_QUERY(x.la_disposal_cost, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET comms_cost = JSON_MODIFY(JSON_MODIFY(x.comms_cost,
+        ''$.MaterialCosts'', JSON_QUERY(a.materials_json)),
+        ''$.Total'', JSON_QUERY(t.total_json))
+    FROM dbo.calc_result_comms_cost x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(JSON_MODIFY(m.value,
+                    ''$.CommsCost.TotalTonnage'', d.TotalTonnage),
+                    ''$.CommsCost.PricePerTonne'', d.PricePerTonne) AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY m.ord), '''') + '']'' AS materials_json,
+               ISNULL(SUM(v.England), 0)         AS England,
+               ISNULL(SUM(v.Wales), 0)           AS Wales,
+               ISNULL(SUM(v.Scotland), 0)        AS Scotland,
+               ISNULL(SUM(v.NorthernIreland), 0) AS NorthernIreland,
+               ISNULL(SUM(v.TotalCost), 0)       AS TotalCost,
+               ISNULL(SUM(v.Household), 0)       AS Household,
+               ISNULL(SUM(v.PublicBin), 0)       AS PublicBin,
+               ISNULL(SUM(v.DrinksContainers), 0) AS DrinksContainers,
+               ISNULL(SUM(v.LateReporting), 0)   AS LateReporting
+        FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.comms_cost, ''$.MaterialCosts'')) m
+        CROSS APPLY OPENJSON(m.value, ''$.CommsCost'') WITH (
+            England          decimal(38, 28) ''$.Cost.England'',
+            Wales            decimal(38, 28) ''$.Cost.Wales'',
+            Scotland         decimal(38, 28) ''$.Cost.Scotland'',
+            NorthernIreland  decimal(38, 28) ''$.Cost.NorthernIreland'',
+            TotalCost        decimal(20, 3)  ''$.TotalCost'',
+            Household        decimal(24, 6)  ''$.HouseholdPackagingWasteTonnage'',
+            PublicBin        decimal(24, 6)  ''$.PublicBinTonnage'',
+            DrinksContainers decimal(24, 6)  ''$.HouseholdDrinksContainersTonnage'',
+            LateReporting    decimal(24, 6)  ''$.LateReportingTonnage'') v
+        CROSS APPLY (
+            SELECT CAST(v.Household + v.LateReporting + v.PublicBin + v.DrinksContainers AS decimal(24, 6)) AS TotalTonnage
+        ) c
+        CROSS APPLY (
+            SELECT c.TotalTonnage,
+                   CASE WHEN c.TotalTonnage = 0 THEN 0 ELSE ROUND(v.TotalCost / c.TotalTonnage, 4) END AS PricePerTonne
+        ) d
+    ) a
+    CROSS APPLY (
+        SELECT CAST(a.Household + a.LateReporting + a.PublicBin + a.DrinksContainers AS decimal(24, 6)) AS TotalTonnage,
+               CAST(a.TotalCost AS decimal(20, 3)) AS TotalCost
+    ) tc
+    CROSS APPLY (
+        SELECT (
+            SELECT a.England          AS [Cost.England],
+                   a.Wales            AS [Cost.Wales],
+                   a.Scotland         AS [Cost.Scotland],
+                   a.NorthernIreland  AS [Cost.NorthernIreland],
+                   a.TotalCost        AS TotalCost,
+                   a.Household        AS HouseholdPackagingWasteTonnage,
+                   a.PublicBin        AS PublicBinTonnage,
+                   a.DrinksContainers AS HouseholdDrinksContainersTonnage,
+                   a.LateReporting    AS LateReportingTonnage,
+                   tc.TotalTonnage    AS TotalTonnage,
+                   CASE WHEN tc.TotalTonnage = 0 THEN 0 ELSE ROUND(tc.TotalCost / tc.TotalTonnage, 4) END AS PricePerTonne
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE JSON_QUERY(x.comms_cost, ''$.Total'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET one_plus_four_apppointment = JSON_MODIFY(JSON_MODIFY(x.one_plus_four_apppointment,
+        ''$.TotalOnePlusFour'', JSON_QUERY(t.total_json)),
+        ''$.OnePlusFourApportionment'', JSON_QUERY(COALESCE(c.apportionment_json, a.apportionment_json)))
+    FROM dbo.calc_result_one_plus_four_apportionment x
+    CROSS APPLY OPENJSON(x.one_plus_four_apppointment) WITH (
+        LaEngland           decimal(20, 3) ''$.LaDisposalCost.England'',
+        LaWales             decimal(20, 3) ''$.LaDisposalCost.Wales'',
+        LaScotland          decimal(20, 3) ''$.LaDisposalCost.Scotland'',
+        LaNorthernIreland   decimal(20, 3) ''$.LaDisposalCost.NorthernIreland'',
+        PrepEngland         decimal(20, 3) ''$.LADataPrepCharge.England'',
+        PrepWales           decimal(20, 3) ''$.LADataPrepCharge.Wales'',
+        PrepScotland        decimal(20, 3) ''$.LADataPrepCharge.Scotland'',
+        PrepNorthernIreland decimal(20, 3) ''$.LADataPrepCharge.NorthernIreland'') v
+    CROSS APPLY (
+        SELECT CAST(v.LaEngland         + v.PrepEngland         AS decimal(20, 3)) AS England,
+               CAST(v.LaWales           + v.PrepWales           AS decimal(20, 3)) AS Wales,
+               CAST(v.LaScotland        + v.PrepScotland        AS decimal(20, 3)) AS Scotland,
+               CAST(v.LaNorthernIreland + v.PrepNorthernIreland AS decimal(20, 3)) AS NorthernIreland
+    ) s
+    CROSS APPLY (SELECT CAST(s.England + s.Wales + s.Scotland + s.NorthernIreland AS decimal(20, 3)) AS uk) u
+    CROSS APPLY (
+        SELECT (SELECT s.England, s.Wales, s.Scotland, s.NorthernIreland FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS total_json
+    ) t
+    OUTER APPLY (
+        SELECT TOP 1 JSON_QUERY(cc.comms_cost, ''$.OnePlusFourApportionment'') AS apportionment_json
+        FROM dbo.calc_result_comms_cost cc
+        WHERE cc.calculator_run_id = x.calculator_run_id
+        ORDER BY cc.id
+    ) c
+    CROSS APPLY (
+        SELECT (
+            SELECT CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.England         * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS England,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Wales           * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Wales,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.Scotland        * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS Scotland,
+                   CASE WHEN u.uk = 0 THEN 0 ELSE CAST(s.NorthernIreland * 100 AS decimal(19, 3)) / CAST(u.uk AS decimal(15, 3)) END AS NorthernIreland
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS apportionment_json
+    ) a
+    WHERE JSON_QUERY(x.one_plus_four_apppointment, ''$.TotalOnePlusFour'') IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [calc_result_modulation] ADD [total] varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET material_modulations = a.materials_json,
+        total = t.total_json
+    FROM dbo.calc_result_modulation x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(JSON_MODIFY(m.value,
+                    ''$.ModulationDetail.TotalMaterialTonnages'', v.Red + v.Amber + v.Green) AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY m.ord), '''') + '']'' AS materials_json,
+               ISNULL(SUM(v.Red), 0)                  AS Red,
+               ISNULL(SUM(v.Amber), 0)                AS Amber,
+               ISNULL(SUM(v.Green), 0)                AS Green,
+               ISNULL(SUM(v.Red + v.Amber + v.Green), 0) AS Total,
+               ISNULL(SUM(v.RedAtAmber), 0)           AS RedAtAmber,
+               ISNULL(SUM(v.GreenAtAmber), 0)         AS GreenAtAmber
+        FROM (SELECT CAST([key] AS int) AS ord, value FROM OPENJSON(x.material_modulations)) m
+        CROSS APPLY OPENJSON(m.value, ''$.ModulationDetail'') WITH (
+            Red          decimal(24, 6) ''$.RedMaterialTonnages'',
+            Amber        decimal(24, 6) ''$.AmberMaterialTonnages'',
+            Green        decimal(24, 6) ''$.GreenMaterialTonnages'',
+            RedAtAmber   decimal(20, 3)   ''$.TotalRedMaterialAtAmberDisposalCost'',
+            GreenAtAmber decimal(20, 3)   ''$.TotalGreenMaterialAtAmberDisposalCost'') v
+    ) a
+    CROSS APPLY (
+        SELECT (
+            SELECT a.Red          AS RedMaterialTonnages,
+                   a.Amber        AS AmberMaterialTonnages,
+                   a.Green        AS GreenMaterialTonnages,
+                   a.Total        AS TotalMaterialTonnages,
+                   a.RedAtAmber   AS TotalRedMaterialAtAmberDisposalCost,
+                   a.GreenAtAmber AS TotalGreenMaterialAtAmberDisposalCost
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS total_json
+    ) t
+    WHERE x.total IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.calc_result_modulation ALTER COLUMN total varchar(max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'EXEC sp_rename N''dbo.PK_transform_scaled'', N''PK_transform_scaled_bk'', N''OBJECT''');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[transform_scaled].[IX_transform_scaled_calculator_run_id]', N'IX_transform_scaled_bk_calculator_run_id', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[transform_scaled]', N'transform_scaled_bk', 'OBJECT';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    CREATE TABLE [transform_scaled] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [producer_name] nvarchar(400) NULL,
+        [trading_name] nvarchar(400) NULL,
+        [submission_period] nvarchar(50) NOT NULL,
+        [level] nvarchar(5) NOT NULL,
+        [is_subtotal] bit NOT NULL,
+        [is_total] bit NOT NULL,
+        [days_in_submission_period] int NOT NULL,
+        [days_in_whole_period] int NOT NULL,
+        [scaled_factor] decimal(16,12) NOT NULL,
+        [material_code] nvarchar(50) NOT NULL,
+        [household_tonnage] decimal(18,3) NOT NULL,
+        [public_bin_tonnage] decimal(18,3) NOT NULL,
+        [hdc_tonnage] decimal(18,3) NOT NULL,
+        [total_reported_tonnage] decimal(18,3) NOT NULL,
+        [smcw_tonnage] decimal(18,3) NOT NULL,
+        [net_reported_tonnage] decimal(18,3) NOT NULL,
+        [scaled_household_tonnage] decimal(18,3) NOT NULL,
+        [scaled_public_bin_tonnage] decimal(18,3) NOT NULL,
+        [scaled_hdc_tonnage] decimal(18,3) NOT NULL,
+        [scaled_total_reported_tonnage] decimal(18,3) NOT NULL,
+        [scaled_smcw_tonnage] decimal(18,3) NOT NULL,
+        [scaled_net_reported_tonnage] decimal(18,3) NOT NULL,
+        CONSTRAINT [PK_transform_scaled] PRIMARY KEY ([id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    CREATE INDEX [IX_transform_scaled_calculator_run_id] ON [transform_scaled] ([calculator_run_id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'INSERT INTO dbo.transform_scaled (
+        calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+        is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+        household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+        scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+    SELECT p.calculator_run_id, p.producer_id, p.subsidiary_id, p.producer_name, p.trading_name, p.submission_period, p.level,
+           p.is_subtotal, 0, p.days_in_submission_period, p.days_in_whole_period, p.scaled_factor, p.material_code,
+           p.hh, p.pb, p.hdc, p.hh + p.pb + p.hdc, p.cw, p.hh + p.pb + p.hdc - p.cw,
+           p.scaled_hh, p.scaled_pb, p.scaled_hdc, p.scaled_hh + p.scaled_pb + p.scaled_hdc, p.scaled_cw, p.scaled_hh + p.scaled_pb + p.scaled_hdc - p.scaled_cw
+    FROM (
+        SELECT b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+               b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code AS material_code,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HH'' THEN b.tonnage END), 0)                         AS hh,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''PB'' THEN b.tonnage END), 0)                         AS pb,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HDC'' AND m.code = ''GL'' THEN b.tonnage END), 0)        AS hdc,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''CW'' THEN b.tonnage END), 0)                         AS cw,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HH'' THEN b.scaled_tonnage END), 0)                  AS scaled_hh,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''PB'' THEN b.scaled_tonnage END), 0)                  AS scaled_pb,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''HDC'' AND m.code = ''GL'' THEN b.scaled_tonnage END), 0) AS scaled_hdc,
+               ISNULL(SUM(CASE WHEN b.packaging_type = ''CW'' THEN b.scaled_tonnage END), 0)                  AS scaled_cw
+        FROM dbo.transform_scaled_bk b
+        JOIN dbo.material m ON m.id = b.material_id
+        GROUP BY b.calculator_run_id, b.producer_id, b.subsidiary_id, b.producer_name, b.trading_name, b.submission_period, b.level,
+                 b.is_subtotal, b.days_in_submission_period, b.days_in_whole_period, b.scaled_factor, m.code
+    ) p');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'INSERT INTO dbo.transform_scaled (
+        calculator_run_id, producer_id, subsidiary_id, producer_name, trading_name, submission_period, level,
+        is_subtotal, is_total, days_in_submission_period, days_in_whole_period, scaled_factor, material_code,
+        household_tonnage, public_bin_tonnage, hdc_tonnage, total_reported_tonnage, smcw_tonnage, net_reported_tonnage,
+        scaled_household_tonnage, scaled_public_bin_tonnage, scaled_hdc_tonnage, scaled_total_reported_tonnage, scaled_smcw_tonnage, scaled_net_reported_tonnage)
+    SELECT calculator_run_id, 0, NULL, NULL, NULL, '''', '''',
+           0, 1, 0, 0, 0, material_code,
+           SUM(household_tonnage), SUM(public_bin_tonnage), SUM(hdc_tonnage), SUM(total_reported_tonnage), SUM(smcw_tonnage), SUM(net_reported_tonnage),
+           SUM(scaled_household_tonnage), SUM(scaled_public_bin_tonnage), SUM(scaled_hdc_tonnage), SUM(scaled_total_reported_tonnage), SUM(scaled_smcw_tonnage), SUM(scaled_net_reported_tonnage)
+    FROM dbo.transform_scaled
+    WHERE is_subtotal = 0 AND is_total = 0
+    GROUP BY calculator_run_id, material_code');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE c
+    SET h2_ram_proportions_red           = p.h2_ram_proportions_red,
+        h2_ram_proportions_amber         = p.h2_ram_proportions_amber,
+        h2_ram_proportions_green         = p.h2_ram_proportions_green,
+        h2_ram_proportions_red_medical   = p.h2_ram_proportions_red_medical,
+        h2_ram_proportions_amber_medical = p.h2_ram_proportions_amber_medical,
+        h2_ram_proportions_green_medical = p.h2_ram_proportions_green_medical
+    FROM dbo.transform_projected_h1 c
+    JOIN dbo.transform_projected_h1 p
+      ON p.calculator_run_id = c.calculator_run_id
+     AND p.producer_id = c.producer_id
+     AND p.material_code = c.material_code
+     AND p.level = ''1''
+    WHERE c.level <> ''1''');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_household_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_public_bin_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_red] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_amber] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_green] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_red_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_amber_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_hdc_tonnage_green_medical] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    ALTER TABLE [transform_partial] ADD [partial_smcw_tonnage] decimal(18,3) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE t
+    SET partial_household_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.household, 0) ELSE CASE WHEN t.household_tonnage_red IS NOT NULL THEN ROUND(t.household_tonnage_red * t.obligated_factor, 3) + ROUND(t.household_tonnage_amber * t.obligated_factor, 3) + ROUND(t.household_tonnage_green * t.obligated_factor, 3) + ROUND(t.household_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.household_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.household_tonnage_green_medical * t.obligated_factor, 3) ELSE ROUND(t.household_tonnage * t.obligated_factor, 3) END END,
+        partial_household_tonnage_red = CASE WHEN t.household_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_red, 0) ELSE ROUND(t.household_tonnage_red * t.obligated_factor, 3) END,
+        partial_household_tonnage_amber = CASE WHEN t.household_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_amber, 0) ELSE ROUND(t.household_tonnage_amber * t.obligated_factor, 3) END,
+        partial_household_tonnage_green = CASE WHEN t.household_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_green, 0) ELSE ROUND(t.household_tonnage_green * t.obligated_factor, 3) END,
+        partial_household_tonnage_red_medical = CASE WHEN t.household_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_red_medical, 0) ELSE ROUND(t.household_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_household_tonnage_amber_medical = CASE WHEN t.household_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_amber_medical, 0) ELSE ROUND(t.household_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_household_tonnage_green_medical = CASE WHEN t.household_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.household_green_medical, 0) ELSE ROUND(t.household_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin, 0) ELSE CASE WHEN t.public_bin_tonnage_red IS NOT NULL THEN ROUND(t.public_bin_tonnage_red * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_amber * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_green * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.public_bin_tonnage_green_medical * t.obligated_factor, 3) ELSE ROUND(t.public_bin_tonnage * t.obligated_factor, 3) END END,
+        partial_public_bin_tonnage_red = CASE WHEN t.public_bin_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_red, 0) ELSE ROUND(t.public_bin_tonnage_red * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_amber = CASE WHEN t.public_bin_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_amber, 0) ELSE ROUND(t.public_bin_tonnage_amber * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_green = CASE WHEN t.public_bin_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_green, 0) ELSE ROUND(t.public_bin_tonnage_green * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_red_medical = CASE WHEN t.public_bin_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_red_medical, 0) ELSE ROUND(t.public_bin_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_amber_medical = CASE WHEN t.public_bin_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_amber_medical, 0) ELSE ROUND(t.public_bin_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_public_bin_tonnage_green_medical = CASE WHEN t.public_bin_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.public_bin_green_medical, 0) ELSE ROUND(t.public_bin_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage = CASE WHEN fees.has_rows = 1 THEN CASE WHEN t.hdc_tonnage IS NULL THEN NULL ELSE ISNULL(f.hdc, 0) END ELSE CASE WHEN t.hdc_tonnage_red IS NOT NULL THEN ROUND(t.hdc_tonnage_red * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_amber * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_green * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_red_medical * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_amber_medical * t.obligated_factor, 3) + ROUND(t.hdc_tonnage_green_medical * t.obligated_factor, 3) WHEN t.hdc_tonnage IS NULL THEN NULL ELSE ROUND(t.hdc_tonnage * t.obligated_factor, 3) END END,
+        partial_hdc_tonnage_red = CASE WHEN t.hdc_tonnage_red IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_red, 0) ELSE ROUND(t.hdc_tonnage_red * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_amber = CASE WHEN t.hdc_tonnage_amber IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_amber, 0) ELSE ROUND(t.hdc_tonnage_amber * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_green = CASE WHEN t.hdc_tonnage_green IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_green, 0) ELSE ROUND(t.hdc_tonnage_green * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_red_medical = CASE WHEN t.hdc_tonnage_red_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_red_medical, 0) ELSE ROUND(t.hdc_tonnage_red_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_amber_medical = CASE WHEN t.hdc_tonnage_amber_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_amber_medical, 0) ELSE ROUND(t.hdc_tonnage_amber_medical * t.obligated_factor, 3) END,
+        partial_hdc_tonnage_green_medical = CASE WHEN t.hdc_tonnage_green_medical IS NULL THEN NULL WHEN fees.has_rows = 1 THEN ISNULL(f.hdc_green_medical, 0) ELSE ROUND(t.hdc_tonnage_green_medical * t.obligated_factor, 3) END,
+        partial_smcw_tonnage = CASE WHEN fees.has_rows = 1 THEN ISNULL(f.smcw, 0) ELSE ROUND(t.smcw_tonnage * t.obligated_factor, 3) END
+    FROM dbo.transform_partial t
+    OUTER APPLY (
+        SELECT MIN(pd.id) AS producer_detail_id
+        FROM dbo.producer_detail pd
+        WHERE pd.calculator_run_id = t.calculator_run_id AND pd.producer_id = t.producer_id
+          AND ISNULL(pd.subsidiary_id, '''') = ISNULL(t.subsidiary_id, '''')
+    ) d
+    OUTER APPLY (
+        SELECT CASE WHEN EXISTS (SELECT 1 FROM dbo.producer_material_packaging x WHERE x.producer_detail_id = d.producer_detail_id) THEN 1 ELSE 0 END AS has_rows
+    ) fees
+    OUTER APPLY (
+        SELECT SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage END) AS household,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_red END) AS household_red,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_amber END) AS household_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_green END) AS household_green,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_red_medical END) AS household_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_amber_medical END) AS household_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HH'' THEN pmp.packaging_tonnage_green_medical END) AS household_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage END) AS public_bin,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_red END) AS public_bin_red,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_amber END) AS public_bin_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_green END) AS public_bin_green,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_red_medical END) AS public_bin_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_amber_medical END) AS public_bin_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''PB'' THEN pmp.packaging_tonnage_green_medical END) AS public_bin_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage END) AS hdc,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_red END) AS hdc_red,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_amber END) AS hdc_amber,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_green END) AS hdc_green,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_red_medical END) AS hdc_red_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_amber_medical END) AS hdc_amber_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''HDC'' THEN pmp.packaging_tonnage_green_medical END) AS hdc_green_medical,
+               SUM(CASE WHEN pmp.packaging_type = ''CW'' THEN pmp.packaging_tonnage END) AS smcw
+        FROM dbo.producer_material_packaging pmp
+        JOIN dbo.material m ON m.id = pmp.material_id
+        WHERE pmp.producer_detail_id = d.producer_detail_id AND m.code = t.material_code
+    ) f');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_household_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_public_bin_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'ALTER TABLE dbo.transform_partial ALTER COLUMN partial_smcw_tonnage decimal(18,3) NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[calc_result_smcw_producer]', N'calc_result_smcw_producer_bk', 'OBJECT';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC sp_rename N'[calc_result_smcw]', N'calc_result_smcw_bk', 'OBJECT';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261111000000_RefineStoredCalcResults', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

@@ -1,3 +1,9 @@
+using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -30,13 +36,11 @@ public static partial class TestDataHelper
                 H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty,
             },
             CalcResultModulation               = applyModulation
-                ? new ModulationResult
-                {
-                    CalculatorRunId      = 1,
-                    GreenFactor          = 1,
-                    RedFactor            = 2,
-                    ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>()
-                }
+                ? CalcResultModulationBuilder.Create(
+                    calculatorRunId: 1,
+                    greenFactor:     1,
+                    redFactor:       2,
+                    byMaterial:      new Dictionary<MaterialDetail, ModulationDetail>())
                 : null
         };
     }
@@ -96,125 +100,116 @@ public static partial class TestDataHelper
 
     public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
     {
-        return new CalcResultLaDisposalCostData
+        return CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                ["AL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 5000, Wales = 1750, Scotland = 2000, NorthernIreland = 1250 },
-                        HouseholdPackagingWasteTonnage = 6980,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 8000
-                    },
-                ["FC"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 7500, Wales = 2100, Scotland = 3400, NorthernIreland = 1750 },
-                        HouseholdPackagingWasteTonnage = 11850,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 7000
-                    },
-                ["GL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 45000, Wales = 0, Scotland = 20700, NorthernIreland = 4500 },
-                        HouseholdPackagingWasteTonnage = 4900,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 100,
-                        LateReportingTonnage = 6000
-                    },
-                ["PC"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 12500, Wales = 2300, Scotland = 4500, NorthernIreland = 3400 },
-                        HouseholdPackagingWasteTonnage = 4270,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 5000
-                    },
-                ["PL"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 23000, Wales = 4500, Scotland = 6700, NorthernIreland = 2100 },
-                        HouseholdPackagingWasteTonnage = 12805,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 4000
-                    },
-                ["ST"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 13400, Wales = 0, Scotland = 7800, NorthernIreland = 0 },
-                        HouseholdPackagingWasteTonnage = 7700,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 3000
-                    },
-                ["WD"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 0, Wales = 12000, Scotland = 0, NorthernIreland = 5600 },
-                        HouseholdPackagingWasteTonnage = 6800,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 2000
-                    },
-                ["OT"] =
-                    new()
-                    {
-                        Cost = new ByCountryCost { England = 3400, Wales = 2100, Scotland = 4200, NorthernIreland = 700 },
-                        HouseholdPackagingWasteTonnage = 7700,
-                        PublicBinTonnage = 2000,
-                        HouseholdDrinkContainersTonnage = 0,
-                        LateReportingTonnage = 1000
-                    }
-            }
-        };
+            ["AL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 5000, Wales = 1750, Scotland = 2000, NorthernIreland = 1250 },
+                    HouseholdPackagingWasteTonnage = 6980,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 8000
+                },
+            ["FC"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 7500, Wales = 2100, Scotland = 3400, NorthernIreland = 1750 },
+                    HouseholdPackagingWasteTonnage = 11850,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 7000
+                },
+            ["GL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 45000, Wales = 0, Scotland = 20700, NorthernIreland = 4500 },
+                    HouseholdPackagingWasteTonnage = 4900,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 100,
+                    LateReportingTonnage = 6000
+                },
+            ["PC"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 12500, Wales = 2300, Scotland = 4500, NorthernIreland = 3400 },
+                    HouseholdPackagingWasteTonnage = 4270,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 5000
+                },
+            ["PL"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 23000, Wales = 4500, Scotland = 6700, NorthernIreland = 2100 },
+                    HouseholdPackagingWasteTonnage = 12805,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 4000
+                },
+            ["ST"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 13400, Wales = 0, Scotland = 7800, NorthernIreland = 0 },
+                    HouseholdPackagingWasteTonnage = 7700,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 3000
+                },
+            ["WD"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 0, Wales = 12000, Scotland = 0, NorthernIreland = 5600 },
+                    HouseholdPackagingWasteTonnage = 6800,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 2000
+                },
+            ["OT"] =
+                new()
+                {
+                    Cost = new ByCountryCost { England = 3400, Wales = 2100, Scotland = 4200, NorthernIreland = 700 },
+                    HouseholdPackagingWasteTonnage = 7700,
+                    PublicBinTonnage = 2000,
+                    HouseholdDrinkContainersTonnage = 0,
+                    LateReportingTonnage = 1000
+                }
+        });
     }
 
     public static CalcResultLapcapData GetCalcResultLapcapData()
     {
-        return new CalcResultLapcapData
+        return CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>
         {
-            ByMaterial = new Dictionary<string, ByCountryCost>
-            {
-                ["AL"] = new() { England =  5000, Wales =  1750, Scotland =  2000, NorthernIreland = 1250 },
-                ["FC"] = new() { England =  7500, Wales =  2100, Scotland =  3400, NorthernIreland = 1750 },
-                ["GL"] = new() { England = 45000, Wales =     0, Scotland = 20700, NorthernIreland = 4500 },
-                ["PC"] = new() { England = 12500, Wales =  2300, Scotland =  4500, NorthernIreland = 3400 },
-                ["PL"] = new() { England = 23000, Wales =  4500, Scotland =  6700, NorthernIreland = 2100 },
-                ["ST"] = new() { England = 13400, Wales =     0, Scotland =  7800, NorthernIreland =    0 },
-                ["WD"] = new() { England =     0, Wales = 12000, Scotland =     0, NorthernIreland = 5600 },
-                ["OT"] = new() { England =  3400, Wales =  2100, Scotland =  4200, NorthernIreland =  700 }
-            }
-        };
+            ["AL"] = new() { England =  5000, Wales =  1750, Scotland =  2000, NorthernIreland = 1250 },
+            ["FC"] = new() { England =  7500, Wales =  2100, Scotland =  3400, NorthernIreland = 1750 },
+            ["GL"] = new() { England = 45000, Wales =     0, Scotland = 20700, NorthernIreland = 4500 },
+            ["PC"] = new() { England = 12500, Wales =  2300, Scotland =  4500, NorthernIreland = 3400 },
+            ["PL"] = new() { England = 23000, Wales =  4500, Scotland =  6700, NorthernIreland = 2100 },
+            ["ST"] = new() { England = 13400, Wales =     0, Scotland =  7800, NorthernIreland =    0 },
+            ["WD"] = new() { England =     0, Wales = 12000, Scotland =     0, NorthernIreland = 5600 },
+            ["OT"] = new() { England =  3400, Wales =  2100, Scotland =  4200, NorthernIreland =  700 }
+        });
     }
 
     public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
     {
-        return new CalcResultOnePlusFourApportionment
-        {
-            LaDisposalCost   = new ByCountryCost { England = 30, Wales = 5, Scotland = 15, NorthernIreland = 35 },
-            LADataPrepCharge = new ByCountryCost { England = 10, Wales = 5, Scotland =  0, NorthernIreland =  0 }
-        };
+        return CalcResultOnePlusFourApportionmentBuilder.Create(
+            laDisposalCost:   new ByCountryCost { England = 30, Wales = 5, Scotland = 15, NorthernIreland = 35 },
+            laDataPrepCharge: new ByCountryCost { England = 10, Wales = 5, Scotland =  0, NorthernIreland =  0 });
     }
 
     public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
     {
-        return new CalcResultCommsCost
-        {
-            OnePlusFourApportionment = new ByCountryApportionment
+        return CalcResultCommsCostBuilder.Create(
+            onePlusFourApportionment: new ByCountryApportionment
             {
                 England         = 50.23m,
                 Wales           = 30.34m,
                 Scotland        = 10.45m,
                 NorthernIreland = 8.98m
             },
-            ByMaterial = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
+            byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>
             {
                 ["AL"] = new()
                 {
@@ -235,27 +230,23 @@ public static partial class TestDataHelper
                     LateReportingTonnage = 4.56m
                 }
             },
-            CommsCostUkWide    = new ByCountryCost { England = 1500, Wales = 200, Scotland = 500, NorthernIreland = 331 },
-            CommsCostByCountry = new ByCountryCost { England = 1400, Wales = 250, Scotland = 600, NorthernIreland = 280 }
-        };
+            commsCostUkWide:          new ByCountryCost { England = 1500, Wales = 200, Scotland = 500, NorthernIreland = 331 },
+            commsCostByCountry:       new ByCountryCost { England = 1400, Wales = 250, Scotland = 600, NorthernIreland = 280 });
     }
 
     public static CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage()
     {
-        return new CalcResultLateReportingTonnage
+        return CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>
-            {
-                ["AL"] = new() { Red = 1000.00m, Amber = 2000.00m, Green = 5000.00m, Total = 8000.00m },
-                ["FC"] = new() { Red =    5.00m, Amber =    0.00m, Green =    5.00m, Total =   10.00m },
-                ["GL"] = new() { Red =   10.00m, Amber =    0.00m, Green =    0.00m, Total =   10.00m },
-                ["PC"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["PL"] = new() { Red = 1000.00m, Amber =  500.00m, Green =  500.00m, Total = 2000.00m },
-                ["ST"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["WD"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
-                ["OT"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m }
-            }
-        };
+            ["AL"] = new() { Red = 1000.00m, Amber = 2000.00m, Green = 5000.00m, Total = 8000.00m },
+            ["FC"] = new() { Red =    5.00m, Amber =    0.00m, Green =    5.00m, Total =   10.00m },
+            ["GL"] = new() { Red =   10.00m, Amber =    0.00m, Green =    0.00m, Total =   10.00m },
+            ["PC"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["PL"] = new() { Red = 1000.00m, Amber =  500.00m, Green =  500.00m, Total = 2000.00m },
+            ["ST"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["WD"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m },
+            ["OT"] = new() { Red =    0.00m, Amber =    0.00m, Green =    0.00m, Total =    0.00m }
+        });
     }
 
     public static ProducerFees GetProducerFees(bool applyModulation = false)
@@ -1040,7 +1031,12 @@ public static partial class TestDataHelper
                                 HouseholdRAMTonnage = new RamTonnage(),
                                 PublicBinTonnage = 20,
                                 PublicBinRAMTonnage = new RamTonnage(),
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 0m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialPublicBinTonnage = 0m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         },
                         {
@@ -1054,7 +1050,14 @@ public static partial class TestDataHelper
                                 PublicBinRAMTonnage = new RamTonnage(),
                                 HouseholdDrinksContainersTonnage = 70,
                                 HouseholdDrinksContainersRAMTonnage = new RamTonnage(),
-                                SelfManagedConsumerWasteTonnage = 60
+                                SelfManagedConsumerWasteTonnage = 60,
+                                PartialHouseholdTonnage = 0m,
+                                PartialHouseholdRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialPublicBinTonnage = 0m,
+                                PartialPublicBinRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialHouseholdDrinksContainersTonnage = 0m,
+                                PartialHouseholdDrinksContainersRAMTonnage = new RamTonnage { Red = 0m, Amber = 0m, Green = 0m, RedMedical = 0m, AmberMedical = 0m, GreenMedical = 0m },
+                                PartialSelfManagedConsumerWasteTonnage = 30m
                             }
                         }
                     }
