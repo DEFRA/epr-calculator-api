@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
@@ -41,6 +40,7 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PutCalculatorRunStatus([FromBody] SetRunClassificationRequest request, CancellationToken cancellationToken = default)
     {
+        // Tracked: the run is updated and saved below.
         var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == request.RunId, cancellationToken: cancellationToken);
 
         if (run == null)
@@ -74,6 +74,7 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
     {
+        // AsNoTracking() not needed: projects to a DTO.
         var runDto = await dbContext.CalculatorRuns
             .Where(run => run.Id == runId)
             .Select(CalcRunMapper.ToDto)
@@ -91,10 +92,26 @@ public class CalculatorNewController(
         if (runDto.RunClassification is not (RunClassification.Initial or RunClassification.Recalculation))
             return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToChangeStatusToCompleted, runDto.RunClassification));
 
+        // The file goes to FSS before the run is marked as shared: a failure here leaves nothing to undo, and a retry overwrites it.
+        if (featureFlags.Value.UploadFssBillingFileToBlobStorage)
+        {
+            var success = await fileExportService.Export(runId, FileExportType.BillingJson, cancellationToken) switch
+            {
+                FileExportResult.Streamed s => await UploadBillingJson(s, runId, cancellationToken),
+                FileExportResult.NotFound _ => false,
+                FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken), cancellationToken),
+                _ => false
+            };
+
+            if (!success)
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", runId));
+        }
+
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
+            // Tracked: the run is updated and saved below.
             var run = await dbContext.CalculatorRuns
                 .SingleAsync(x => x.Id == runId, cancellationToken);
 
@@ -109,20 +126,6 @@ public class CalculatorNewController(
 
             dbContext.CalculatorRuns.Update(run);
             await dbContext.SaveChangesAsync(cancellationToken);
-
-            if (featureFlags.Value.UploadFssBillingFileToBlobStorage)
-            {
-                var success = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
-                {
-                    FileExportResult.Exported s => await UploadBillingJson(s.Content, runId, cancellationToken),
-                    FileExportResult.NotFound _ => false,
-                    FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(await GetBillingJsonFileName(runDto.BillingFile.Id, cancellationToken), cancellationToken),
-                    _ => false
-                };
-
-                if (!success)
-                    return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", runId));
-            }
 
             await transaction.CommitAsync(cancellationToken);
 
@@ -142,16 +145,17 @@ public class CalculatorNewController(
             .Select(m => m.BillingJsonFileName)
             .SingleAsync(cancellationToken);
 
-    private async Task<bool> UploadBillingJson(byte[] content, int calculatorRunId, CancellationToken cancellationToken)
+    private async Task<bool> UploadBillingJson(FileExportResult.Streamed billingJson, int calculatorRunId, CancellationToken cancellationToken)
     {
-        await storageUploadService.UploadFileContentAsync(
-            new IStorageUploadService.Request
+        await storageUploadService.UploadFileStreamAsync(
+            new IStorageUploadService.StreamRequest
             {
                 FileName = string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse("{0}billing.json"), calculatorRunId),
-                Content = content,
                 ContainerName = blobStorageOptions.Value.FssContainer,
-                Overwrite = true
+                Overwrite = true,
+                UseUtf8Bom = false
             },
+            billingJson.WriteTo,
             cancellationToken);
 
         return true;

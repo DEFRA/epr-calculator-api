@@ -24,54 +24,40 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
         [ActivityTrace]
         public IEnumerable<CalcResultErrorReport> Construct(RunContext runContext)
         {
-            var baseQuery =
-                from run in context.CalculatorRuns
-                where run.Id == runContext.RunId
-
-                join er in context.ErrorReports on run.Id equals er.CalculatorRunId
-
-                // LEFT JOIN to find a subsidiary-specific organisation record: match ProdId + SubsId
-                join subOrg in context.CalculatorRunOrganisations
-                    on new { OrgId = er.ProducerId, RunId = run.Id, SubsId = er.SubsidiaryId }
-                    equals new { OrgId = subOrg.OrganisationId, RunId = subOrg.CalculatorRunId, SubsId = subOrg.SubsidiaryId }
-                    into subGroup
-                from subLeft in subGroup.DefaultIfEmpty()
-
-                    // LEFT JOIN to find a producer-level organisation record (SubsidiaryId null) as fallback
-                join prodOrg in context.CalculatorRunOrganisations
-                    on new { OrgId = er.ProducerId, RunId = run.Id, SubsId = (string?)null }
-                    equals new { OrgId = prodOrg.OrganisationId, RunId = prodOrg.CalculatorRunId, SubsId = prodOrg.SubsidiaryId }
-                    into prodGroup
-                from prodLeft in prodGroup.DefaultIfEmpty()
-
-                // A producer can have several organisation rows (one per submitter) - order so First() below is repeatable.
-                orderby er.Id, subLeft == null ? 0 : subLeft.Id, prodLeft == null ? 0 : prodLeft.Id
-
-                select new CalcResultErrorReport
-                {
-                    Id = er.Id,
-                    ProducerId = er.ProducerId,
-                    SubsidiaryId = er.SubsidiaryId ?? CommonConstants.Hyphen,
-
-                    // prefer subsidiary-specific name, otherwise producer-level name, otherwise hyphen
-                    ProducerName = IsSubsidary(subLeft) ? subLeft.OrganisationName : GetProducerName(prodLeft),
-
-                    TradingName = IsSubsidary(subLeft) ? GetFormatedTradingName(subLeft.TradingName)
-                                    : GetTradingName(prodLeft),
-
-                    LeaverCode = er.LeaverCode ?? CommonConstants.Hyphen,
-                    ErrorCodeText = er.ErrorCode
-                };
-
-            var errorReports = baseQuery
+            // Matched in memory: joining on the nullable subsidiary ID in SQL scans the organisation table once per error row.
+            var organisations = context.CalculatorRunOrganisations
                 .AsNoTracking()
+                .Where(o => o.CalculatorRunId == runContext.RunId)
+                .OrderBy(o => o.Id)
                 .AsEnumerable()
+                .GroupBy(o => (o.OrganisationId, o.SubsidiaryId))
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var errorReports = context.ErrorReports
+                .AsNoTracking()
+                .Where(er => er.CalculatorRunId == runContext.RunId)
+                .OrderBy(er => er.Id)
+                .AsEnumerable()
+                .Select(er =>
+                {
+                    var (producerName, tradingName) = GetNames(organisations.GetValueOrDefault((er.ProducerId, er.SubsidiaryId)));
+                    return new CalcResultErrorReport
+                    {
+                        Id = er.Id,
+                        ProducerId = er.ProducerId,
+                        SubsidiaryId = er.SubsidiaryId ?? CommonConstants.Hyphen,
+                        ProducerName = producerName,
+                        TradingName = tradingName,
+                        LeaverCode = er.LeaverCode ?? CommonConstants.Hyphen,
+                        ErrorCodeText = er.ErrorCode
+                    };
+                })
                 .GroupBy(x => new { x.ProducerId, x.SubsidiaryId, x.ErrorCodeText })
                 .Select(g => g.First())
                 .ToList();
 
             return errorReports
-                .Concat(HoldingCompanyRows(runContext.RunId, errorReports))
+                .Concat(HoldingCompanyRows(errorReports, organisations))
                 .OrderBy(x => x.ProducerId)
                 .ThenBy(x => x.SubsidiaryId)
                 .ThenBy(x => x.ErrorCodeText)
@@ -82,58 +68,37 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
         ///     A blank holding-company-level row for any producer whose errors are all subsidiary-scoped,
         ///     so the holding company itself also shows up in the error report.
         /// </summary>
-        private IEnumerable<CalcResultErrorReport> HoldingCompanyRows(int runId, IReadOnlyList<CalcResultErrorReport> errorReports)
+        private static List<CalcResultErrorReport> HoldingCompanyRows(
+            IReadOnlyList<CalcResultErrorReport> errorReports,
+            Dictionary<(int OrganisationId, string? SubsidiaryId), CalculatorRunOrganisation> organisations)
         {
-            var producerIds = errorReports
+            return errorReports
                 .GroupBy(x => x.ProducerId)
                 .Where(g => g.All(x => x.SubsidiaryId != CommonConstants.Hyphen))
-                .Select(g => g.Key)
-                .ToList();
-
-            if (producerIds.Count == 0)
-                return [];
-
-            var holdingCompanies = context.CalculatorRunOrganisations
-                .AsNoTracking()
-                .Where(o => o.CalculatorRunId == runId && o.SubsidiaryId == null && producerIds.Contains(o.OrganisationId))
-                .OrderBy(o => o.Id)
-                .AsEnumerable()
-                .GroupBy(o => o.OrganisationId)
-                .ToDictionary(g => g.Key, g => g.First());
-
-            return producerIds.Select(producerId =>
-            {
-                var holdingCompany = holdingCompanies.GetValueOrDefault(producerId);
-                var hasName = holdingCompany is not null && !string.IsNullOrWhiteSpace(holdingCompany.OrganisationName);
-
-                return new CalcResultErrorReport
+                .Select(g =>
                 {
-                    ProducerId = producerId,
-                    SubsidiaryId = CommonConstants.Hyphen,
-                    ProducerName = hasName ? holdingCompany!.OrganisationName : CommonConstants.Hyphen,
-                    TradingName = hasName ? GetFormatedTradingName(holdingCompany!.TradingName) : CommonConstants.Hyphen,
-                    LeaverCode = string.Empty,
-                    ErrorCodeText = string.Empty
-                };
-            });
+                    var (producerName, tradingName) = GetNames(organisations.GetValueOrDefault((g.Key, null)));
+                    return new CalcResultErrorReport
+                    {
+                        ProducerId = g.Key,
+                        SubsidiaryId = CommonConstants.Hyphen,
+                        ProducerName = producerName,
+                        TradingName = tradingName,
+                        LeaverCode = string.Empty,
+                        ErrorCodeText = string.Empty
+                    };
+                })
+                .ToList();
         }
 
-        private static string GetProducerName(CalculatorRunOrganisation? prodLeft) =>
-            prodLeft is null || string.IsNullOrWhiteSpace(prodLeft.OrganisationName) || prodLeft.SubsidiaryId == null
-                ? CommonConstants.Hyphen
-                : prodLeft.OrganisationName;
-
-        private static string GetTradingName(CalculatorRunOrganisation? prodLeft) =>
-            prodLeft is null || string.IsNullOrWhiteSpace(prodLeft.OrganisationName) || prodLeft.SubsidiaryId == null
-                ? CommonConstants.Hyphen
-                : GetFormatedTradingName(prodLeft.TradingName);
+        private static (string ProducerName, string TradingName) GetNames(CalculatorRunOrganisation? organisation) =>
+            organisation is not null && !string.IsNullOrWhiteSpace(organisation.OrganisationName)
+                ? (organisation.OrganisationName, GetFormatedTradingName(organisation.TradingName))
+                : (CommonConstants.Hyphen, CommonConstants.Hyphen);
 
         private static string GetFormatedTradingName(string? tradingName) =>
             string.IsNullOrEmpty(tradingName)
                 ? CommonConstants.Hyphen
                 : tradingName;
-
-        private static bool IsSubsidary(CalculatorRunOrganisation? subLeft) =>
-            subLeft != null && !string.IsNullOrWhiteSpace(subLeft.OrganisationName);
     }
 }

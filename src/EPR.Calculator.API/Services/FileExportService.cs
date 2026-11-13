@@ -23,16 +23,16 @@ namespace EPR.Calculator.API.Services;
 
 public interface IFileExportService
 {
-    Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken);
+    Task<FileExportResult> Export(int runId, FileExportType fileType, CancellationToken cancellationToken);
 }
 
-public enum FileExportType { Csv, Json }
+public enum FileExportType { ResultsCsv, BillingCsv, BillingJson }
 
 
 public abstract record FileExportResult
 {
     private FileExportResult() { }
-    public sealed record Exported(byte[] Content, string FileName) : FileExportResult;
+    public sealed record Streamed(Func<Stream, CancellationToken, Task> WriteTo, string FileName) : FileExportResult;
     public sealed record NotFound() : FileExportResult;
     public sealed record Legacy() : FileExportResult;
 }
@@ -50,16 +50,16 @@ public class FileExportService(
     IBillingFileJsonWriter billingJsonWriter
 )  : IFileExportService
 {
-    private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
-    
+    private static readonly UTF8Encoding Utf8WithBom = new(encoderShouldEmitUTF8Identifier: true);
+
     [ActivityMetric(nameof(Metrics.FileExportDuration), threshold: "00:00:10")]
-    public Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken)
+    public Task<FileExportResult> Export(int runId, FileExportType fileType, CancellationToken cancellationToken)
     {
-        return runType switch
+        return fileType switch
         {
-            RunType.Calculator => ExportResultCsv(runId, cancellationToken),
-            RunType.Billing => ExportBilling(runId, fileType, cancellationToken),
-            _ => Task.FromResult<FileExportResult>(new FileExportResult.NotFound())
+            FileExportType.ResultsCsv => ExportResultCsv(runId, cancellationToken),
+            FileExportType.BillingCsv or FileExportType.BillingJson => ExportBilling(runId, fileType, cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(fileType), fileType, null)
         };
     }
 
@@ -67,27 +67,28 @@ public class FileExportService(
     {
         var runContext = await GetCalculatorRunContext(runId, cancellationToken);
 
-        if(runContext is null)
+        if (runContext is null)
             return new FileExportResult.NotFound();
 
-        var result = await GetResult(runContext, cancellationToken);
+        var result = await GetResult(runContext, FileExportType.ResultsCsv, cancellationToken);
 
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var content = await resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId));
         var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
-        return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
+        return new FileExportResult.Streamed(
+            (stream, ct) => WriteCsv(stream, writer => resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId), writer), ct),
+            fileName);
     }
 
     private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
     {
         var runContext = await GetBillingRunContext(runId, cancellationToken);
 
-        if(runContext is null)
+        if (runContext is null)
             return new FileExportResult.NotFound();
 
-        var result = await GetResult(runContext, cancellationToken);
+        var result = await GetResult(runContext, billingFileType, cancellationToken);
 
         if (result is null)
             return new FileExportResult.Legacy();
@@ -99,30 +100,30 @@ public class FileExportService(
 
         return billingFileType switch
         {
-            FileExportType.Csv => new FileExportResult.Exported(
-                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails)),
+            FileExportType.BillingCsv => new FileExportResult.Streamed(
+                (stream, ct) => WriteCsv(stream, writer => billingFileExporter.Export(runContext, filteredResult, acceptedFeeDetails, writer), ct),
                 billingCsvFileName
             ),
-            FileExportType.Json => new FileExportResult.Exported(
-                await WriteBillingJson(runContext, filteredResult, acceptedFeeDetails, cancellationToken),
+            FileExportType.BillingJson => new FileExportResult.Streamed(
+                (stream, ct) => billingJsonWriter.WriteTo(stream, runContext, filteredResult, acceptedFeeDetails, ct),
                 new CalcResultsAndBillingFileName(runContext.RunId)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };
     }
 
-    private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
+    private static async Task WriteCsv(Stream stream, Func<TextWriter, Task> export, CancellationToken cancellationToken)
     {
-        using var stream = new MemoryStream();
-        await billingJsonWriter.WriteTo(stream, runContext, calcResult, producerFeeDetails, cancellationToken);
-        return stream.ToArray();
+        await using var writer = new StreamWriter(stream, Utf8WithBom, bufferSize: 64 * 1024, leaveOpen: true);
+        await export(writer);
+        await writer.FlushAsync(cancellationToken);
     }
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
     {
         var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        if(run is null || run.CalculationRunStatus != CalculationRunStatus.Completed || run.Classification == RunClassification.Deleted)
+        if (run is null || run.CalculationRunStatus != CalculationRunStatus.Completed || run.Classification == RunClassification.Deleted)
             return null;
 
         return new CalculatorRunContext
@@ -176,11 +177,12 @@ public class FileExportService(
         };
     }
 
-    private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
+    private async Task<CalcResult?> GetResult(RunContext runContext, FileExportType fileType, CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: AnyAsync returns a bool.
         var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
-        if(!hasData)
+        if (!hasData)
             return null;
 
         var result = CalcResult.Empty;
@@ -191,7 +193,7 @@ public class FileExportService(
         result.CalcResultParameterOtherCost = await calcResultReader.ReadParameterOtherCost(runContext.RunId, cancellationToken);
         result.CalcResultOnePlusFourApportionment = await calcResultReader.ReadOnePlusFourApportionment(runContext.RunId, cancellationToken);
 
-        if (runContext.RequiresModulation)
+        if (runContext.RequiresModulation && fileType is not FileExportType.BillingJson)
         {
             result.CalcResultProjectedProducers.H1ProjectedProducers = await calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken);
             result.CalcResultProjectedProducers.H2ProjectedProducers = await  calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken);
@@ -200,13 +202,18 @@ public class FileExportService(
         if (runContext.RequiresScaling)
             result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
-        result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
+        if (fileType is not FileExportType.BillingJson)
+        {
+            result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
+            result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
+        }
+
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
-        result.Smcw = await calcResultReader.ReadSmcw(runContext.RunId, cancellationToken);
         result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);
         result.CalcResultCommsCostReportDetail = await calcResultReader.ReadCommsCost(runContext.RunId, cancellationToken);
 
-        if(runContext.RunType is RunType.Billing)
+        // The billing JSON doesn't show rejected producers, but FilterResult needs them to remove them from its cancelled producers.
+        if (fileType is FileExportType.BillingCsv or FileExportType.BillingJson)
             result.CalcResultRejectedProducers = await rejectedProducersBuilder.ConstructAsync(runContext, cancellationToken);
 
         if (runContext.RequiresModulation)
@@ -214,7 +221,7 @@ public class FileExportService(
 
         result.ProducerFeesTotal = await calcResultReader.ReadProducerFeesTotal(runContext.RunId, cancellationToken);
 
-        if (runContext.RunType is RunType.Calculator)
+        if (fileType is FileExportType.ResultsCsv)
             result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
 
         return result;

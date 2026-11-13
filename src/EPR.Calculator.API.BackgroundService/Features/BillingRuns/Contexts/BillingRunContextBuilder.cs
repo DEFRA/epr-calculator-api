@@ -91,6 +91,7 @@ public class BillingRunContextBuilder(
     {
         try
         {
+            // Tracked: the run's billing status is updated and saved below.
             var run = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId, ct);
             run.BillingRunStatus = BillingRunStatus.Errored;
             await dbContext.SaveChangesAsync(ct);

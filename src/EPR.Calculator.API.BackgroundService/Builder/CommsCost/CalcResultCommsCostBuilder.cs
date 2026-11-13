@@ -87,6 +87,6 @@ public class CalcResultCommsCostBuilder(ApplicationDBContext context)
             where run.Id == runContext.RunId &&
                   mat.PackagingType != PackagingTypes.ConsumerWaste
             select mat
-        ).Distinct().ToListAsync();
+        ).AsNoTracking().Distinct().ToListAsync();
     }
 }

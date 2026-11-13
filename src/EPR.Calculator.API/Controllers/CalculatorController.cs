@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -42,6 +41,7 @@ public class CalculatorController(
     public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
     {
         // Runs are queued as None, until the background service starts processing them
+        // AsNoTracking() not needed: AnyAsync returns a bool.
         var isCalcAlreadyRunning = await dbContext.CalculatorRuns
             .AnyAsync(run => run.CalculationRunStatus == CalculationRunStatus.None
                              || run.CalculationRunStatus == CalculationRunStatus.Started);
@@ -78,10 +78,12 @@ public class CalculatorController(
 
         // Get active default parameter settings master
         var activeDefaultParameterSettingsMaster = await dbContext.DefaultParameterSettings
+            .AsNoTracking()
             .SingleAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYear.Value);
 
         // Get active lapcap data master
         var activeLapcapDataMaster = await dbContext.LapcapDataMaster
+            .AsNoTracking()
             .SingleAsync(data => data.RelativeYear == relativeYear.Value && data.EffectiveTo == null);
 
         // Setup calculator run details
@@ -140,6 +142,7 @@ public class CalculatorController(
         [FromQuery] string? runName,
         CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: projects to a DTO.
         var runDtos = await dbContext.CalculatorRuns
             .Where(run => relativeYear == null || run.RelativeYear == relativeYear)
             .Where(run => runName == null || EF.Functions.Like(run.Name, runName)) // Safe for user-supplied query params (parameterised SQL). Supports LIKE wildcards: %, _.
@@ -157,6 +160,7 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken)
     {
+        // AsNoTracking() not needed: projects to a DTO.
         var runDto = await dbContext.CalculatorRuns
             .Where(run => run.Id == runId)
             .Select(CalcRunMapper.ToDto)
@@ -175,9 +179,9 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadResultCsv(int runId, CancellationToken cancellationToken = default)
     {
-        return await fileExportService.Export(runId, RunType.Calculator, FileExportType.Csv, cancellationToken) switch
+        return await fileExportService.Export(runId, FileExportType.ResultsCsv, cancellationToken) switch
         {
-            FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
+            FileExportResult.Streamed s => new PushStreamFileResult("text/csv", s.FileName, s.WriteTo),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadResultCsvFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
@@ -186,7 +190,7 @@ public class CalculatorController(
 
     private async Task<IActionResult> DownloadResultCsvFromBlobStorage(int runId)
     {
-        var csvFileMetadata = await dbContext.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
+        var csvFileMetadata = await dbContext.CalculatorRunCsvFileMetadata.AsNoTracking().SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
 
         if (csvFileMetadata == null)
             return NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
@@ -205,6 +209,7 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> RelativeYears()
     {
+        // AsNoTracking() not needed: projects to values.
         var relativeYears = await dbContext.CalculatorRunRelativeYears
             .Select(y => y.Value)
             .ToListAsync();
@@ -231,6 +236,7 @@ public class CalculatorController(
         if (classifications.Count == 0)
             return NotFound(CommonResources.NoClassificationsFound);
 
+        // AsNoTracking() not needed: projects to a DTO.
         var runs = await dbContext.CalculatorRuns
             .WhereOfficialForYear(relativeYear)
             .Select(CalcRunMapper.ToDto)
@@ -254,6 +260,7 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteCalculatorRun(int runId, CancellationToken cancellationToken)
     {
+        // Tracked: the run is updated and saved below.
         var run = await dbContext.CalculatorRuns
             .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
 
@@ -279,10 +286,12 @@ public class CalculatorController(
     {
         // Get active default parameter settings for the given relative year
         var activeDefaultParameterSettings = dbContext.DefaultParameterSettings
+            .AsNoTracking()
             .SingleOrDefault(x => x.EffectiveTo == null && x.RelativeYear == relativeYear);
 
         // Get active Lapcap data for the given relative year
         var activeLapcapData = dbContext.LapcapDataMaster
+            .AsNoTracking()
             .SingleOrDefault(data => data.RelativeYear == relativeYear && data.EffectiveTo == null);
 
         // Return no active default paramater settings and lapcap data message
@@ -308,6 +317,7 @@ public class CalculatorController(
         if (int.TryParse(runName, out _))
             errorMessage = string.Format(CommonResources.CalculatorRunNameNotNumber);
 
+        // AsNoTracking() not needed: Any returns a bool.
         if (dbContext.CalculatorRuns.Any(run => EF.Functions.Like(run.Name, runName)))
             errorMessage = string.Format(CommonResources.CalculatorRunNameExists, runName);
 

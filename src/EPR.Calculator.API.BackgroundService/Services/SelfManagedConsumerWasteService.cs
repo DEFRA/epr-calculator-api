@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     ProducerDetail = pd,
                     ProducerMaterialPackaging = prm,
                 }
-            ).ToListAsync();
+            ).AsNoTracking().ToListAsync();
 
             var projectedMaterialsLookup = producerMaterialDetails
                 .ToLookup(
