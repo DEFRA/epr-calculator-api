@@ -50,7 +50,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
             var pbTonnageWithoutRAM = CalcResultProjectedProducersBuilder.TonnageWithoutRAM(pbTonnage, pbRAMTonnage);
             decimal? hdcTonnageWithoutRAM = (hdcTonnage != null && hdcRAMTonnage != null) ? CalcResultProjectedProducersBuilder.TonnageWithoutRAM(hdcTonnage.Value, hdcRAMTonnage) : null;
 
-            var h2ProjectedTotalTonnage = h2ProjectedProducer?.H2ProjectedTonnageByMaterial[material.Code].TotalTonnage() ?? 0;
+            var h2ProjectedTotalTonnage = h2ProjectedProducer?.H2ProjectedTonnageByMaterial[material.Code].TotalTonnage ?? 0;
             var h2RamProportions = ComputeProportionsFromH2(h2ProjectedProducer, material.Code);
 
             var h1ProportionateRAMTonnage = (decimal tonnage, RamTonnage ramTonnage, decimal tonnageWithoutRAM, decimal h2TotalTonnage)
@@ -80,7 +80,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
         private static RAMProportions ComputeProportionsFromH2(CalcResultH2ProjectedProducer? h2Producer, string materialCode)
         {
             var t = h2Producer != null ? h2Producer.H2ProjectedTonnageByMaterial[materialCode] : GetEmptyH2MaterialTonnage(materialCode);
-            var total = t.TotalTonnage();
+            var total = t.TotalTonnage;
             return new RAMProportions
             {
                 Red          = GetH2RAMProportion(t.GetTotalProjectedRedTonnage()         , total),
@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
 
         public static RamTonnage ReconcileRoundingDifference(decimal tonnage, RamTonnage projectedTonnage)
         {
-            var diffTonnage = tonnage - projectedTonnage.TotalRamTonnage();
+            var diffTonnage = tonnage - projectedTonnage.TotalRamTonnage;
             if (diffTonnage != 0)
             {
                 var dominantRamTonnage = new[]

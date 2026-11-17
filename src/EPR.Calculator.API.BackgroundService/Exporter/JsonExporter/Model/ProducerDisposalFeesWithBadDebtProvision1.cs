@@ -111,7 +111,7 @@ public record ModulatedTonnageBreakdown
     {
         return new ModulatedTonnageBreakdown
         {
-            Total        = ramTonnage.TotalRamTonnage(),
+            Total        = ramTonnage.TotalRamTonnage,
             Red          = ramTonnage.Red,
             Amber        = ramTonnage.Amber,
             Green        = ramTonnage.Green,
@@ -292,10 +292,10 @@ public record ProducerDisposalFeesWithBadDebtProvision1MaterialBreakdown
                 WalesWithBadDebtProvision                  = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Wales),
                 ScotlandWithBadDebtProvision               = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.Scotland),
                 NorthernIrelandWithBadDebtProvision        = FormatUtils.FormatCurrency(producerTonnage.FeeWithBadDebtByCountry.NorthernIreland),
-                HouseholdPackagingWasteTonnage             = producerTonnage.HhTonnage.TotalRamTonnage(),
-                PublicBinTonnage                           = producerTonnage.PbTonnage.TotalRamTonnage(),
-                HouseholdDrinksContainersTonnageGlass      = material.Code == MaterialCodes.Glass ? producerTonnage.HdcTonnage.TotalRamTonnage(): null,
-                TotalTonnage                               = producerTonnage.TotalTonnage.TotalRamTonnage(),
+                HouseholdPackagingWasteTonnage             = producerTonnage.HhTonnage.TotalRamTonnage,
+                PublicBinTonnage                           = producerTonnage.PbTonnage.TotalRamTonnage,
+                HouseholdDrinksContainersTonnageGlass      = material.Code == MaterialCodes.Glass ? producerTonnage.HdcTonnage.TotalRamTonnage: null,
+                TotalTonnage                               = producerTonnage.TotalTonnage.TotalRamTonnage,
                 SelfManagedConsumerWasteTonnage            = producerTonnage.SmcwTonnage,
                 NetTonnage                                 = producerTonnage.NetTonnage.Total ?? 0,
                 PricePerTonne                              = FormatUtils.FormatCurrency(producerTonnage.PricePerTonne.Total       ?? 0, 4),

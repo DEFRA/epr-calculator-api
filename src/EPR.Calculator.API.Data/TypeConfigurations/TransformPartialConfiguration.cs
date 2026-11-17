@@ -223,5 +223,11 @@ public class TransformPartialConfiguration : IEntityTypeConfiguration<TransformP
         builder.Property(p => p.PartialSMCWTonnage)
             .HasColumnName("partial_smcw_tonnage")
             .HasPrecision(18, 3);
+        builder.Property(p => p.TotalTonnage)
+            .HasColumnName("total_tonnage")
+            .HasPrecision(18, 3);
+        builder.Property(p => p.PartialTotalTonnage)
+            .HasColumnName("partial_total_tonnage")
+            .HasPrecision(18, 3);
     }
 }

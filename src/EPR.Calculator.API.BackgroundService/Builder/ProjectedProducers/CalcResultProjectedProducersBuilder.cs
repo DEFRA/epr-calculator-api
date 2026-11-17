@@ -130,7 +130,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
 
         public static decimal TonnageWithoutRAM(decimal tonnage, RamTonnage ramTonnage)
         {
-            return Math.Max(0, tonnage - ramTonnage.TotalRamTonnage());
+            return Math.Max(0, tonnage - ramTonnage.TotalRamTonnage);
         }
 
         public static RamTonnage SumRAMTonnages(List<ICalcResultProjectedProducer> producers, string materialCode, Func<CalcResultProjectedProducerMaterialTonnage, RamTonnage?> getRAMTonnage)

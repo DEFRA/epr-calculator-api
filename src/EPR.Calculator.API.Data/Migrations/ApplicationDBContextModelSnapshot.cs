@@ -2278,6 +2278,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("decimal(18,3)")
                         .HasColumnName("partial_smcw_tonnage");
 
+                    b.Property<decimal>("PartialTotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_total_tonnage");
+
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
                         .HasColumnName("producer_id");
@@ -2335,6 +2340,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
+
+                    b.Property<decimal>("TotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("total_tonnage");
 
                     b.Property<string>("TradingName")
                         .HasMaxLength(400)
@@ -2914,6 +2924,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
+
+                    b.Property<decimal>("TotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("total_tonnage");
 
                     b.HasKey("Id");
 
@@ -5069,6 +5084,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
@@ -5099,6 +5117,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -5159,6 +5180,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
@@ -5202,10 +5226,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Amber")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("AmberAndAmberMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("AmberMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("GreenAndGreenMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
@@ -5214,7 +5244,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Red")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("RedAndRedMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -5998,6 +6034,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
@@ -6028,6 +6067,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -6088,6 +6130,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
@@ -6131,10 +6176,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Amber")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("AmberAndAmberMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("AmberMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("GreenAndGreenMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
@@ -6143,7 +6194,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Red")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("RedAndRedMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
