@@ -118,6 +118,21 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
     }
 
     [TestMethod]
+    public void Create_StoresMaterialCostsByCountryAndTheirTotalsAtTwoDecimalPlaces()
+    {
+        var third = new ByCountryCost { England = 3.333333m, Wales = 3.333333m, Scotland = 3.333333m, NorthernIreland = 0.003m };
+        var material = new CalcResultCommsCostCommsCostByMaterial
+        {
+            Cost = third, TotalCost = 10, HouseholdPackagingWasteTonnage = 1, PublicBinTonnage = 0, HouseholdDrinksContainersTonnage = 0, LateReportingTonnage = 0
+        };
+
+        var result = CalcResultCommsCostBuilder.Create(ByCountryApportionment.Empty, new Dictionary<string, CalcResultCommsCostCommsCostByMaterial> { ["AL"] = material, ["FC"] = material }, ByCountryCost.Empty, ByCountryCost.Empty);
+
+        result.ByMaterial["AL"].Cost.ShouldBe(new ByCountryCost { England = 3.33m, Wales = 3.33m, Scotland = 3.33m, NorthernIreland = 0, Total = 10.00m });
+        result.Total.Cost.ShouldBe(new ByCountryCost { England = 6.67m, Wales = 6.67m, Scotland = 6.67m, NorthernIreland = 0.01m, Total = 20.01m });
+    }
+
+    [TestMethod]
     public async Task GetProducerReportedMaterials_ShouldReturnValidMaterials()
     {
         // Arrange

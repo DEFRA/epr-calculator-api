@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using EPR.Calculator.API.Data.Utils;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public record ByCountryCost
     {
@@ -80,10 +82,10 @@
 
         public required decimal NorthernIreland { get; init; }
 
-        // Read back from storage so the files show the run's own total; until it's stored, it's the sum.
+        // Only shown, so it's the sum to the 8 dp the files show, or that total read back from storage.
         public decimal Total
         {
-            get => storedTotal ?? England + Wales + Scotland + NorthernIreland;
+            get => storedTotal ?? MathUtils.RoundAwayFromZero(England + Wales + Scotland + NorthernIreland, 8);
             init => storedTotal = value;
         }
 
