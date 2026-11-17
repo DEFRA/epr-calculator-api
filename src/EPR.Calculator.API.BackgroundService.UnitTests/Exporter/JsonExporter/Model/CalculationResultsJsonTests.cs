@@ -122,9 +122,9 @@ public class CalculationResultsJsonFromTests
         }
 
         Assert.AreEqual(expected.Value.PreviousInvoicedTonnage, actualValue);
-        Assert.AreEqual(expected.Value.HhTonnage.TotalRamTonnage(), actual["householdPackagingWasteTonnage"]!.GetValue<decimal>());
-        Assert.AreEqual(expected.Value.PbTonnage.TotalRamTonnage(), actual["publicBinTonnage"]!.GetValue<decimal>());
-        Assert.AreEqual(expected.Value.TotalTonnage.TotalRamTonnage(), actual["totalTonnage"]!.GetValue<decimal>());
+        Assert.AreEqual(expected.Value.HhTonnage.TotalRamTonnage, actual["householdPackagingWasteTonnage"]!.GetValue<decimal>());
+        Assert.AreEqual(expected.Value.PbTonnage.TotalRamTonnage, actual["publicBinTonnage"]!.GetValue<decimal>());
+        Assert.AreEqual(expected.Value.TotalTonnage.TotalRamTonnage, actual["totalTonnage"]!.GetValue<decimal>());
         Assert.AreEqual(expected.Value.SmcwTonnage, actual["selfManagedConsumerWasteTonnage"]!.GetValue<decimal>());
         Assert.AreEqual(expected.Value.NetTonnage.Total, actual["netTonnage"]!.GetValue<decimal>());
 

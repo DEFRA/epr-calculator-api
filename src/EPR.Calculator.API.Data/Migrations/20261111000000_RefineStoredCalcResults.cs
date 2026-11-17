@@ -499,6 +499,7 @@ namespace EPR.Calculator.API.Data.Migrations
             foreach (var column in RequiredPartialObligationColumns)
                 migrationBuilder.Sql(Exec($"ALTER TABLE dbo.transform_partial ALTER COLUMN {column} decimal(18,3) NOT NULL"));
 
+            AddTonnageTotalColumns(migrationBuilder);
             SetCountryTotals(migrationBuilder, remove: false);
 
             // Kept as _bk tables so Down can restore them.
@@ -515,6 +516,10 @@ namespace EPR.Calculator.API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             SetCountryTotals(migrationBuilder, remove: true);
+
+            migrationBuilder.DropColumn(name: "total_tonnage", table: "transform_projected_h2");
+            migrationBuilder.DropColumn(name: "total_tonnage", table: "transform_partial");
+            migrationBuilder.DropColumn(name: "partial_total_tonnage", table: "transform_partial");
 
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_bk",
@@ -620,6 +625,22 @@ namespace EPR.Calculator.API.Data.Migrations
             "$.MaterialFees[]$.CommFee.Costs.ByCountry",
         ];
 
+        private static void AddTonnageTotalColumns(MigrationBuilder migrationBuilder)
+        {
+            foreach (var (table, column) in new[] { ("transform_projected_h2", "total_tonnage"), ("transform_partial", "total_tonnage"), ("transform_partial", "partial_total_tonnage") })
+                migrationBuilder.AddColumn<decimal>(name: column, table: table, type: "decimal(18,3)", precision: 18, scale: 3, nullable: true);
+
+            migrationBuilder.Sql(Exec("UPDATE dbo.transform_projected_h2 SET total_tonnage = household_tonnage + public_bin_tonnage + ISNULL(hdc_tonnage, 0)"));
+            migrationBuilder.Sql(Exec("""
+                UPDATE dbo.transform_partial
+                SET total_tonnage = household_tonnage + public_bin_tonnage + ISNULL(hdc_tonnage, 0),
+                    partial_total_tonnage = partial_household_tonnage + partial_public_bin_tonnage + ISNULL(partial_hdc_tonnage, 0)
+                """));
+
+            foreach (var (table, column) in new[] { ("transform_projected_h2", "total_tonnage"), ("transform_partial", "total_tonnage"), ("transform_partial", "partial_total_tonnage") })
+                migrationBuilder.Sql(Exec($"ALTER TABLE dbo.{table} ALTER COLUMN {column} decimal(18,3) NOT NULL"));
+        }
+
         // JSON paths of the country breakdowns in each column; "[]" splits an array's path from each element's.
         private static readonly (string Table, string Column, string[] Paths)[] CountryBreakdowns =
         [
@@ -669,6 +690,43 @@ namespace EPR.Calculator.API.Data.Migrations
                 END
                 """));
 
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_add_sum(@doc nvarchar(max), @path nvarchar(400), @key nvarchar(100), @parts nvarchar(400), @remove bit) RETURNS nvarchar(max) AS
+                BEGIN
+                    DECLARE @tonnage nvarchar(max) = JSON_QUERY(@doc, @path);
+                    IF @tonnage IS NULL RETURN @doc;
+                    IF @remove = 1 RETURN JSON_MODIFY(@doc, @path + N'.' + @key, NULL);
+                    IF JSON_VALUE(@tonnage, N'$.' + @key) IS NOT NULL RETURN @doc;
+                    DECLARE @total decimal(38, 28) = (
+                        SELECT SUM(CAST([value] AS decimal(38, 28))) FROM OPENJSON(@tonnage)
+                        WHERE [key] IN (SELECT [value] FROM STRING_SPLIT(@parts, N',')));
+                    RETURN JSON_MODIFY(@doc, @path, JSON_QUERY(STUFF(@tonnage, LEN(@tonnage), 0, N',"' + @key + N'":' + dbo.ecv931_number(ISNULL(@total, 0)))));
+                END
+                """));
+
+            // Each material's RAM tonnages hold their total, and the total tonnage its red, amber and green + medical totals.
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_ram_totals_in_array(@doc nvarchar(max), @remove bit) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF JSON_QUERY(@doc, N'$.MaterialFees') IS NULL RETURN @doc;
+                    DECLARE @all nvarchar(400) = N'Red,RedMedical,Amber,AmberMedical,Green,GreenMedical';
+                    DECLARE @elements nvarchar(max) = (
+                        SELECT N'[' + ISNULL(STRING_AGG(CAST(
+                            dbo.ecv931_add_sum(dbo.ecv931_add_sum(dbo.ecv931_add_sum(
+                            dbo.ecv931_add_sum(dbo.ecv931_add_sum(dbo.ecv931_add_sum(dbo.ecv931_add_sum([value],
+                                N'$.DisposalFee.HhTonnage', N'TotalRamTonnage', @all, @remove),
+                                N'$.DisposalFee.PbTonnage', N'TotalRamTonnage', @all, @remove),
+                                N'$.DisposalFee.HdcTonnage', N'TotalRamTonnage', @all, @remove),
+                                N'$.DisposalFee.TotalTonnage', N'TotalRamTonnage', @all, @remove),
+                                N'$.DisposalFee.TotalTonnage', N'RedAndRedMedical', N'Red,RedMedical', @remove),
+                                N'$.DisposalFee.TotalTonnage', N'AmberAndAmberMedical', N'Amber,AmberMedical', @remove),
+                                N'$.DisposalFee.TotalTonnage', N'GreenAndGreenMedical', N'Green,GreenMedical', @remove)
+                            AS nvarchar(max)), N',') WITHIN GROUP (ORDER BY CAST([key] AS int)), N'') + N']'
+                        FROM OPENJSON(@doc, N'$.MaterialFees'));
+                    RETURN JSON_MODIFY(@doc, N'$.MaterialFees', JSON_QUERY(@elements));
+                END
+                """));
+
             // The fee details also hold 1 + 2a + 2b + 2c: the sum of those four sections' country breakdowns.
             migrationBuilder.Sql(Exec("""
                 CREATE FUNCTION dbo.ecv931_one_plus_2a_2b_2c_total(@doc nvarchar(max), @remove bit) RETURNS nvarchar(max) AS
@@ -706,7 +764,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 });
 
                 if (column is "total" or "detail")
-                    value = $"dbo.ecv931_one_plus_2a_2b_2c_total({value}, {flag})";
+                    value = $"dbo.ecv931_ram_totals_in_array(dbo.ecv931_one_plus_2a_2b_2c_total({value}, {flag}), {flag})";
 
                 // Only shown and invoiced at 2 dp; the total row was summed from the unrounded amounts. Down leaves it rounded.
                 if (column is "total" or "detail" && !remove)
@@ -715,7 +773,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 migrationBuilder.Sql(Exec($"UPDATE dbo.{table} SET [{column}] = {value}"));
             }
 
-            foreach (var function in new[] { "ecv931_round_2dp", "ecv931_one_plus_2a_2b_2c_total", "ecv931_country_totals_in_array", "ecv931_country_total", "ecv931_number" })
+            foreach (var function in new[] { "ecv931_round_2dp", "ecv931_ram_totals_in_array", "ecv931_add_sum", "ecv931_one_plus_2a_2b_2c_total", "ecv931_country_totals_in_array", "ecv931_country_total", "ecv931_number" })
                 migrationBuilder.Sql(Exec($"DROP FUNCTION dbo.{function}"));
 
             if (!remove)

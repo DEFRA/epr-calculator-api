@@ -344,7 +344,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 ProjectedHDCTonnageGreen = tonnage.ProjectedHouseholdDrinksContainerRAMTonnage?.Green,
                 ProjectedHDCTonnageRedMedical = tonnage.ProjectedHouseholdDrinksContainerRAMTonnage?.RedMedical,
                 ProjectedHDCTonnageAmberMedical = tonnage.ProjectedHouseholdDrinksContainerRAMTonnage?.AmberMedical,
-                ProjectedHDCTonnageGreenMedical = tonnage.ProjectedHouseholdDrinksContainerRAMTonnage?.GreenMedical
+                ProjectedHDCTonnageGreenMedical = tonnage.ProjectedHouseholdDrinksContainerRAMTonnage?.GreenMedical,
+                TotalTonnage = tonnage.TotalTonnage
             };
         }
 
@@ -407,7 +408,9 @@ namespace EPR.Calculator.API.BackgroundService.Services
                 PartialHDCTonnageRedMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.RedMedical,
                 PartialHDCTonnageAmberMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.AmberMedical,
                 PartialHDCTonnageGreenMedical = tonnage.PartialHouseholdDrinksContainersRAMTonnage?.GreenMedical,
-                PartialSMCWTonnage = tonnage.PartialSelfManagedConsumerWasteTonnage
+                PartialSMCWTonnage = tonnage.PartialSelfManagedConsumerWasteTonnage,
+                TotalTonnage = tonnage.TotalTonnage,
+                PartialTotalTonnage = tonnage.PartialTotalTonnage
             };
         }
     }

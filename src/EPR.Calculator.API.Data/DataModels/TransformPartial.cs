@@ -59,4 +59,6 @@ public class TransformPartial
     public decimal? PartialHDCTonnageAmberMedical { get; set; }
     public decimal? PartialHDCTonnageGreenMedical { get; set; }
     public required decimal PartialSMCWTonnage { get; set; }
+    public decimal TotalTonnage { get; set; }
+    public decimal PartialTotalTonnage { get; set; }
 }

@@ -213,7 +213,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
                     var hhRam  = RamTonnage.ToRamTonnage(rows, PackagingTypes.Household);
                     var pbRam  = RamTonnage.ToRamTonnage(rows, PackagingTypes.PublicBin);
                     var hdcRam = isGlass ? RamTonnage.ToRamTonnage(rows, PackagingTypes.HouseholdDrinksContainers) : null;
-                    return new MaterialTotals(hhRam.TotalRamTonnage(), hhRam, pbRam.TotalRamTonnage(), pbRam, hdcRam?.TotalRamTonnage(), hdcRam, smcw);
+                    return new MaterialTotals(hhRam.TotalRamTonnage, hhRam, pbRam.TotalRamTonnage, pbRam, hdcRam?.TotalRamTonnage, hdcRam, smcw);
                 }
 
                 return new MaterialTotals(

@@ -453,7 +453,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         RedMedical = t.ProjectedHDCTonnageRedMedical!.Value,
                         AmberMedical = t.ProjectedHDCTonnageAmberMedical!.Value,
                         GreenMedical = t.ProjectedHDCTonnageGreenMedical!.Value
-                    } : null
+                    } : null,
+                    TotalTonnage = t.TotalTonnage
                 }
             );
         }
@@ -565,7 +566,9 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         t.PartialHDCTonnageAmberMedical,
                         t.PartialHDCTonnageGreenMedical
                     ) : null,
-                    PartialSelfManagedConsumerWasteTonnage = t.PartialSMCWTonnage
+                    PartialSelfManagedConsumerWasteTonnage = t.PartialSMCWTonnage,
+                    TotalTonnage = t.TotalTonnage,
+                    PartialTotalTonnage = t.PartialTotalTonnage
                 }
             );
         }

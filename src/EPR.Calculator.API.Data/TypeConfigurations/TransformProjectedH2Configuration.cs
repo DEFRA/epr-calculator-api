@@ -184,5 +184,8 @@ public class TransformProjectedH2Configuration : IEntityTypeConfiguration<Transf
             .HasColumnName("projected_hdc_tonnage_green_medical")
             .HasPrecision(18, 3)
             .IsRequired(false);
+        builder.Property(p => p.TotalTonnage)
+            .HasColumnName("total_tonnage")
+            .HasPrecision(18, 3);
     }
 }

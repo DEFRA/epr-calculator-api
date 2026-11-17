@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
                     csvContent.Append(CsvSanitiser.SanitiseData(tonnage.HouseholdDrinksContainerTonnageWithoutRAM, DecimalPlaces.Three, DecimalFormats.F3));
                 }
 
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.TotalTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.TotalTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             }
         }
 

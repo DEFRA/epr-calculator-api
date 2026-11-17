@@ -19,14 +19,20 @@ namespace EPR.Calculator.API.BackgroundService.Models
         public decimal? PartialHouseholdDrinksContainersTonnage { get; init; }
         public RamTonnage? PartialHouseholdDrinksContainersRAMTonnage { get; init; }
         public required decimal PartialSelfManagedConsumerWasteTonnage { get; init; }
-        public decimal TotalTonnage()
+        public decimal TotalTonnage
         {
-            return HouseholdTonnage + PublicBinTonnage + (HouseholdDrinksContainersTonnage ?? 0);
+            get => storedTotalTonnage ?? HouseholdTonnage + PublicBinTonnage + (HouseholdDrinksContainersTonnage ?? 0);
+            init => storedTotalTonnage = value;
         }
-        public decimal PartialTotalTonnage()
+
+        public decimal PartialTotalTonnage
         {
-            return PartialHouseholdTonnage + PartialPublicBinTonnage + (PartialHouseholdDrinksContainersTonnage ?? 0);
+            get => storedPartialTotalTonnage ?? PartialHouseholdTonnage + PartialPublicBinTonnage + (PartialHouseholdDrinksContainersTonnage ?? 0);
+            init => storedPartialTotalTonnage = value;
         }
+
+        private readonly decimal? storedTotalTonnage;
+        private readonly decimal? storedPartialTotalTonnage;
     }
 }
 

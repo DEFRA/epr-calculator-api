@@ -95,7 +95,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.PartialOblig
                     AppendRam(tonnage.HouseholdDrinksContainersRAMTonnage);
                 }
 
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.TotalTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.TotalTonnage, DecimalPlaces.Three, DecimalFormats.F3));
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.SelfManagedConsumerWasteTonnage, DecimalPlaces.Three, DecimalFormats.F3));
 
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialHouseholdTonnage, DecimalPlaces.Three, DecimalFormats.F3));
@@ -110,7 +110,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.PartialOblig
                     AppendRam(tonnage.PartialHouseholdDrinksContainersRAMTonnage);
                 }
 
-                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialTotalTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+                csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialTotalTonnage, DecimalPlaces.Three, DecimalFormats.F3));
                 csvContent.Append(CsvSanitiser.SanitiseData(tonnage.PartialSelfManagedConsumerWasteTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             }
         }
