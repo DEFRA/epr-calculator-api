@@ -61,7 +61,7 @@ public class ProducerFeeDetailConfiguration : IEntityTypeConfiguration<ProducerF
                 disposal.OwnsOne(x => x.PbTonnage);
                 disposal.OwnsOne(x => x.HdcTonnage);
                 disposal.OwnsOne(x => x.TotalTonnage);
-                disposal.OwnsOne(x => x.FeeWithBadDebtByCountry, c => c.Ignore(x => x.Total));
+                disposal.OwnsOne(x => x.FeeWithBadDebtByCountry);
                 disposal.OwnsOne(x => x.ActionedSmcwTonnage);
                 disposal.OwnsOne(x => x.NetTonnage);
                 disposal.OwnsOne(x => x.PricePerTonne);
@@ -77,5 +77,5 @@ public class ProducerFeeDetailConfiguration : IEntityTypeConfiguration<ProducerF
 
     private static void ConfigureBadDebt<T>(
         OwnedNavigationBuilder<T, FeeWithBadDebt> section) where T : class =>
-        section.OwnsOne(x => x.ByCountry, c => c.Ignore(x => x.Total));
+        section.OwnsOne(x => x.ByCountry);
 }

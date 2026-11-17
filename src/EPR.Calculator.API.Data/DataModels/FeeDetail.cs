@@ -39,12 +39,17 @@ public record FeeDetail
 
     public decimal ReportedTonnagePercentage { get; set; }
 
-    public decimal TotalOnePlus2A2B2CWithBadDebt() =>
-        LADisposalCostsSection1.ByCountry.Total
-        + CommsCostsSection2a.ByCountry.Total
-        + CommsCostsSection2b.ByCountry.Total
-        + CommsCostsSection2c.ByCountry.Total;
-    
+    public decimal TotalOnePlus2A2B2CWithBadDebt
+    {
+        get => storedTotalOnePlus2A2B2CWithBadDebt
+               ?? LADisposalCostsSection1.ByCountry.Total
+               + CommsCostsSection2a.ByCountry.Total
+               + CommsCostsSection2b.ByCountry.Total
+               + CommsCostsSection2c.ByCountry.Total;
+        init => storedTotalOnePlus2A2B2CWithBadDebt = value;
+    }
+
+    private readonly decimal? storedTotalOnePlus2A2B2CWithBadDebt;
 
     public decimal TotalOnePlus2A2B2CWithBadDebtPercentage { get; set; }
 

@@ -66,7 +66,7 @@ public class CalculationResultsJsonFromTests
             roundTrippedData["feeForCommsCostsByCountryWideWithBadDebtprovision2c"]);
 
         // 1+2a+2b+2c
-        AssertAreEqual(FormatUtils.FormatCurrency(data.TotalOnePlus2A2B2CWithBadDebt()),
+        AssertAreEqual(FormatUtils.FormatCurrency(data.TotalOnePlus2A2B2CWithBadDebt),
             roundTrippedData["total12a2b2cWithBadDebt"]);
 
         // 3
@@ -165,7 +165,7 @@ public class CalculationResultsJsonFromTests
         var actual = roundTrippedData[0]!["totalProducerFeeWithBadDebtProvisibadDebProvisionFor2con_1_2a_2b_2c"]!;
         var producer = details.SingleOrDefault(t => !string.IsNullOrEmpty(t.Level))!;
 
-        AssertAreEqual(FormatUtils.FormatCurrency(producer.TotalOnePlus2A2B2CWithBadDebt()), actual["totalFeeWithBadDebtProvision"]);
+        AssertAreEqual(FormatUtils.FormatCurrency(producer.TotalOnePlus2A2B2CWithBadDebt), actual["totalFeeWithBadDebtProvision"]);
         AssertAreEqual($"{producer.TotalOnePlus2A2B2CWithBadDebtPercentage.ToString("F8")}%", actual["producerPercentageOfOverallProducerCost"]);
     }
 

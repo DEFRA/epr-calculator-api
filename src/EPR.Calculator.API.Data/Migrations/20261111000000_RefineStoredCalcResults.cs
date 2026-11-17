@@ -496,6 +496,8 @@ namespace EPR.Calculator.API.Data.Migrations
             foreach (var column in RequiredPartialObligationColumns)
                 migrationBuilder.Sql(Exec($"ALTER TABLE dbo.transform_partial ALTER COLUMN {column} decimal(18,3) NOT NULL"));
 
+            SetCountryTotals(migrationBuilder, remove: false);
+
             // Kept as _bk tables so Down can restore them.
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_producer",
@@ -509,6 +511,8 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            SetCountryTotals(migrationBuilder, remove: true);
+
             migrationBuilder.RenameTable(
                 name: "calc_result_smcw_bk",
                 newName: "calc_result_smcw");
@@ -594,6 +598,101 @@ namespace EPR.Calculator.API.Data.Migrations
                     FROM OPENJSON(x.material_modulations) m
                 ) a
                 """));
+        }
+
+        private static readonly string[] FeeDetailCountryBreakdowns =
+        [
+            .. new[] { "LADisposalCostsSection1", "CommsCostsSection2a", "CommsCostsSection2b", "CommsCostsSection2c", "SaOperatingCostsSection3", "LaDataPrepSection4", "SaSetupCostsSection5", "TotalBillBreakdown" }
+                .Select(section => $"$.{section}.ByCountry"),
+            "$.MaterialFees[]$.DisposalFee.FeeWithBadDebtByCountry",
+            "$.MaterialFees[]$.CommFee.Costs.ByCountry",
+        ];
+
+        // JSON paths of the country breakdowns in each column; "[]" splits an array's path from each element's.
+        private static readonly (string Table, string Column, string[] Paths)[] CountryBreakdowns =
+        [
+            ("calc_result_lapcap_data", "lapcap", ["$.Total", "$.CountryApportionment", "$.MaterialCosts[]$.Cost"]),
+            ("calc_result_la_disposal_cost", "la_disposal_cost", ["$.Total.Cost", "$.MaterialCosts[]$.Detail.Cost"]),
+            ("calc_result_comms_cost", "comms_cost", ["$.OnePlusFourApportionment", "$.CommsCostUkWide", "$.CommsCostByCountry", "$.Total.Cost", "$.MaterialCosts[]$.CommsCost.Cost"]),
+            ("calc_result_one_plus_four_apportionment", "one_plus_four_apppointment", ["$.LaDisposalCost", "$.LADataPrepCharge", "$.TotalOnePlusFour", "$.OnePlusFourApportionment"]),
+            ("calc_result_parameter_other_cost", "parameter_other_cost", ["$.SaOperatingCost", "$.LaDataPrepCharge", "$.CountryApportionment", "$.SchemeSetupCost"]),
+            ("calc_result_producer_fees", "total", FeeDetailCountryBreakdowns),
+            ("calc_result_producer_fee_detail", "detail", FeeDetailCountryBreakdowns),
+        ];
+
+        // Adds each country breakdown's Total, summed exactly, to runs stored before the model held it.
+        private static void SetCountryTotals(MigrationBuilder migrationBuilder, bool remove)
+        {
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_number(@value decimal(38, 28)) RETURNS nvarchar(50) AS
+                BEGIN
+                    DECLARE @text nvarchar(50) = CONVERT(nvarchar(50), @value);
+                    SET @text = LEFT(@text, LEN(@text) - PATINDEX(N'%[^0]%', REVERSE(@text)) + 1);
+                    RETURN CASE WHEN RIGHT(@text, 1) = N'.' THEN LEFT(@text, LEN(@text) - 1) ELSE @text END;
+                END
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_country_total(@doc nvarchar(max), @path nvarchar(400), @remove bit) RETURNS nvarchar(max) AS
+                BEGIN
+                    DECLARE @breakdown nvarchar(max) = JSON_QUERY(@doc, @path);
+                    IF @breakdown IS NULL RETURN @doc;
+                    IF @remove = 1 RETURN JSON_MODIFY(@doc, @path + N'.Total', NULL);
+                    IF JSON_VALUE(@breakdown, N'$.Total') IS NOT NULL RETURN @doc;
+                    DECLARE @total decimal(38, 28) = (
+                        SELECT SUM(CAST([value] AS decimal(38, 28))) FROM OPENJSON(@breakdown)
+                        WHERE [key] IN (N'England', N'Wales', N'Scotland', N'NorthernIreland'));
+                    RETURN JSON_MODIFY(@doc, @path, JSON_QUERY(STUFF(@breakdown, LEN(@breakdown), 0, N',"Total":' + dbo.ecv931_number(@total))));
+                END
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_country_totals_in_array(@doc nvarchar(max), @arrayPath nvarchar(400), @path nvarchar(400), @remove bit) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF JSON_QUERY(@doc, @arrayPath) IS NULL RETURN @doc;
+                    DECLARE @elements nvarchar(max) = (
+                        SELECT N'[' + ISNULL(STRING_AGG(CAST(dbo.ecv931_country_total([value], @path, @remove) AS nvarchar(max)), N',') WITHIN GROUP (ORDER BY CAST([key] AS int)), N'') + N']'
+                        FROM OPENJSON(@doc, @arrayPath));
+                    RETURN JSON_MODIFY(@doc, @arrayPath, JSON_QUERY(@elements));
+                END
+                """));
+
+            // The fee details also hold 1 + 2a + 2b + 2c: the sum of those four sections' country breakdowns.
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_one_plus_2a_2b_2c_total(@doc nvarchar(max), @remove bit) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF @remove = 1 RETURN JSON_MODIFY(@doc, N'$.TotalOnePlus2A2B2CWithBadDebt', NULL);
+                    IF JSON_VALUE(@doc, N'$.TotalOnePlus2A2B2CWithBadDebt') IS NOT NULL RETURN @doc;
+                    DECLARE @total decimal(38, 28) = (
+                        SELECT SUM(CAST([value] AS decimal(38, 28))) FROM (
+                            SELECT [key], [value] FROM OPENJSON(@doc, N'$.LADisposalCostsSection1.ByCountry')
+                            UNION ALL SELECT [key], [value] FROM OPENJSON(@doc, N'$.CommsCostsSection2a.ByCountry')
+                            UNION ALL SELECT [key], [value] FROM OPENJSON(@doc, N'$.CommsCostsSection2b.ByCountry')
+                            UNION ALL SELECT [key], [value] FROM OPENJSON(@doc, N'$.CommsCostsSection2c.ByCountry')
+                        ) c
+                        WHERE [key] IN (N'England', N'Wales', N'Scotland', N'NorthernIreland'));
+                    RETURN STUFF(@doc, LEN(@doc), 0, N',"TotalOnePlus2A2B2CWithBadDebt":' + dbo.ecv931_number(ISNULL(@total, 0)));
+                END
+                """));
+
+            var flag = remove ? "1" : "0";
+
+            foreach (var (table, column, paths) in CountryBreakdowns)
+            {
+                var value = paths.Aggregate($"[{column}]", (doc, path) => path.Split("[]") switch
+                {
+                    [var arrayPath, var elementPath] => $"dbo.ecv931_country_totals_in_array({doc}, N'{arrayPath}', N'{elementPath}', {flag})",
+                    _ => $"dbo.ecv931_country_total({doc}, N'{path}', {flag})"
+                });
+
+                if (column is "total" or "detail")
+                    value = $"dbo.ecv931_one_plus_2a_2b_2c_total({value}, {flag})";
+
+                migrationBuilder.Sql(Exec($"UPDATE dbo.{table} SET [{column}] = {value}"));
+            }
+
+            foreach (var function in new[] { "ecv931_one_plus_2a_2b_2c_total", "ecv931_country_totals_in_array", "ecv931_country_total", "ecv931_number" })
+                migrationBuilder.Sql(Exec($"DROP FUNCTION dbo.{function}"));
         }
 
         private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";

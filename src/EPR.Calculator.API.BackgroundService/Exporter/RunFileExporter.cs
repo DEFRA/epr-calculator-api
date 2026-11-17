@@ -233,6 +233,7 @@ public class RunFileExporter(
         SaOperatingCostsSection3                 = total.SaOperatingCostsSection3,
         LaDataPrepSection4                       = total.LaDataPrepSection4,
         SaSetupCostsSection5                     = total.SaSetupCostsSection5,
+        TotalOnePlus2A2B2CWithBadDebt            = total.TotalOnePlus2A2B2CWithBadDebt,
         TotalOnePlus2A2B2CWithBadDebtPercentage  = total.TotalOnePlus2A2B2CWithBadDebtPercentage
     };
 }

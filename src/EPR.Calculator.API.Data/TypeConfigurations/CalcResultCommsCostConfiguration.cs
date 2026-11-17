@@ -18,18 +18,18 @@ public class CalcResultCommsCostConfiguration : IEntityTypeConfiguration<CalcRes
         {
             o.ToJson("comms_cost");
 
-            o.OwnsOne(x => x.OnePlusFourApportionment, a => a.Ignore(p => p.Total));
+            o.OwnsOne(x => x.OnePlusFourApportionment);
 
             o.OwnsMany(x => x.MaterialCosts, a =>
             {
                 a.Property(x => x.MaterialCode);
-                a.OwnsOne(x => x.CommsCost, c => c.OwnsOne(x => x.Cost, d => d.Ignore(p => p.Total)));
+                a.OwnsOne(x => x.CommsCost, c => c.OwnsOne(x => x.Cost));
             });
 
-            o.OwnsOne(x => x.CommsCostUkWide, a => a.Ignore(p => p.Total));
-            o.OwnsOne(x => x.CommsCostByCountry, a => a.Ignore(p => p.Total));
+            o.OwnsOne(x => x.CommsCostUkWide);
+            o.OwnsOne(x => x.CommsCostByCountry);
 
-            o.OwnsOne(x => x.Total, c => c.OwnsOne(x => x.Cost, d => d.Ignore(p => p.Total)));
+            o.OwnsOne(x => x.Total, c => c.OwnsOne(x => x.Cost));
         });
     }
 }

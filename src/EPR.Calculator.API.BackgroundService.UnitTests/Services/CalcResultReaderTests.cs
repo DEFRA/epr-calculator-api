@@ -194,19 +194,19 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
         private static readonly JsonSerializerOptions DecimalNormalizingJsonOptions = new()
         {
-            Converters = { new DecimalAsDoubleJsonConverter() }
+            Converters = { new DecimalWithoutTrailingZerosJsonConverter() }
         };
 
         private static string SerializeNormalized<T>(T value) =>
             JsonSerializer.Serialize(value, DecimalNormalizingJsonOptions);
 
-        private sealed class DecimalAsDoubleJsonConverter : JsonConverter<decimal>
+        private sealed class DecimalWithoutTrailingZerosJsonConverter : JsonConverter<decimal>
         {
             public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
                 reader.GetDecimal();
 
             public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options) =>
-                writer.WriteNumberValue((double)value);
+                writer.WriteRawValue(value.ToString("G29", System.Globalization.CultureInfo.InvariantCulture));
         }
 
         [TestMethod]

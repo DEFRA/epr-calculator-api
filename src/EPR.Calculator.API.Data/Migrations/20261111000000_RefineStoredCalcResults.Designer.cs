@@ -3184,6 +3184,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3208,6 +3211,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3230,6 +3236,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3286,6 +3295,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -3367,6 +3379,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("Total")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
@@ -3469,6 +3484,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -3550,6 +3568,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -3609,6 +3630,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3631,6 +3655,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3674,6 +3701,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -3832,6 +3862,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3854,6 +3887,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3880,6 +3916,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3902,6 +3941,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3967,6 +4009,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3989,6 +4034,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -4051,6 +4099,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -4073,6 +4124,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -4486,6 +4540,9 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.Property<string>("TonnageChangeCount");
 
+                            b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebt")
+                                .HasPrecision(18, 6);
+
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
                                 .HasPrecision(18, 6);
 
@@ -4569,6 +4626,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4612,6 +4672,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -4659,6 +4722,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4704,6 +4770,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4747,6 +4816,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -4843,6 +4915,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
+                                                                .HasPrecision(18, 6);
+
+                                                            b5.Property<decimal>("Total")
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
@@ -4959,6 +5034,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -5215,6 +5293,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5260,6 +5341,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5303,6 +5387,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5381,6 +5468,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Property<string>("TonnageChangeAdvice");
 
                             b1.Property<string>("TonnageChangeCount");
+
+                            b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebt")
+                                .HasPrecision(18, 6);
 
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
                                 .HasPrecision(18, 6);
@@ -5465,6 +5555,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5508,6 +5601,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5555,6 +5651,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5600,6 +5699,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5643,6 +5745,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5739,6 +5844,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
+                                                                .HasPrecision(18, 6);
+
+                                                            b5.Property<decimal>("Total")
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
@@ -5855,6 +5963,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -6111,6 +6222,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -6156,6 +6270,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -6199,6 +6316,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
