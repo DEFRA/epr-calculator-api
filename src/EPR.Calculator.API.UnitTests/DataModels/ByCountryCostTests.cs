@@ -94,4 +94,12 @@ public class ByCountryCostTests
 
         apportionment.Total.ShouldBe(99.99999999m);
     }
+
+    [TestMethod]
+    public void ApportionmentTotal_IsTheSumToEightDecimalPlaces()
+    {
+        var apportionment = new ByCountryApportionment { England = 33.3333333333m, Wales = 33.3333333333m, Scotland = 33.3333333334m, NorthernIreland = 0.000000004m };
+
+        apportionment.Total.ShouldBe(100.00000000m);
+    }
 }

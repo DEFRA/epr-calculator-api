@@ -9576,6 +9576,14 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'SELECT id, comms_cost INTO dbo.calc_result_comms_cost_bk FROM dbo.calc_result_comms_cost');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC(N'UPDATE x
     SET comms_cost = JSON_MODIFY(JSON_MODIFY(x.comms_cost,
         ''$.MaterialCosts'', JSON_QUERY(a.materials_json)),
@@ -10220,6 +10228,18 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
+    EXEC(N'CREATE FUNCTION dbo.ecv931_round_2dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+    BEGIN
+        IF JSON_VALUE(@doc, @path) IS NULL RETURN @doc;
+        RETURN JSON_MODIFY(@doc, @path, CAST(CAST(JSON_VALUE(@doc, @path) AS decimal(38, 28)) AS decimal(38, 2)));
+    END');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
     EXEC(N'UPDATE dbo.calc_result_lapcap_data SET [lapcap] = dbo.ecv931_country_totals_in_array(dbo.ecv931_country_total(dbo.ecv931_country_total([lapcap], N''$.Total'', 0), N''$.CountryApportionment'', 0), N''$.MaterialCosts'', N''$.Cost'', 0)');
 END;
 
@@ -10260,7 +10280,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
-    EXEC(N'UPDATE dbo.calc_result_producer_fees SET [total] = dbo.ecv931_one_plus_2a_2b_2c_total(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total([total], N''$.LADisposalCostsSection1.ByCountry'', 0), N''$.CommsCostsSection2a.ByCountry'', 0), N''$.CommsCostsSection2b.ByCountry'', 0), N''$.CommsCostsSection2c.ByCountry'', 0), N''$.SaOperatingCostsSection3.ByCountry'', 0), N''$.LaDataPrepSection4.ByCountry'', 0), N''$.SaSetupCostsSection5.ByCountry'', 0), N''$.TotalBillBreakdown.ByCountry'', 0), N''$.MaterialFees'', N''$.DisposalFee.FeeWithBadDebtByCountry'', 0), N''$.MaterialFees'', N''$.CommFee.Costs.ByCountry'', 0), 0)');
+    EXEC(N'UPDATE dbo.calc_result_producer_fees SET [total] = dbo.ecv931_round_2dp(dbo.ecv931_one_plus_2a_2b_2c_total(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total([total], N''$.LADisposalCostsSection1.ByCountry'', 0), N''$.CommsCostsSection2a.ByCountry'', 0), N''$.CommsCostsSection2b.ByCountry'', 0), N''$.CommsCostsSection2c.ByCountry'', 0), N''$.SaOperatingCostsSection3.ByCountry'', 0), N''$.LaDataPrepSection4.ByCountry'', 0), N''$.SaSetupCostsSection5.ByCountry'', 0), N''$.TotalBillBreakdown.ByCountry'', 0), N''$.MaterialFees'', N''$.DisposalFee.FeeWithBadDebtByCountry'', 0), N''$.MaterialFees'', N''$.CommFee.Costs.ByCountry'', 0), 0), N''$.BillingInstruction.SuggestedInvoiceAmount'')');
 END;
 
 IF NOT EXISTS (
@@ -10268,7 +10288,15 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
 )
 BEGIN
-    EXEC(N'UPDATE dbo.calc_result_producer_fee_detail SET [detail] = dbo.ecv931_one_plus_2a_2b_2c_total(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total([detail], N''$.LADisposalCostsSection1.ByCountry'', 0), N''$.CommsCostsSection2a.ByCountry'', 0), N''$.CommsCostsSection2b.ByCountry'', 0), N''$.CommsCostsSection2c.ByCountry'', 0), N''$.SaOperatingCostsSection3.ByCountry'', 0), N''$.LaDataPrepSection4.ByCountry'', 0), N''$.SaSetupCostsSection5.ByCountry'', 0), N''$.TotalBillBreakdown.ByCountry'', 0), N''$.MaterialFees'', N''$.DisposalFee.FeeWithBadDebtByCountry'', 0), N''$.MaterialFees'', N''$.CommFee.Costs.ByCountry'', 0), 0)');
+    EXEC(N'UPDATE dbo.calc_result_producer_fee_detail SET [detail] = dbo.ecv931_round_2dp(dbo.ecv931_one_plus_2a_2b_2c_total(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_totals_in_array(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total(dbo.ecv931_country_total([detail], N''$.LADisposalCostsSection1.ByCountry'', 0), N''$.CommsCostsSection2a.ByCountry'', 0), N''$.CommsCostsSection2b.ByCountry'', 0), N''$.CommsCostsSection2c.ByCountry'', 0), N''$.SaOperatingCostsSection3.ByCountry'', 0), N''$.LaDataPrepSection4.ByCountry'', 0), N''$.SaSetupCostsSection5.ByCountry'', 0), N''$.TotalBillBreakdown.ByCountry'', 0), N''$.MaterialFees'', N''$.DisposalFee.FeeWithBadDebtByCountry'', 0), N''$.MaterialFees'', N''$.CommFee.Costs.ByCountry'', 0), 0), N''$.BillingInstruction.SuggestedInvoiceAmount'')');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'DROP FUNCTION dbo.ecv931_round_2dp');
 END;
 
 IF NOT EXISTS (
@@ -10301,6 +10329,90 @@ IF NOT EXISTS (
 )
 BEGIN
     EXEC(N'DROP FUNCTION dbo.ecv931_number');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'CREATE FUNCTION dbo.ecv931_round_countries_2dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+    BEGIN
+        IF JSON_QUERY(@doc, @path) IS NULL RETURN @doc;
+        SET @doc = JSON_MODIFY(@doc, @path + N''.England'', CAST(CAST(JSON_VALUE(@doc, @path + N''.England'') AS decimal(38, 28)) AS decimal(38, 2)));
+        SET @doc = JSON_MODIFY(@doc, @path + N''.Wales'', CAST(CAST(JSON_VALUE(@doc, @path + N''.Wales'') AS decimal(38, 28)) AS decimal(38, 2)));
+        SET @doc = JSON_MODIFY(@doc, @path + N''.Scotland'', CAST(CAST(JSON_VALUE(@doc, @path + N''.Scotland'') AS decimal(38, 28)) AS decimal(38, 2)));
+        SET @doc = JSON_MODIFY(@doc, @path + N''.NorthernIreland'', CAST(CAST(JSON_VALUE(@doc, @path + N''.NorthernIreland'') AS decimal(38, 28)) AS decimal(38, 2)));
+        RETURN JSON_MODIFY(@doc, @path + N''.Total'', CAST(CAST(JSON_VALUE(@doc, @path + N''.Total'') AS decimal(38, 28)) AS decimal(38, 2)));
+    END');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'CREATE FUNCTION dbo.ecv931_round_8dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+    BEGIN
+        IF JSON_VALUE(@doc, @path) IS NULL RETURN @doc;
+        RETURN JSON_MODIFY(@doc, @path, CAST(CAST(JSON_VALUE(@doc, @path) AS decimal(38, 28)) AS decimal(38, 8)));
+    END');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE x
+    SET comms_cost = dbo.ecv931_round_8dp(dbo.ecv931_round_countries_2dp(JSON_MODIFY(x.comms_cost, ''$.MaterialCosts'', JSON_QUERY(m.materials_json)), ''$.Total.Cost''), ''$.OnePlusFourApportionment.Total'')
+    FROM dbo.calc_result_comms_cost x
+    CROSS APPLY (
+        SELECT ''['' + ISNULL(STRING_AGG(CAST(dbo.ecv931_round_countries_2dp(c.value, ''$.CommsCost.Cost'') AS nvarchar(max)), '','')
+                    WITHIN GROUP (ORDER BY CAST(c.[key] AS int)), '''') + '']'' AS materials_json
+        FROM OPENJSON(x.comms_cost, ''$.MaterialCosts'') c
+    ) m
+    WHERE JSON_QUERY(x.comms_cost, ''$.MaterialCosts'') IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE dbo.calc_result_lapcap_data SET lapcap = dbo.ecv931_round_8dp(lapcap, ''$.CountryApportionment.Total'')');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE dbo.calc_result_parameter_other_cost SET parameter_other_cost = dbo.ecv931_round_8dp(parameter_other_cost, ''$.CountryApportionment.Total'')');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'UPDATE dbo.calc_result_one_plus_four_apportionment SET one_plus_four_apppointment = dbo.ecv931_round_8dp(one_plus_four_apppointment, ''$.OnePlusFourApportionment.Total'')');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'DROP FUNCTION dbo.ecv931_round_8dp');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261111000000_RefineStoredCalcResults'
+)
+BEGIN
+    EXEC(N'DROP FUNCTION dbo.ecv931_round_countries_2dp');
 END;
 
 IF NOT EXISTS (

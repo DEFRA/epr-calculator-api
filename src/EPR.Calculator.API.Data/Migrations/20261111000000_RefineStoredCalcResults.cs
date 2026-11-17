@@ -161,6 +161,9 @@ namespace EPR.Calculator.API.Data.Migrations
                 WHERE JSON_QUERY(x.la_disposal_cost, '$.Total') IS NULL
                 """));
 
+            // Kept so Down can restore the comms costs, which are rounded to 2 dp below.
+            migrationBuilder.Sql(Exec("SELECT id, comms_cost INTO dbo.calc_result_comms_cost_bk FROM dbo.calc_result_comms_cost"));
+
             migrationBuilder.Sql(Exec($"""
                 UPDATE x
                 SET comms_cost = JSON_MODIFY(JSON_MODIFY(x.comms_cost,
@@ -598,6 +601,15 @@ namespace EPR.Calculator.API.Data.Migrations
                     FROM OPENJSON(x.material_modulations) m
                 ) a
                 """));
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE c
+                SET comms_cost = b.comms_cost
+                FROM dbo.calc_result_comms_cost c
+                JOIN dbo.calc_result_comms_cost_bk b ON b.id = c.id
+                """));
+
+            migrationBuilder.Sql(Exec("DROP TABLE dbo.calc_result_comms_cost_bk"));
         }
 
         private static readonly string[] FeeDetailCountryBreakdowns =
@@ -675,6 +687,14 @@ namespace EPR.Calculator.API.Data.Migrations
                 END
                 """));
 
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_round_2dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF JSON_VALUE(@doc, @path) IS NULL RETURN @doc;
+                    RETURN JSON_MODIFY(@doc, @path, CAST(CAST(JSON_VALUE(@doc, @path) AS decimal(38, 28)) AS decimal(38, 2)));
+                END
+                """));
+
             var flag = remove ? "1" : "0";
 
             foreach (var (table, column, paths) in CountryBreakdowns)
@@ -688,11 +708,61 @@ namespace EPR.Calculator.API.Data.Migrations
                 if (column is "total" or "detail")
                     value = $"dbo.ecv931_one_plus_2a_2b_2c_total({value}, {flag})";
 
+                // Only shown and invoiced at 2 dp; the total row was summed from the unrounded amounts. Down leaves it rounded.
+                if (column is "total" or "detail" && !remove)
+                    value = $"dbo.ecv931_round_2dp({value}, N'$.BillingInstruction.SuggestedInvoiceAmount')";
+
                 migrationBuilder.Sql(Exec($"UPDATE dbo.{table} SET [{column}] = {value}"));
             }
 
-            foreach (var function in new[] { "ecv931_one_plus_2a_2b_2c_total", "ecv931_country_totals_in_array", "ecv931_country_total", "ecv931_number" })
+            foreach (var function in new[] { "ecv931_round_2dp", "ecv931_one_plus_2a_2b_2c_total", "ecv931_country_totals_in_array", "ecv931_country_total", "ecv931_number" })
                 migrationBuilder.Sql(Exec($"DROP FUNCTION dbo.{function}"));
+
+            if (!remove)
+                RoundShownOnlyFigures(migrationBuilder);
+        }
+
+        // Figures only shown go to the precision the files show, after their totals are taken.
+        private static void RoundShownOnlyFigures(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_round_countries_2dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF JSON_QUERY(@doc, @path) IS NULL RETURN @doc;
+                    SET @doc = JSON_MODIFY(@doc, @path + N'.England', CAST(CAST(JSON_VALUE(@doc, @path + N'.England') AS decimal(38, 28)) AS decimal(38, 2)));
+                    SET @doc = JSON_MODIFY(@doc, @path + N'.Wales', CAST(CAST(JSON_VALUE(@doc, @path + N'.Wales') AS decimal(38, 28)) AS decimal(38, 2)));
+                    SET @doc = JSON_MODIFY(@doc, @path + N'.Scotland', CAST(CAST(JSON_VALUE(@doc, @path + N'.Scotland') AS decimal(38, 28)) AS decimal(38, 2)));
+                    SET @doc = JSON_MODIFY(@doc, @path + N'.NorthernIreland', CAST(CAST(JSON_VALUE(@doc, @path + N'.NorthernIreland') AS decimal(38, 28)) AS decimal(38, 2)));
+                    RETURN JSON_MODIFY(@doc, @path + N'.Total', CAST(CAST(JSON_VALUE(@doc, @path + N'.Total') AS decimal(38, 28)) AS decimal(38, 2)));
+                END
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                CREATE FUNCTION dbo.ecv931_round_8dp(@doc nvarchar(max), @path nvarchar(400)) RETURNS nvarchar(max) AS
+                BEGIN
+                    IF JSON_VALUE(@doc, @path) IS NULL RETURN @doc;
+                    RETURN JSON_MODIFY(@doc, @path, CAST(CAST(JSON_VALUE(@doc, @path) AS decimal(38, 28)) AS decimal(38, 8)));
+                END
+                """));
+
+            migrationBuilder.Sql(Exec("""
+                UPDATE x
+                SET comms_cost = dbo.ecv931_round_8dp(dbo.ecv931_round_countries_2dp(JSON_MODIFY(x.comms_cost, '$.MaterialCosts', JSON_QUERY(m.materials_json)), '$.Total.Cost'), '$.OnePlusFourApportionment.Total')
+                FROM dbo.calc_result_comms_cost x
+                CROSS APPLY (
+                    SELECT '[' + ISNULL(STRING_AGG(CAST(dbo.ecv931_round_countries_2dp(c.value, '$.CommsCost.Cost') AS nvarchar(max)), ',')
+                                WITHIN GROUP (ORDER BY CAST(c.[key] AS int)), '') + ']' AS materials_json
+                    FROM OPENJSON(x.comms_cost, '$.MaterialCosts') c
+                ) m
+                WHERE JSON_QUERY(x.comms_cost, '$.MaterialCosts') IS NOT NULL
+                """));
+
+            migrationBuilder.Sql(Exec("UPDATE dbo.calc_result_lapcap_data SET lapcap = dbo.ecv931_round_8dp(lapcap, '$.CountryApportionment.Total')"));
+            migrationBuilder.Sql(Exec("UPDATE dbo.calc_result_parameter_other_cost SET parameter_other_cost = dbo.ecv931_round_8dp(parameter_other_cost, '$.CountryApportionment.Total')"));
+            migrationBuilder.Sql(Exec("UPDATE dbo.calc_result_one_plus_four_apportionment SET one_plus_four_apppointment = dbo.ecv931_round_8dp(one_plus_four_apppointment, '$.OnePlusFourApportionment.Total')"));
+
+            migrationBuilder.Sql(Exec("DROP FUNCTION dbo.ecv931_round_8dp"));
+            migrationBuilder.Sql(Exec("DROP FUNCTION dbo.ecv931_round_countries_2dp"));
         }
 
         private static string Exec(string sql) => $"EXEC(N'{sql.Replace("'", "''")}');";

@@ -7,6 +7,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Utils;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using EPR.Calculator.API.Data.DataModels;
 
@@ -89,7 +90,7 @@ public class BillingRunFinalizer(
             suggestedInstruction.PercentageLiabilityDifferenceCalcVsPrev = fee.BillingInstruction?.PercentageLiabilityDifference;
             suggestedInstruction.TonnagePercentageThresholdBreached = LiabilityDirectionUtils.ToThresholdBreachedString(fee.BillingInstruction?.TonnageAmountPercentageLiabilityDirection);
             suggestedInstruction.SuggestedBillingInstruction = fee.BillingInstruction?.SuggestedBillingInstruction!;
-            suggestedInstruction.SuggestedInvoiceAmount = fee.BillingInstruction?.SuggestedInvoiceAmount ?? 0m;
+            suggestedInstruction.SuggestedInvoiceAmount = MathUtils.RoundAwayFromZero(fee.BillingInstruction?.SuggestedInvoiceAmount ?? 0m, 2);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

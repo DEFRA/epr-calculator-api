@@ -85,10 +85,10 @@ public class CalcResultCommsCostBuilder(ApplicationDBContext context)
         new()
         {
             OnePlusFourApportionment = onePlusFourApportionment,
-            ByMaterial               = byMaterial.ToDictionary(kvp => kvp.Key, kvp => WithTotalTonnageAndPricePerTonne(kvp.Value)),
+            ByMaterial               = byMaterial.ToDictionary(kvp => kvp.Key, kvp => WithTotalTonnageAndPricePerTonne(kvp.Value) with { Cost = ToShownPrecision(kvp.Value.Cost) }),
             Total                    = WithTotalTonnageAndPricePerTonne(new CalcResultCommsCostCommsCostByMaterial
             {
-                Cost                             = ByCountryCost.Sum([.. byMaterial.Values.Select(v => v.Cost)]),
+                Cost                             = ToShownPrecision(ByCountryCost.Sum([.. byMaterial.Values.Select(v => v.Cost)])),
                 TotalCost                        = byMaterial.Values.Sum(v => v.TotalCost),
                 HouseholdPackagingWasteTonnage   = byMaterial.Values.Sum(v => v.HouseholdPackagingWasteTonnage),
                 PublicBinTonnage                 = byMaterial.Values.Sum(v => v.PublicBinTonnage),
@@ -97,6 +97,17 @@ public class CalcResultCommsCostBuilder(ApplicationDBContext context)
             }),
             CommsCostUkWide          = commsCostUkWide,
             CommsCostByCountry       = commsCostByCountry
+        };
+
+    // Only shown, so stored at the 2 dp the files show; the total is rounded from the unrounded costs.
+    private static ByCountryCost ToShownPrecision(ByCountryCost cost) =>
+        new()
+        {
+            England         = MathUtils.RoundAwayFromZero(cost.England, 2),
+            Wales           = MathUtils.RoundAwayFromZero(cost.Wales, 2),
+            Scotland        = MathUtils.RoundAwayFromZero(cost.Scotland, 2),
+            NorthernIreland = MathUtils.RoundAwayFromZero(cost.NorthernIreland, 2),
+            Total           = MathUtils.RoundAwayFromZero(cost.Total, 2)
         };
 
     private static CalcResultCommsCostCommsCostByMaterial WithTotalTonnageAndPricePerTonne(CalcResultCommsCostCommsCostByMaterial commsCost)
