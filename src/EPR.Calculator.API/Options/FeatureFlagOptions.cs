@@ -10,4 +10,9 @@ public record FeatureFlagOptions
     ///     building them from the database.
     /// </summary>
     public bool DownloadFromBlobStorage { get; init; }
+
+    /// <summary>
+    ///     Whether runs can be imported from their billing CSVs.
+    /// </summary>
+    public bool RunImport { get; init; }
 }
