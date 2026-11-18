@@ -22,16 +22,7 @@ public record CalcResultLateReportingTonnage
             new MaterialLateReportingTonnageData { MaterialCode = kvp.Key, Detail = kvp.Value })];
     }
 
-    private CalcResultLateReportingTonnageDetail? total;
-    public CalcResultLateReportingTonnageDetail Total =>
-        total ??=
-            new CalcResultLateReportingTonnageDetail
-            {
-                 Total = ByMaterial.Values.Sum(v => v.Total),
-                 Red   = ByMaterial.Values.Sum(v => v.Red),
-                 Amber = ByMaterial.Values.Sum(v => v.Amber),
-                 Green = ByMaterial.Values.Sum(v => v.Green)
-            };
+    public required CalcResultLateReportingTonnageDetail Total { get; init; }
 }
 
 internal record MaterialLateReportingTonnageData

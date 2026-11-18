@@ -35,11 +35,20 @@ namespace EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages
                 })
                 .ToDictionary();
 
-
-            return new CalcResultLateReportingTonnage
-            {
-                ByMaterial = tonnageDetails
-            };
+            return Create(tonnageDetails);
         }
+
+        public static CalcResultLateReportingTonnage Create(IReadOnlyDictionary<string, CalcResultLateReportingTonnageDetail> byMaterial) =>
+            new()
+            {
+                ByMaterial = byMaterial,
+                Total = new CalcResultLateReportingTonnageDetail
+                {
+                    Total = byMaterial.Values.Sum(v => v.Total),
+                    Red   = byMaterial.Values.Sum(v => v.Red),
+                    Amber = byMaterial.Values.Sum(v => v.Amber),
+                    Green = byMaterial.Values.Sum(v => v.Green)
+                }
+            };
     }
 }

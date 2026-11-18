@@ -21,29 +21,9 @@ public class CalcResultLapcapData
             new MaterialLapcapData { MaterialCode = kvp.Key, Cost = kvp.Value })];
     }
 
-    private ByCountryCost? total;
-    public ByCountryCost Total =>
-        total ??=
-            new ByCountryCost
-            {
-                England         = ByMaterial.Values.Sum(x => x.England),
-                NorthernIreland = ByMaterial.Values.Sum(x => x.NorthernIreland),
-                Scotland        = ByMaterial.Values.Sum(x => x.Scotland),
-                Wales           = ByMaterial.Values.Sum(x => x.Wales)
-            };
+    public required ByCountryCost Total { get; init; }
 
-    private ByCountryApportionment? countryApportionment;
-    public ByCountryApportionment CountryApportionment =>
-        countryApportionment ??=
-            Total.Total == 0
-            ? ByCountryApportionment.Empty
-            : new ByCountryApportionment
-            {
-                England         = Total.England         / Total.Total * 100,
-                Wales           = Total.Wales           / Total.Total * 100,
-                Scotland        = Total.Scotland        / Total.Total * 100,
-                NorthernIreland = Total.NorthernIreland / Total.Total * 100
-            };
+    public required ByCountryApportionment CountryApportionment { get; init; }
 }
 
 internal record MaterialLapcapData

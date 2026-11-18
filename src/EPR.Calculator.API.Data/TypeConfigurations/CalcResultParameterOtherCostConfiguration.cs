@@ -17,10 +17,10 @@ public class CalcResultParameterOtherCostConfiguration : IEntityTypeConfiguratio
         builder.OwnsOne(x => x.ParameterOtherCost, o =>
         {
             o.ToJson("parameter_other_cost");
-            o.OwnsOne(x => x.SaOperatingCost, y => y.Ignore(p => p.Total));
-            o.OwnsOne(x => x.LaDataPrepCharge, y => y.Ignore(p => p.Total));
-            o.OwnsOne(x => x.CountryApportionment, y => y.Ignore(p => p.Total));
-            o.OwnsOne(x => x.SchemeSetupCost, y => y.Ignore(p => p.Total));
+            o.OwnsOne(x => x.SaOperatingCost);
+            o.OwnsOne(x => x.LaDataPrepCharge);
+            o.OwnsOne(x => x.CountryApportionment);
+            o.OwnsOne(x => x.SchemeSetupCost);
             o.OwnsOne(x => x.MaterialityIncrease);
             o.OwnsOne(x => x.MaterialityDecrease);
             o.OwnsOne(x => x.TonnageChangeIncrease);

@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.ProjectedProduc
             Assert.AreEqual(2, prod11Mats.Count());
             Assert.AreEqual(expProd11MatAl, prod11Al.HouseholdRAMTonnage);
             Assert.AreEqual(expProd11AlDefaultRed, prod11Al.HouseholdTonnageWithoutRAM);
-            Assert.AreEqual(expProd11AlTotalTonnage, prod11Al.TotalTonnage());
+            Assert.AreEqual(expProd11AlTotalTonnage, prod11Al.TotalTonnage);
             Assert.AreEqual(expProd11MatAl, prod11Al.ProjectedHouseholdRAMTonnage);
 
             var prod11Sub22 = result.FirstOrDefault(p => p.ProducerId == 11 && p.SubsidiaryId == "22");
@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.ProjectedProduc
             Assert.AreEqual(2, prod11Sub22Mats.Count());
             Assert.AreEqual(expProd11Sub22HDC, prod11Sub22Glass.HouseholdDrinksContainerRAMTonnage);
             Assert.AreEqual(expProd11Sub22HDCDefaultRed, prod11Sub22Glass.HouseholdDrinksContainerTonnageWithoutRAM);
-            Assert.AreEqual(expProd11Sub22HDCTotalTonnage, prod11Sub22Glass.TotalTonnage());
+            Assert.AreEqual(expProd11Sub22HDCTotalTonnage, prod11Sub22Glass.TotalTonnage);
             Assert.AreEqual(expProd11Sub22HDC with { Red = 500 }, prod11Sub22Glass.ProjectedHouseholdDrinksContainerRAMTonnage);
         }
 

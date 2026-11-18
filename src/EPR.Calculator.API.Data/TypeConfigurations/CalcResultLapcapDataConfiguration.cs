@@ -21,11 +21,11 @@ public class CalcResultLapcapDataConfiguration : IEntityTypeConfiguration<CalcRe
             o.OwnsMany(x => x.MaterialCosts, a =>
             {
                 a.Property(x => x.MaterialCode);
-                a.OwnsOne(x => x.Cost, c => c.Ignore(p => p.Total));
+                a.OwnsOne(x => x.Cost);
             });
 
-            o.Ignore(x => x.Total);
-            o.Ignore(x => x.CountryApportionment);
+            o.OwnsOne(x => x.Total);
+            o.OwnsOne(x => x.CountryApportionment);
         });
     }
 }

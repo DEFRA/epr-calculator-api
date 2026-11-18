@@ -44,7 +44,7 @@ internal sealed class ProducerRowBuilder(
 
             invoicedNetTonnageByProducerMaterial.TryGetValue((producerId, material.Id), out var prevInvoiced);
 
-            var l1TotalReportedTonnage = l2MatRows.Sum(r => r.DisposalFee.TotalTonnage.TotalRamTonnage());
+            var l1TotalReportedTonnage = l2MatRows.Sum(r => r.DisposalFee.TotalTonnage.TotalRamTonnage);
 
             var disposalFee = l1Smcw.SmcwTonnage > l1TotalReportedTonnage
                 ? new RamTonnageGroup { Total = 0m, Red = 0m, Amber = 0m, Green = 0m }

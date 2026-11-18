@@ -91,6 +91,31 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Sc
         }
 
         [TestMethod]
+        public void Export_PrintsStoredTotalRow()
+        {
+            var materials = GetMaterials();
+            var total = new CalcResultScaledupProducer
+            {
+                Level = string.Empty,
+                SubmissionPeriodCode = string.Empty,
+                ScaledupProducerTonnageByMaterial = new Dictionary<string, CalcResultScaledupProducerTonnage>
+                {
+                    ["AL"] = new() { ReportedHouseholdPackagingWasteTonnage = 1.5m, TotalReportedTonnage = 1.5m, NetReportedTonnage = 1.5m },
+                    ["GL"] = new() { HouseholdDrinksContainersTonnageGlass = 2.25m, TotalReportedTonnage = 2.25m, NetReportedTonnage = 2.25m }
+                }
+            };
+            var scaledupProducers = new CalcResultScaledupProducers { ScaledupProducers = GetCalcResultScaledupProducerList(), Total = total };
+
+            var csvContent = new StringBuilder();
+            exporter.Export(scaledupProducers, materials, showTotal: true, csvContent);
+
+            var totalLine = csvContent.ToString().ReplaceLineEndings("\n").Split("\n").Single(l => l.Contains(CommonConstants.Totals));
+            Assert.AreEqual(
+                ",,,,,,,,Totals,1.500,0.000,1.500,0.000,1.500,0.000,0.000,0.000,0.000,0.000,0.000,0.000,2.250,2.250,0.000,2.250,0.000,0.000,0.000,0.000,0.000,0.000,",
+                totalLine.Replace("\"", ""));
+        }
+
+        [TestMethod]
         public void Export_ScaledUpProducer_ShouldNotContainTotalWhenIndicated()
         {
             // Arrange
@@ -191,83 +216,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Sc
                     },
                 }
             ];
-        }
-
-        [TestMethod]
-        public void GetOverallTotalRowTest()
-        {
-            var runProducerMaterialDetails = new List<CalcResultScaledupProducer>();
-            var dictionary = new Dictionary<string, CalcResultScaledupProducerTonnage>();
-            dictionary.Add("AL", new CalcResultScaledupProducerTonnage
-            {
-                ReportedHouseholdPackagingWasteTonnage = 10,
-                ReportedPublicBinTonnage = 10,
-                TotalReportedTonnage = 10,
-                ReportedSelfManagedConsumerWasteTonnage = 10,
-                NetReportedTonnage = 10,
-                ScaledupReportedHouseholdPackagingWasteTonnage = 10,
-                ScaledupReportedPublicBinTonnage = 10,
-                ScaledupTotalReportedTonnage = 10,
-                ScaledupReportedSelfManagedConsumerWasteTonnage = 10,
-                ScaledupNetReportedTonnage = 10,
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 1,
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "1",
-                SubmissionPeriodCode = "2025-P2"
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 1,
-                SubsidiaryId = "Sub1",
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "2",
-                SubmissionPeriodCode = "2025-P2"
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 1,
-                SubsidiaryId = "Sub2",
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "2",
-                SubmissionPeriodCode = "2025-P2"
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 2,
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "1",
-                SubmissionPeriodCode = "2025-P2"
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 2,
-                SubsidiaryId = "Sub3",
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "2",
-                SubmissionPeriodCode = "2025-P2"
-            });
-            runProducerMaterialDetails.Add(new CalcResultScaledupProducer
-            {
-                ProducerId = 2,
-                SubsidiaryId = "Sub4",
-                ScaledupProducerTonnageByMaterial = dictionary,
-                Level = "2",
-                SubmissionPeriodCode = "2025-P2"
-            });
-
-            List<MaterialDetail> materialDetails = [new() { Id = 1, Code = "AL", Name = "Aluminium" }];
-            var totalRow = CalcResultScaledupProducersExporter.GetOverallTotalRow(runProducerMaterialDetails, materialDetails);
-            Assert.IsNotNull(totalRow);
-            var aluminium = totalRow.ScaledupProducerTonnageByMaterial["Aluminium"];
-            Assert.IsNotNull(aluminium);
-            Assert.AreEqual(60, aluminium.NetReportedTonnage);
-            Assert.AreEqual(60, aluminium.ScaledupTotalReportedTonnage);
-            Assert.AreEqual(60, aluminium.ScaledupNetReportedTonnage);
-            Assert.AreEqual(60, aluminium.ScaledupReportedPublicBinTonnage);
-            Assert.AreEqual(60, aluminium.ScaledupReportedPublicBinTonnage);
         }
     }
 }

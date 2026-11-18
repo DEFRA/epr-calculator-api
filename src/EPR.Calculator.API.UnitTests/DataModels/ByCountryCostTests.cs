@@ -71,4 +71,35 @@ public class ByCountryCostTests
 
         cost.Total.ShouldBe(10);
     }
+
+    [TestMethod]
+    public void Total_IsTheStoredTotalWhenSet()
+    {
+        var cost = Make(1, 2, 3, 4) with { Total = 10.0000000001m };
+
+        cost.Total.ShouldBe(10.0000000001m);
+    }
+
+    [TestMethod]
+    public void Equality_ComparesValuesWhetherTheTotalIsStoredOrSummed()
+    {
+        Make(1, 2, 3, 4).ShouldBe(Make(1, 2, 3, 4) with { Total = 10.0m });
+        Make(1, 2, 3, 4).ShouldNotBe(Make(1, 2, 3, 4) with { Total = 11 });
+    }
+
+    [TestMethod]
+    public void ApportionmentTotal_IsTheStoredTotalWhenSet()
+    {
+        var apportionment = new ByCountryApportionment { England = 25, Wales = 25, Scotland = 25, NorthernIreland = 25, Total = 99.99999999m };
+
+        apportionment.Total.ShouldBe(99.99999999m);
+    }
+
+    [TestMethod]
+    public void ApportionmentTotal_IsTheSumToEightDecimalPlaces()
+    {
+        var apportionment = new ByCountryApportionment { England = 33.3333333333m, Wales = 33.3333333333m, Scotland = 33.3333333334m, NorthernIreland = 0.000000004m };
+
+        apportionment.Total.ShouldBe(100.00000000m);
+    }
 }

@@ -24,7 +24,7 @@ public class CalcResultLateReportingTonnageConfiguration : IEntityTypeConfigurat
                 a.OwnsOne(x => x.Detail);
             });
 
-            o.Ignore(x => x.Total);
+            o.OwnsOne(x => x.Total);
         });
     }
 }

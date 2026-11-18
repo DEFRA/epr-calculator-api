@@ -1,3 +1,6 @@
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
@@ -27,35 +30,29 @@ public class ThreeSaCostsProducerTests
             SchemeSetupCost = new ByCountryCost { England = 40, Wales = 30, Scotland = 20, NorthernIreland = 10 }
         },
         CalcResultDetail = new CalcResultDetail { RunId = 1, RelativeYear = new RelativeYear(2024) },
-        CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData
+        CalcResultLaDisposalCostData = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>
         {
-            ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>
-            {
-                ["AL"] =
-                    new()
-                    {
-                        Cost = ByCountryCost.Empty,
-                        HouseholdPackagingWasteTonnage = 0,
-                        PublicBinTonnage = 0,
-                        HouseholdDrinkContainersTonnage = 0
-                    },
-                ["PL"] =
-                    new()
-                    {
-                        Cost = ByCountryCost.Empty,
-                        HouseholdPackagingWasteTonnage = 0,
-                        PublicBinTonnage = 0,
-                        HouseholdDrinkContainersTonnage = 0
-                    }
-            }
-        },
-        CalcResultLapcapData = new CalcResultLapcapData
-        {
-            ByMaterial = new Dictionary<string, ByCountryCost>()
-        },
+            ["AL"] =
+                new()
+                {
+                    Cost = ByCountryCost.Empty,
+                    HouseholdPackagingWasteTonnage = 0,
+                    PublicBinTonnage = 0,
+                    HouseholdDrinkContainersTonnage = 0
+                },
+            ["PL"] =
+                new()
+                {
+                    Cost = ByCountryCost.Empty,
+                    HouseholdPackagingWasteTonnage = 0,
+                    PublicBinTonnage = 0,
+                    HouseholdDrinkContainersTonnage = 0
+                }
+        }),
+        CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
         CalcResultOnePlusFourApportionment = TestDataHelper.GetCalcResultOnePlusFourApportionment(),
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
-        CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage { ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>() },
+        CalcResultLateReportingTonnageData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>()),
         CalcResultProjectedProducers = new CalcResultProjectedProducers(){
             H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
             H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty,

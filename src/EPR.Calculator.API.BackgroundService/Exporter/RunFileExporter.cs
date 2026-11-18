@@ -169,13 +169,10 @@ public class RunFileExporter(
         }
 
         if (runContext.RequiresScaling)
-            result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
+            result.CalcResultScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
         if (fileType is not FileType.BillingJson)
-        {
             result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
-            result.SmcwByMaterial = await calcResultReader.ReadSmcwByMaterial(runContext.RunId, cancellationToken);
-        }
 
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
         result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);
@@ -236,6 +233,7 @@ public class RunFileExporter(
         SaOperatingCostsSection3                 = total.SaOperatingCostsSection3,
         LaDataPrepSection4                       = total.LaDataPrepSection4,
         SaSetupCostsSection5                     = total.SaSetupCostsSection5,
+        TotalOnePlus2A2B2CWithBadDebt            = total.TotalOnePlus2A2B2CWithBadDebt,
         TotalOnePlus2A2B2CWithBadDebtPercentage  = total.TotalOnePlus2A2B2CWithBadDebtPercentage
     };
 }

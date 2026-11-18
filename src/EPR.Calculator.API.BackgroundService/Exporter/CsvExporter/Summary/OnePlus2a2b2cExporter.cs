@@ -25,13 +25,13 @@ public class OnePlus2a2b2cExporter : IProducerFeesPartExporter
     public void AppendGroupHeader(StringBuilder csvContent, FeeDetail producerFeesTotal, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         int count = GetColumnHeaders(materials, applyModulation).Count();
-        csvContent.Append(CsvSanitiser.SanitiseData(producerFeesTotal.TotalOnePlus2A2B2CWithBadDebt(), DecimalPlaces.Two, null, isCurrency: true));
+        csvContent.Append(CsvSanitiser.SanitiseData(producerFeesTotal.TotalOnePlus2A2B2CWithBadDebt, DecimalPlaces.Two, null, isCurrency: true));
         csvContent.Append(',', count - 1);
     }
 
     public void AppendRow(StringBuilder csvContent, ProducerFeeExportRow producer, bool applyModulation, bool isOverallTotal)
     {
-        csvContent.Append(CsvSanitiser.SanitiseData(producer.FeeDetail.TotalOnePlus2A2B2CWithBadDebt(), DecimalPlaces.Two, null, isCurrency: true));
+        csvContent.Append(CsvSanitiser.SanitiseData(producer.FeeDetail.TotalOnePlus2A2B2CWithBadDebt, DecimalPlaces.Two, null, isCurrency: true));
         csvContent.Append(CsvSanitiser.SanitiseData(producer.FeeDetail.TotalOnePlus2A2B2CWithBadDebtPercentage, DecimalPlaces.Eight, DecimalFormats.F8, isCurrency: false, isPercentage: true));
     }
 }
