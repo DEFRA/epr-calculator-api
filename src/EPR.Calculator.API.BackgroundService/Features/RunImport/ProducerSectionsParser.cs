@@ -19,7 +19,7 @@ public static class ProducerSectionsParser
         {
             decimal? Last(string material) => csv.NullableNumber(row, columns[material]);
             string? Text(params string[] names) => names.Select(n => columns.TryGetValue(n, out var c) ? c : (int?)null).FirstOrDefault(c => c is not null) is { } column
-                ? NullIfEmpty(csv.Cell(row, column))
+                ? csv.Text(row, column)
                 : null;
 
             producers.Add(new CalcResultCancelledProducer
@@ -42,9 +42,9 @@ public static class ProducerSectionsParser
                 LatestInvoice = new LatestInvoice
                 {
                     CurrentYearInvoicedTotalToDate = csv.NullableNumber(row, columns.TryGetValue("last invoiced total", out var total) ? total : columns["current year invoiced total to date"]),
-                    RunNumber                      = NullIfEmpty(csv.Cell(row, columns["run number"])),
-                    RunName                        = NullIfEmpty(csv.Cell(row, columns["run name"])),
-                    BillingInstructionId           = NullIfEmpty(csv.Cell(row, columns["billing instruction id"]))
+                    RunNumber                      = csv.Text(row, columns["run number"]),
+                    RunName                        = csv.Text(row, columns["run name"]),
+                    BillingInstructionId           = csv.Text(row, columns["billing instruction id"])
                 }
             });
         }
@@ -75,12 +75,12 @@ public static class ProducerSectionsParser
         for (var row = header + 1; IsProducerRow(csv, row); row++)
             producers.Add(new RejectedProducer(
                 (int)csv.Number(row, columns["producer id"]),
-                NullIfEmpty(csv.Cell(row, columns["producer"])),
-                NullIfEmpty(csv.Cell(row, columns["trading name"])),
+                csv.Text(row, columns["producer"]),
+                csv.Text(row, columns["trading name"]),
                 csv.Cell(row, columns["suggested billing instruction"]),
                 csv.NullableNumber(row, columns["suggested invoice amount"]),
                 csv.Date(row, columns["instruction confirmed date"]),
-                NullIfEmpty(csv.Cell(row, columns["instruction confirmed by"])),
+                csv.Text(row, columns["instruction confirmed by"]),
                 csv.Cell(row, columns["reason for reject"])));
 
         return producers;
@@ -102,9 +102,9 @@ public static class ProducerSectionsParser
             producers.Add(new CalcResultScaledupProducer
             {
                 ProducerId                        = (int)csv.Number(row, columns["producer id"]),
-                SubsidiaryId                      = NullIfEmpty(csv.Cell(row, columns["subsidiary id"])),
-                ProducerName                      = NullIfEmpty(csv.Cell(row, columns["producer / subsidiary name"])),
-                TradingName                       = NullIfEmpty(csv.Cell(row, columns["trading name"])),
+                SubsidiaryId                      = csv.Text(row, columns["subsidiary id"]),
+                ProducerName                      = csv.Text(row, columns["producer / subsidiary name"]),
+                TradingName                       = csv.Text(row, columns["trading name"]),
                 Level                             = csv.Cell(row, columns["level"]),
                 SubmissionPeriodCode              = csv.Cell(row, columns["submission period code"]),
                 DaysInSubmissionPeriod            = (int)(csv.NullableNumber(row, columns["days in submission period"]) ?? -1),
@@ -174,6 +174,4 @@ public static class ProducerSectionsParser
 
     private static bool IsProducerRow(BillingCsv csv, int row) =>
         row < csv.Rows.Count && int.TryParse(csv.Cell(row, 0), out _);
-
-    private static string? NullIfEmpty(string value) => value.Length == 0 ? null : value;
 }

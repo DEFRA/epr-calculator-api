@@ -5,20 +5,27 @@ namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
 /// <summary>
 ///     The rows of a results or billing CSV, with the lookups and value parsing the layouts share.
 /// </summary>
-public sealed class BillingCsv(IReadOnlyList<string[]> rows)
+public sealed class BillingCsv(IReadOnlyList<string[]> rows, IReadOnlySet<(int Row, int Column)>? quotedEmptyCells = null)
 {
     public IReadOnlyList<string[]> Rows { get; } = rows;
 
     public static BillingCsv Read(TextReader reader)
     {
         var rows = new List<string[]>();
-        while (ReadRecord(reader) is { } record)
+        var quotedEmptyCells = new HashSet<(int, int)>();
+        while (ReadRecord(reader, rows.Count, quotedEmptyCells) is { } record)
             rows.Add(record);
-        return new BillingCsv(rows);
+        return new BillingCsv(rows, quotedEmptyCells);
     }
 
     public string Cell(int row, int column) =>
         row < Rows.Count && column < Rows[row].Length ? Clean(Rows[row][column]) : string.Empty;
+
+    /// <summary>The cell's text; an empty cell is null unless it's quoted, which the export writes for an empty string.</summary>
+    public string? Text(int row, int column) =>
+        Cell(row, column) is { Length: > 0 } text ? text
+        : quotedEmptyCells?.Contains((row, column)) == true ? string.Empty
+        : null;
 
     /// <summary>The first row at or after <paramref name="start" /> whose first cell starts with <paramref name="label" />.</summary>
     public int FindRow(string label, int start = 0)
@@ -57,7 +64,7 @@ public sealed class BillingCsv(IReadOnlyList<string[]> rows)
     // CsvSanitiser adds a left-to-right mark to stop spreadsheets reading a field as a formula.
     private static string Clean(string value) => value.Replace("‎", "").Trim();
 
-    private static string[]? ReadRecord(TextReader reader)
+    private static string[]? ReadRecord(TextReader reader, int row, HashSet<(int, int)> quotedEmptyCells)
     {
         if (reader.Peek() < 0)
             return null;
@@ -65,6 +72,16 @@ public sealed class BillingCsv(IReadOnlyList<string[]> rows)
         var fields = new List<string>();
         var field = new System.Text.StringBuilder();
         var quoted = false;
+        var wasQuoted = false;
+
+        void EndField()
+        {
+            if (wasQuoted && field.Length == 0)
+                quotedEmptyCells.Add((row, fields.Count));
+            fields.Add(field.ToString());
+            field.Clear();
+            wasQuoted = false;
+        }
 
         while (true)
         {
@@ -80,13 +97,13 @@ public sealed class BillingCsv(IReadOnlyList<string[]> rows)
                 continue;
             }
 
-            if (c == '"') quoted = true;
-            else if (c == ',') { fields.Add(field.ToString()); field.Clear(); }
+            if (c == '"') quoted = wasQuoted = true;
+            else if (c == ',') EndField();
             else if (c == '\n') break;
             else if (c != '\r') field.Append((char)c);
         }
 
-        fields.Add(field.ToString());
+        EndField();
         return [.. fields];
     }
 }
