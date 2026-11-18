@@ -61,7 +61,7 @@ public static class FeeTableParser
     {
         decimal? Value(int? column) => column is { } c ? csv.NullableNumber(row, c) : null;
         decimal Number(int? column) => Value(column) ?? 0;
-        string? Text(int? column) => column is { } c && csv.Cell(row, c) is { Length: > 0 } text ? text : null;
+        string? Text(int? column) => column is { } c ? csv.Text(row, c) : null;
         string? Raw(int? column) => column is { } c ? csv.Cell(row, c) : null;
 
         // A section's bad debt column has its own group heading ("Bad Debt Provision"), so it's found by its header alone.
