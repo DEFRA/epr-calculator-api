@@ -185,6 +185,48 @@ public static class RunSectionsParser
         };
     }
 
+    /// <summary>
+    ///     The modulation section, from 2026; null before then. Its first tonnage columns repeat the LA disposal data,
+    ///     which is stored with that section.
+    /// </summary>
+    public static ModulationResult? ReadModulation(BillingCsv csv, int runId, IReadOnlyList<MaterialDetail> materials)
+    {
+        if (csv.TryFindRow("Modulation Calculation") is not { } section)
+            return null;
+
+        var header = csv.FindRow("Material", section);
+        var total = csv.FindRow("Total", header);
+        var byCode = materials.ToDictionary(m => m.Code);
+
+        return new ModulationResult
+        {
+            CalculatorRunId      = runId,
+            RedFactor            = csv.Number(csv.FindRow("Red Modulation Factor", section), 1),
+            GreenFactor          = csv.Number(csv.FindRow("Green Modulation Factor", section), 1),
+            ModulationByMaterial = MaterialRows(csv, header + 1, total).ToDictionary(m => byCode[m.Code], m => new ModulationDetail
+            {
+                TotalMaterialTonnages                 = csv.Number(m.Row, 6),
+                RedMaterialTonnages                   = csv.Number(m.Row, 7),
+                AmberMaterialTonnages                 = csv.Number(m.Row, 8),
+                GreenMaterialTonnages                 = csv.Number(m.Row, 9),
+                TotalRedMaterialAtAmberDisposalCost   = csv.Number(m.Row, 10),
+                TotalGreenMaterialAtAmberDisposalCost = csv.Number(m.Row, 11),
+                RedMaterialDisposalCost               = csv.Number(m.Row, 12),
+                AmberMaterialDisposalCost             = csv.Number(m.Row, 13),
+                GreenMaterialDisposalCost             = csv.Number(m.Row, 14)
+            }),
+            Total = new ModulationTotal
+            {
+                TotalMaterialTonnages                 = csv.Number(total, 6),
+                RedMaterialTonnages                   = csv.Number(total, 7),
+                AmberMaterialTonnages                 = csv.Number(total, 8),
+                GreenMaterialTonnages                 = csv.Number(total, 9),
+                TotalRedMaterialAtAmberDisposalCost   = csv.Number(total, 10),
+                TotalGreenMaterialAtAmberDisposalCost = csv.Number(total, 11)
+            }
+        };
+    }
+
     private static IEnumerable<(string Code, int Row)> MaterialRows(BillingCsv csv, int from, int to)
     {
         for (var row = from; row < to; row++)

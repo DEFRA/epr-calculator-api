@@ -1,4 +1,3 @@
-using System.Text;
 using System.Globalization;
 using System.Collections.Immutable;
 using System.Text.Json;
@@ -30,9 +29,9 @@ public class RunImportIntegrationTests : BaseIntegrationTest
 
     // Runs are imported in order, since a year's first run is classified Initial and the rest Recalculation.
     [TestMethod]
-    public async Task Import_2025_runs()
+    public async Task Import_all_runs()
     {
-        foreach (var runId in new[] { 10, 51, 68, 84 })
+        foreach (var runId in new[] { 10, 51, 68, 84, 102 })
             await ImportAndReadBack(runId);
     }
 
@@ -71,7 +70,7 @@ public class RunImportIntegrationTests : BaseIntegrationTest
         parameters.CutOffDate.ShouldBe(header.CutOffDate);
 
         var downloaded = await ReadFileResult(await CreateController<BillingFileController>(services).DownloadBillingCsv(runId, downloadFromBlobStorage: false));
-        var comparison = BillingCsvComparison.Compare(csv, BillingCsv.Read(new StringReader(Encoding.UTF8.GetString(downloaded))));
+        var comparison = BillingCsvComparison.Compare(csv, BillingCsv.Read(new StreamReader(new MemoryStream(downloaded))));
         await File.WriteAllTextAsync(Path.Combine(folder, $"run-{runId}.comparison.txt"), comparison.ToString());
 
         var db = services.GetRequiredService<ApplicationDBContext>();

@@ -17,7 +17,7 @@ public interface IRunImporter
 /// <summary>
 ///     Stores a run from its billing CSV, in the same shape a calculator run stores it, so its files can be downloaded again.
 /// </summary>
-public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcResultWriter) : IRunImporter
+public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcResultWriter, IMaterialService materialService) : IRunImporter
 {
     public async Task<int> ImportAsync(TextReader billingCsv, string fileName, RunImportDetails details, CancellationToken cancellationToken)
     {
@@ -38,13 +38,15 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
         var scaledUp = ProducerSectionsParser.ReadScaledupProducers(csv, RunSectionsParser.MaterialCodes);
         var fees = FeeTableParser.Read(csv, RunSectionsParser.MaterialCodes);
         var rejected = ProducerSectionsParser.ReadRejectedProducers(csv);
+        var modulation = RunSectionsParser.ReadModulation(csv, header.RunId, await materialService.GetMaterials());
+        var projected = ProjectedProducersParser.Read(csv, RunSectionsParser.MaterialCodes);
 
         if (fees.Warnings.Count > 0)
             throw new FormatException(string.Join(Environment.NewLine, fees.Warnings));
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-        await StoreRunAsync(header, file, details, DefaultParameters(header, lateReporting, otherCost, comms, details), cancellationToken);
+        await StoreRunAsync(header, file, details, DefaultParameters(header, lateReporting, otherCost, comms, modulation, details), cancellationToken);
 
         await calcResultWriter.StoreLapcapData(header.RunId, lapcap, cancellationToken);
         await calcResultWriter.StoreLateReportingTonnage(header.RunId, lateReporting, cancellationToken);
@@ -56,6 +58,15 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
 
         if (scaledUp is not null)
             await calcResultWriter.StoreScaledData(header.RunId, scaledUp, cancellationToken);
+
+        if (projected is not null)
+        {
+            await calcResultWriter.StoreProjectedH1Data(header.RunId, projected.H1ProjectedProducers, cancellationToken);
+            await calcResultWriter.StoreProjectedH2Data(header.RunId, projected.H2ProjectedProducers, cancellationToken);
+        }
+
+        if (modulation is not null)
+            await calcResultWriter.StoreModulationResult(header.RunId, modulation, cancellationToken);
 
         await calcResultWriter.StoreProducerFees(header.RunId, fees.Total, fees.Producers, cancellationToken);
         await StoreBillingInstructionsAsync(header.RunId, fees.Producers, file, details.BillingFileCreatedBy ?? header.RunBy, cancellationToken);
@@ -265,6 +276,7 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
         CalcResultLateReportingTonnage lateReporting,
         CalcResultParameterOtherCost otherCost,
         CalcResultCommsCost comms,
+        ModulationResult? modulation,
         RunImportDetails details)
     {
         var values = new Dictionary<string, decimal>();
@@ -309,7 +321,7 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
         parameters["COFF-DT"] = header.CutOffDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "NA";
 
         // Runs before modulation have no red modulation factor.
-        parameters["REDM-RF"] = "0";
+        parameters["REDM-RF"] = (modulation?.RedFactor ?? 0).ToString(CultureInfo.InvariantCulture);
 
         foreach (var (reference, value) in details.DefaultParameters)
             parameters[reference] = value;
