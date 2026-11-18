@@ -92,21 +92,68 @@ public static class FeeTableParser
             const string section1 = "1 producer disposal fees";
             const string section2a = "2a fees for comms costs - by material";
 
+            decimal? Disposal(string header) => Value(columns.Find(section1, disposal, header));
+
+            // From modulation (2026) each tonnage is shown with its RAM split; before it, a run held each tonnage as amber.
+            var modulated = columns.Find(section1, disposal, "household red material tonnage") is not null;
+
+            RamTonnage Ram(string prefix, string total) => modulated
+                ? Disposal(total) is { } tonnage
+                    ? new RamTonnage
+                    {
+                        Red             = Disposal($"{prefix} red material tonnage") ?? 0,
+                        Amber           = Disposal($"{prefix} amber material tonnage") ?? 0,
+                        Green           = Disposal($"{prefix} green material tonnage") ?? 0,
+                        RedMedical      = Disposal($"{prefix} red medical material tonnage") ?? 0,
+                        AmberMedical    = Disposal($"{prefix} amber medical material tonnage") ?? 0,
+                        GreenMedical    = Disposal($"{prefix} green medical material tonnage") ?? 0,
+                        TotalRamTonnage = tonnage
+                    }
+                    : RamTonnage.Empty
+                : AmberOnly(columns.Find(section1, disposal, total));
+
+            var totalTonnage = modulated
+                ? new RamTonnage
+                {
+                    Red                  = Disposal("red total tonnage") ?? 0,
+                    Amber                = Disposal("amber total tonnage") ?? 0,
+                    Green                = Disposal("green total tonnage") ?? 0,
+                    RedMedical           = Disposal("red medical total tonnage") ?? 0,
+                    AmberMedical         = Disposal("amber medical total tonnage") ?? 0,
+                    GreenMedical         = Disposal("green medical total tonnage") ?? 0,
+                    TotalRamTonnage      = Disposal("total tonnage") ?? 0,
+                    RedAndRedMedical     = Disposal("red + red medical total tonnage") ?? 0,
+                    AmberAndAmberMedical = Disposal("amber + amber medical total tonnage") ?? 0,
+                    GreenAndGreenMedical = Disposal("green + green medical total tonnage") ?? 0
+                }
+                : AmberOnly(columns.Find(section1, disposal, "total tonnage"));
+
+            RamTonnageGroup Group(string? total, string colours) => new()
+            {
+                Red   = Disposal(string.Format(colours, "red + red medical")),
+                Amber = Disposal(string.Format(colours, "amber + amber medical")),
+                Green = Disposal(string.Format(colours, "green + green medical")),
+                Total = total is null ? null : Disposal(total)
+            };
+
             materialFees[code] = new Fees
             {
                 DisposalFee = new DisposalFee
                 {
-                    PreviousInvoicedTonnage = Value(columns.Find(section1, disposal, "previous invoiced tonnage")),
-                    HhTonnage               = AmberOnly(columns.Find(section1, disposal, "household tonnage")),
-                    PbTonnage               = AmberOnly(columns.Find(section1, disposal, "public bin tonnage")),
-                    HdcTonnage              = AmberOnly(columns.Find(section1, disposal, "household drinks containers tonnage - glass")),
-                    TotalTonnage            = AmberOnly(columns.Find(section1, disposal, "total tonnage")),
+                    PreviousInvoicedTonnage = Disposal("previous invoiced tonnage"),
+                    HhTonnage               = Ram("household", "household tonnage"),
+                    PbTonnage               = Ram("public bin", "public bin tonnage"),
+                    HdcTonnage              = Ram("household drinks containers", "household drinks containers tonnage - glass"),
+                    TotalTonnage            = totalTonnage,
                     SmcwTonnage             = Number(columns.Find(section1, disposal, "self-managed consumer waste tonnage")),
-                    ActionedSmcwTonnage     = new RamTonnageGroup(),
-                    NetTonnage              = new RamTonnageGroup { Total = Value(columns.Find(section1, disposal, "net tonnage")) },
-                    TonnageChange           = Value(columns.Find(section1, disposal, "tonnage change")),
-                    PricePerTonne           = new RamTonnageGroup { Total = Value(columns.Find(section1, disposal, "price per tonne")) },
-                    Fee                     = new RamTonnageGroup { Total = Value(columns.Find(section1, disposal, "producer disposal fee w/o bad debt provision")) },
+                    ActionedSmcwTonnage     = modulated ? Group("actioned self-managed consumer waste tonnage", "{0} actioned self-managed consumer waste tonnage") : new RamTonnageGroup(),
+                    ResidualSmcwTonnage     = modulated ? Disposal("residual self-managed consumer waste") : null,
+                    NetTonnage              = modulated ? Group("net tonnage", "{0} net tonnage") : new RamTonnageGroup { Total = Disposal("net tonnage") },
+                    TonnageChange           = Disposal("tonnage change"),
+                    PricePerTonne           = modulated ? Group(null, "{0} material price per tonne") : new RamTonnageGroup { Total = Disposal("price per tonne") },
+                    Fee                     = modulated
+                        ? Group("producer disposal fee w/o bad debt provision", "producer {0} material disposal cost")
+                        : new RamTonnageGroup { Total = Disposal("producer disposal fee w/o bad debt provision") },
                     BadDebt                 = Number(columns.Find(section1, disposal, "bad debt provision")),
                     FeeWithBadDebtByCountry = ByCountry(section1, disposal, "producer disposal fee with bad debt provision", "{0} with bad debt provision")
                 },

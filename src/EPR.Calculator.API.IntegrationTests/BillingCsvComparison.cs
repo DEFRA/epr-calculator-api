@@ -39,8 +39,18 @@ public static class BillingCsvComparison
             var counts = sections.GetValueOrDefault(section);
             var column = string.Join('|', key.Split('|').Where((_, i) => i != 1));
 
-            if (!b.TryGetValue(key, out var exported)) { counts.onlyA++; onlyIn[$"original: {column}"] = onlyIn.GetValueOrDefault($"original: {column}") + 1; }
-            else if (!a.TryGetValue(key, out var printed)) { counts.onlyB++; onlyIn[$"export: {column}"] = onlyIn.GetValueOrDefault($"export: {column}") + 1; }
+            if (!b.TryGetValue(key, out var exported))
+            {
+                counts.onlyA++;
+                onlyIn[$"original: {column}"] = onlyIn.GetValueOrDefault($"original: {column}") + 1;
+                if (section == "header") sectionDifferences.Add($"only in original {key}: {a[key]}");
+            }
+            else if (!a.TryGetValue(key, out var printed))
+            {
+                counts.onlyB++;
+                onlyIn[$"export: {column}"] = onlyIn.GetValueOrDefault($"export: {column}") + 1;
+                if (section == "header") sectionDifferences.Add($"only in export {key}: {exported}");
+            }
             else if (printed == exported || NormaliseValue(printed) == NormaliseValue(exported)) counts.same++;
             else if (AsNumber(printed) is { } x && AsNumber(exported) is { } y && x == y) counts.number++;
             else
