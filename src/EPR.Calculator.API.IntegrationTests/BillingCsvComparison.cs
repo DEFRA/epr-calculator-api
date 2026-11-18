@@ -124,7 +124,10 @@ public static class BillingCsvComparison
 
             string rowKey;
             if (headers is not null && int.TryParse(first, out _))
-                rowKey = string.Join(':', Enumerable.Range(0, 5).Select(c => csv.Cell(r, c)).Where((_, i) => i is 0 or 1 || headers[Math.Min(i, headers.Length - 1)] == "level"));
+                // Scaled-up producers have a row per submission period.
+                rowKey = string.Join(':', Enumerable.Range(0, Math.Min(headers.Length, 10))
+                    .Where(c => c is 0 or 1 || headers[c] is "level" or "submission period code")
+                    .Select(c => csv.Cell(r, c)));
             else
             {
                 var label = Normalise(first.Length > 0 ? first : "(blank)");
