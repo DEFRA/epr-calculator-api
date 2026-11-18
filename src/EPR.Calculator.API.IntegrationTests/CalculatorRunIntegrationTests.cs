@@ -173,7 +173,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         (await db.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId)).IsBillingFileShared.ShouldBeTrue();
     }
 
-    private static async Task AssertCsv(string actualContents, string expectedPath, List<int> ignoreLines, string label)
+    internal static async Task AssertCsv(string actualContents, string expectedPath, List<int> ignoreLines, string label)
     {
         static string DisplayFullContents(string contents) =>
             $"Full contents:\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n{contents}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
