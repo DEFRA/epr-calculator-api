@@ -5,7 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
 
 /// <summary>
-///     Reads the cancelled and scaled-up producer sections, finding columns by their headers since the wording has changed between layouts.
+///     Reads the cancelled, scaled-up and partial obligation producer sections, finding columns by their headers since the wording has changed between layouts.
 /// </summary>
 public static class ProducerSectionsParser
 {
@@ -115,6 +115,82 @@ public static class ProducerSectionsParser
         }
 
         return new CalcResultScaledupProducers { ScaledupProducers = [.. producers] };
+    }
+
+    /// <summary>Returns null when the file has no partial obligations section (runs before partial obligations).</summary>
+    public static IReadOnlyList<CalcResultPartialObligation>? ReadPartialObligations(BillingCsv csv, IReadOnlyDictionary<string, string> materialCodes)
+    {
+        if (csv.TryFindRow("Partial Obligation Calculation") is not { } section)
+            return null;
+
+        var header = csv.FindRow("Producer ID", section);
+        var columns = Columns(csv, header, from: 0, to: 10);
+        var blocks = MaterialBlocks(csv, header - 1, materialCodes);
+        var producers = new List<CalcResultPartialObligation>();
+
+        for (var row = header + 1; IsProducerRow(csv, row); row++)
+        {
+            var daysInYear = (int)csv.Number(row, columns["days in submission year"]);
+            var daysObligated = (int?)csv.NullableNumber(row, columns["obligated days"]);
+            // Worked out from the days, as the run does, since the file only shows it to 2 decimal places.
+            var obligatedFactor = daysObligated is { } days ? (decimal)days / daysInYear : 1;
+
+            producers.Add(new CalcResultPartialObligation
+            {
+                ProducerId                         = (int)csv.Number(row, columns["producer id"]),
+                SubsidiaryId                       = csv.Text(row, columns["subsidiary id"]),
+                ProducerName                       = csv.Text(row, columns["producer / subsidiary name"]),
+                TradingName                        = csv.Text(row, columns["trading name"]),
+                Level                              = csv.Cell(row, columns["level"]),
+                SubmissionYear                     = (int)csv.Number(row, columns["submission year"]),
+                DaysInSubmissionYear               = daysInYear,
+                JoiningDate                        = csv.Text(row, columns["joining date"]),
+                DaysObligated                      = daysObligated,
+                ObligatedFactor                    = obligatedFactor,
+                PartialObligationTonnageByMaterial = blocks.ToDictionary(b => b.Code, b => PartialTonnage(csv, row, b.Columns, obligatedFactor))
+            });
+        }
+
+        return producers;
+    }
+
+    private static CalcResultPartialObligationTonnage PartialTonnage(BillingCsv csv, int row, IReadOnlyDictionary<string, int> columns, decimal obligatedFactor)
+    {
+        decimal? Value(string name) => columns.TryGetValue(name, out var column) ? csv.NullableNumber(row, column) ?? 0 : null;
+
+        // Only runs with modulation show the RAM split.
+        RamTonnage? Ram(string packaging) => columns.ContainsKey($"{packaging} red material tonnage")
+            ? new RamTonnage
+            {
+                Red          = Value($"{packaging} red material tonnage") ?? 0,
+                Amber        = Value($"{packaging} amber material tonnage") ?? 0,
+                Green        = Value($"{packaging} green material tonnage") ?? 0,
+                RedMedical   = Value($"{packaging} red medical material tonnage") ?? 0,
+                AmberMedical = Value($"{packaging} amber medical material tonnage") ?? 0,
+                GreenMedical = Value($"{packaging} green medical material tonnage") ?? 0
+            }
+            : null;
+
+        return new CalcResultPartialObligationTonnage
+        {
+            ObligatedFactor                            = obligatedFactor,
+            HouseholdTonnage                           = Value("household tonnage") ?? 0,
+            HouseholdRAMTonnage                        = Ram("household"),
+            PublicBinTonnage                           = Value("public bin tonnage") ?? 0,
+            PublicBinRAMTonnage                        = Ram("public bin"),
+            HouseholdDrinksContainersTonnage           = Value("household drinks containers tonnage"),
+            HouseholdDrinksContainersRAMTonnage        = Ram("household drinks containers"),
+            TotalTonnage                               = Value("total tonnage") ?? 0,
+            SelfManagedConsumerWasteTonnage            = Value("self-managed consumer waste tonnage") ?? 0,
+            PartialHouseholdTonnage                    = Value("partial household tonnage") ?? 0,
+            PartialHouseholdRAMTonnage                 = Ram("partial household"),
+            PartialPublicBinTonnage                    = Value("partial public bin tonnage") ?? 0,
+            PartialPublicBinRAMTonnage                 = Ram("partial public bin"),
+            PartialHouseholdDrinksContainersTonnage    = Value("partial household drinks containers tonnage"),
+            PartialHouseholdDrinksContainersRAMTonnage = Ram("partial household drinks containers"),
+            PartialTotalTonnage                        = Value("partial total tonnage") ?? 0,
+            PartialSelfManagedConsumerWasteTonnage     = Value("partial self-managed consumer waste tonnage") ?? 0
+        };
     }
 
     private static CalcResultScaledupProducerTonnage ScaledTonnage(BillingCsv csv, int row, IReadOnlyDictionary<string, int> columns)

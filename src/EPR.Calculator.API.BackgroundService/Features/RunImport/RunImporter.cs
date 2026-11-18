@@ -36,6 +36,7 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
         var laDisposal = RunSectionsParser.ReadLaDisposalCostData(csv);
         var cancelled = ProducerSectionsParser.ReadCancelledProducers(csv);
         var scaledUp = ProducerSectionsParser.ReadScaledupProducers(csv, RunSectionsParser.MaterialCodes);
+        var partial = ProducerSectionsParser.ReadPartialObligations(csv, RunSectionsParser.MaterialCodes);
         var fees = FeeTableParser.Read(csv, RunSectionsParser.MaterialCodes);
         var rejected = ProducerSectionsParser.ReadRejectedProducers(csv);
         var modulation = RunSectionsParser.ReadModulation(csv, header.RunId, await materialService.GetMaterials());
@@ -58,6 +59,9 @@ public class RunImporter(ApplicationDBContext dbContext, ICalcResultWriter calcR
 
         if (scaledUp is not null)
             await calcResultWriter.StoreScaledData(header.RunId, scaledUp, cancellationToken);
+
+        if (partial is not null)
+            await calcResultWriter.StorePartialData(header.RunId, partial, cancellationToken);
 
         if (projected is not null)
         {
