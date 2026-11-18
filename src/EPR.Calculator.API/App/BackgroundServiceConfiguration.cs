@@ -39,6 +39,7 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
+using EPR.Calculator.API.BackgroundService.Features.RunImport;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -142,6 +143,7 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalcResultWriter, CalcResultWriter>();
             services.AddTransient<ISelfManagedConsumerWasteService, SelfManagedConsumerWasteService>();
             services.AddTransient<IReportedProducerService, ReportedProducerService>();
+            services.AddTransient<IRunImporter, RunImporter>();
 
             return services;
         }
