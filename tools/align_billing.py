@@ -1,14 +1,17 @@
 """
-Changes an original results or billing CSV to today's layout, with a light touch, so it can be compared with an export
-of the same run. Built to check runs imported from their files (POST /v1/runs/import) against the files they came from.
+Changes an original results or billing CSV to today's layout, so it can be compared with an export of the same run. It
+never changes a value other than a zero's format or a negative amount's sign, never adds, drops or reorders a row, and
+never takes anything from the export. Built to check runs imported from their files (POST /v1/runs/import) against the
+files they came from.
 
 Usage:
     python3 -I align_billing.py <original.csv>
     python3 -I align_billing.py <runs.zip>
 
 Writes compare/<original>.original-aligned.csv, in a compare folder next to the original or the zip, and prints the
-command to compare it with the downloaded export. Given the zip the import takes, it does that for each results and
-billing CSV in it, and skips the optional CSVs.
+command to compare it with the downloaded export. A file already in today's layout is copied there unchanged, under its
+own name. Given the zip the import takes, it does that for each results and billing CSV in it, and skips the
+optional CSVs.
 
 Changed to today's layout:
     - headings and labels reworded to today's wording (REWORDED, REWORDED_HEADINGS), and the small tables' "Total"
@@ -19,10 +22,11 @@ Changed to today's layout:
       there (MOVED_TO_END), such as late reporting's total
 
 Changed to today's formatting:
-    - section titles quoted, and every line but a producer's ending with a comma; titles and a producer table's heading
-      rows end with one after their last value (the fee table's heading rows are as wide as the table instead), and
-      empty cells outside the producer rows are unquoted
-    - the fee table's Totals row with its label just before the first group of columns
+    - section titles quoted, except the Error Table's, and every line but a producer's ending with a comma; titles and a
+      producer table's heading rows end with one after their last value (the fee table's heading rows are as wide as the
+      table instead), and empty cells outside the producer rows are unquoted
+    - the fee table's Totals row: in a billing file, with its label just before the first group of columns; in a results
+      file, with its label in the Leaver's Date column and its empty cells before the registration status code quoted
     - zeros printed like the other values in their column; in a column of zeros, as ZERO_FORMATS_BY_HEADING or
       ZERO_FORMATS say ("£0" as "£0.00", "0.00" as "0.000", "0%" as "0.00000000%")
     - empty producer values quoted in the columns today's file always quotes them (QUOTED_WHEN_EMPTY)
@@ -239,7 +243,7 @@ def change_layout(lines, name, first, heading, end):
                 source += offset if source >= position else 0
             for r in rows:
                 fields = lines[r][0]
-                if len(fields) < position:
+                if len(fields) < position or not any(v.strip() for v, _ in fields):
                     continue
                 if r == heading:
                     value = title
@@ -272,8 +276,20 @@ def change_layout(lines, name, first, heading, end):
         label = next(c for c, (v, _) in enumerate(lines[first][0]) if v.strip()) - 1
         for r in totals:
             lines[r][0][:] = [['', True] for _ in range(label)] + [['Totals', True], ['', False]]
-        return set(range(first, heading + 1)) | set(totals), set()
-    return set(), set(range(first, heading + 1)) if first < heading else set()
+        # A results file's Totals row quotes its empty cells before the registration status code.
+        status = column(headings(), 'registration status code') or 0
+        filled_totals = [r for r in rows if r > heading and r not in totals and not is_producer_row(lines[r][0])
+                         and next((v for v, _ in lines[r][0] if v.strip()), None) == 'Totals']
+        leaver = column(headings(), "leaver's date")
+        for r in filled_totals:
+            fields = lines[r][0]
+            label = next(c for c, (v, _) in enumerate(fields) if v.strip())
+            if leaver is not None and label != leaver and leaver < len(fields) and not fields[leaver][0]:
+                fields[label], fields[leaver] = ['', False], ['Totals', True]
+            for field in fields[:status]:
+                field[1] = field[1] or not field[0]
+        return set(range(first, heading + 1)) | set(totals), set(), set(filled_totals)
+    return set(), set(range(first, heading + 1)) if first < heading else set(), set()
 
 
 DECIMALS = re.compile(r'^(-?£?)-?\d[\d,]*(?:\.(\d+))?(%?)$')
@@ -328,18 +344,21 @@ def reword(lines):
 RUN_FILE = re.compile(r'^\d+-.*_(Results File_\d{8}|Billing File_\d{12}(_AUTHORISED)?)\.csv$')
 
 
-def align(text, aligned_path):
+def align(text, aligned_path, original_path):
     lines = raw_fields(text)
 
-    full_width, heading_rows = set(), set()
+    full_width, heading_rows, quoted_totals = set(), set(), set()
     for name, first, heading, end in tables(lines):
-        full, headings = change_layout(lines, name, first, heading, end)
+        full, headings, totals = change_layout(lines, name, first, heading, end)
         full_width |= full
         heading_rows |= headings
+        quoted_totals |= totals
         change_formatting(lines, name, first, heading, end)
     reword(lines)
 
     for r, (fields, _) in enumerate(lines):
+        if is_title(r, fields) and normalise(fields[0][0]) == 'error table':
+            continue
         if is_title(r, fields):
             fields[0][1] = True
         if r in full_width or is_producer_row(fields) or not any(v.strip() for v, _ in fields):
@@ -350,15 +369,19 @@ def align(text, aligned_path):
         if r in heading_rows or is_title(r, fields) or any(q for _, q in fields[last + 1:]):
             del fields[last + 1:]
         for field in fields:
-            field[1] = field[1] and bool(field[0])
+            field[1] = field[1] and (bool(field[0]) or r in quoted_totals)
         if fields[-1][0]:
             fields.append(['', False])
 
+    aligned = BOM + ''.join(','.join(f'"{v.replace(chr(34), chr(34) * 2)}"' if q else v for v, q in fields) + ending
+                            for fields, ending in lines)
+    # A file already in today's layout keeps its name, so it's clear nothing was changed.
+    if original_path.exists() and aligned == open(original_path, encoding='utf-8', newline='').read():
+        aligned_path.unlink(missing_ok=True)
+        aligned_path = aligned_path.with_name(original_path.name)
     aligned_path.parent.mkdir(exist_ok=True)
     with open(aligned_path, 'w', newline='', encoding='utf-8') as f:
-        f.write(BOM)
-        for fields, ending in lines:
-            f.write(','.join(f'"{v.replace(chr(34), chr(34) * 2)}"' if q else v for v, q in fields) + ending)
+        f.write(aligned)
     return aligned_path
 
 
@@ -367,7 +390,7 @@ def main(path):
     path = Path(path)
     compare = path.parent / 'compare'
     if path.suffix.lower() != '.zip':
-        return [align(open(path, encoding='utf-8-sig', newline='').read(), compare / f"{path.name}.original-aligned.csv")]
+        return [align(open(path, encoding='utf-8-sig', newline='').read(), compare / f"{path.name}.original-aligned.csv", path)]
 
     aligned = []
     with zipfile.ZipFile(path) as runs:
@@ -381,7 +404,7 @@ def main(path):
                 continue
             with runs.open(entry) as f:
                 text = io.TextIOWrapper(f, encoding='utf-8-sig', newline='').read()
-            aligned.append(align(text, compare / f"{name}.original-aligned.csv"))
+            aligned.append(align(text, compare / f"{name}.original-aligned.csv", path.parent / name))
     return aligned
 
 

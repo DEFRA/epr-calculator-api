@@ -35,7 +35,7 @@ Notable things found along the way (worth knowing about, not just implementation
 
 ## align_billing.py
 
-Changes an original results or billing CSV to today's layout, with a light touch, so it can be compared with an export of the same run. It was written to check runs imported with `POST /v1/runs/import` against the files they came from.
+Changes an original results or billing CSV to today's layout, so it can be compared with an export of the same run. It never changes a value other than a zero's format or a negative amount's sign, never adds, drops or reorders a row, and never takes anything from the export. It does change headings, columns, quoting and number formats, as listed below. It was written to check runs imported with `POST /v1/runs/import` against the files they came from.
 
 ```bash
 python3 -I align_billing.py <original.csv>
@@ -43,7 +43,7 @@ python3 -I align_billing.py <runs.zip>
 code --diff "compare/<original>.original-aligned.csv" "path/to/downloaded/csv"
 ```
 
-It writes `compare/<original>.original-aligned.csv`, in a `compare` folder next to the original, and prints the command to compare it with the downloaded export. Given the zip the import takes, it does that for each results and billing CSV in it, in run order, and skips the optional CSVs.
+It writes `compare/<original>.original-aligned.csv`, in a `compare` folder next to the original, and prints the command to compare it with the downloaded export. A file already in today's layout, such as run 102's, is copied there unchanged, under its own name, so it's clear nothing was changed. Given the zip the import takes, it does that for each results and billing CSV in it, in run order, and skips the optional CSVs.
 
 Changed to today's layout:
 
@@ -54,8 +54,8 @@ Changed to today's layout:
 
 Changed to today's formatting:
 
-- Section titles quoted, and every line but a producer's ending with a comma. Titles and a producer table's heading rows end with one after their last value; the fee table's heading rows are as wide as the table instead. Empty cells outside the producer rows unquoted, and empty producer values quoted in the columns today's file always quotes them (`QUOTED_WHEN_EMPTY`).
-- The fee table's Totals row with its label just before the first group of columns.
+- Section titles quoted, except the Error Table's, and every line but a producer's ending with a comma. Titles and a producer table's heading rows end with one after their last value; the fee table's heading rows are as wide as the table instead. Empty cells outside the producer rows unquoted, and empty producer values quoted in the columns today's file always quotes them (`QUOTED_WHEN_EMPTY`).
+- The fee table's Totals row: in a billing file, with its label just before the first group of columns; in a results file, with its label in the Leaver's Date column and its empty cells before the registration status code quoted.
 - Zeros printed like the other values in their column. In a column of zeros, as `ZERO_FORMATS_BY_HEADING` or `ZERO_FORMATS` say: `£0` as `£0.00`, `0.00` as `0.000`, `0%` as `0.00000000%`.
 - Negative amounts: `£-12.34` as `-£12.34`.
 - A BOM at the start.
