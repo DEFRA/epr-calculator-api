@@ -1,12 +1,14 @@
 """
-Changes an original billing CSV to today's layout, with a light touch, so it can be compared with an export of the same
-run. Built to check runs imported from their billing CSVs (POST /v1/runs/import) against the files they came from.
+Changes an original results or billing CSV to today's layout, with a light touch, so it can be compared with an export
+of the same run. Built to check runs imported from their files (POST /v1/runs/import) against the files they came from.
 
 Usage:
     python3 -I align_billing.py <original.csv>
+    python3 -I align_billing.py <runs.zip>
 
-Writes compare/<original>.original-aligned.csv, in a compare folder next to the original, and prints the command to
-compare it with the downloaded export.
+Writes compare/<original>.original-aligned.csv, in a compare folder next to the original or the zip, and prints the
+command to compare it with the downloaded export. Given the zip the import takes, it does that for each results and
+billing CSV in it, and skips the optional CSVs.
 
 Changed to today's layout:
     - headings and labels reworded to today's wording (REWORDED, REWORDED_HEADINGS), and the small tables' "Total"
@@ -31,8 +33,10 @@ Not changed:
     - every other value, as printed: numbers aren't reformatted, so "3581.4320" against "3581.432" shows
     - lines and sections today's layout adds, such as the Cut-off Date line or the Rejected Report, aren't added
 """
+import io
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 BOM = '\ufeff'
@@ -321,9 +325,10 @@ def reword(lines):
             field[0] = today(field[0])
 
 
-def main(original_path):
-    original_path = Path(original_path)
-    text = open(original_path, encoding='utf-8-sig', newline='').read()
+RUN_FILE = re.compile(r'^\d+-.*_(Results File_\d{8}|Billing File_\d{12}(_AUTHORISED)?)\.csv$')
+
+
+def align(text, aligned_path):
     lines = raw_fields(text)
 
     full_width, heading_rows = set(), set()
@@ -349,7 +354,6 @@ def main(original_path):
         if fields[-1][0]:
             fields.append(['', False])
 
-    aligned_path = original_path.parent / 'compare' / f"{original_path.name}.original-aligned.csv"
     aligned_path.parent.mkdir(exist_ok=True)
     with open(aligned_path, 'w', newline='', encoding='utf-8') as f:
         f.write(BOM)
@@ -358,6 +362,29 @@ def main(original_path):
     return aligned_path
 
 
+def main(path):
+    """Aligns the CSV, or each results and billing CSV in the zip, and returns the aligned files."""
+    path = Path(path)
+    compare = path.parent / 'compare'
+    if path.suffix.lower() != '.zip':
+        return [align(open(path, encoding='utf-8-sig', newline='').read(), compare / f"{path.name}.original-aligned.csv")]
+
+    aligned = []
+    with zipfile.ZipFile(path) as runs:
+        def run_order(entry):
+            run_id = Path(entry.filename).name.split('-')[0]
+            return int(run_id) if run_id.isdigit() else 0, entry.filename
+
+        for entry in sorted(runs.infolist(), key=run_order):
+            name = Path(entry.filename).name
+            if entry.is_dir() or not RUN_FILE.match(name):
+                continue
+            with runs.open(entry) as f:
+                text = io.TextIOWrapper(f, encoding='utf-8-sig', newline='').read()
+            aligned.append(align(text, compare / f"{name}.original-aligned.csv"))
+    return aligned
+
+
 if __name__ == '__main__':
-    aligned = main(sys.argv[1])
-    print(f'code --diff "{aligned}" "path/to/downloaded/billing/csv"')
+    for aligned in main(sys.argv[1]):
+        print(f'code --diff "{aligned}" "path/to/downloaded/csv"')

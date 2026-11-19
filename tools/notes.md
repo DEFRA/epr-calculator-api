@@ -35,14 +35,15 @@ Notable things found along the way (worth knowing about, not just implementation
 
 ## align_billing.py
 
-Changes an original billing CSV to today's layout, with a light touch, so it can be compared with an export of the same run. It was written to check runs imported with `POST /v1/runs/import` against the files they came from.
+Changes an original results or billing CSV to today's layout, with a light touch, so it can be compared with an export of the same run. It was written to check runs imported with `POST /v1/runs/import` against the files they came from.
 
 ```bash
 python3 -I align_billing.py <original.csv>
-code --diff "compare/<original>.original-aligned.csv" "path/to/downloaded/billing/csv"
+python3 -I align_billing.py <runs.zip>
+code --diff "compare/<original>.original-aligned.csv" "path/to/downloaded/csv"
 ```
 
-It writes `compare/<original>.original-aligned.csv`, in a `compare` folder next to the original, and prints the command to compare it with the downloaded export.
+It writes `compare/<original>.original-aligned.csv`, in a `compare` folder next to the original, and prints the command to compare it with the downloaded export. Given the zip the import takes, it does that for each results and billing CSV in it, in run order, and skips the optional CSVs.
 
 Changed to today's layout:
 
