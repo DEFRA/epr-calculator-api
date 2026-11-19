@@ -25,7 +25,7 @@ public class ProducerInvoiceNetTonnageService(
         try
         {
             var materials = await materialService.GetMaterials();
-            var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult, producerFeeDetails, materials);
+            var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult.CalcResultDetail.RunId, producerFeeDetails, materials);
 
             await bulkOps.BulkInsertAsync(dbContext, producerInvoicedNetTonnage, cancellationToken);
 
@@ -37,11 +37,9 @@ public class ProducerInvoiceNetTonnageService(
         }
     }
 
-    private static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<FeeDetail> producerFeeDetails, IReadOnlyList<MaterialDetail> materials)
+    public static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(int runId, IReadOnlyList<FeeDetail> producerFeeDetails, IReadOnlyList<MaterialDetail> materials)
     {
         var producers = producerFeeDetails.Where(producer => producer.Level == CommonConstants.LevelOne.ToString());
-
-        var runId = calcResult.CalcResultDetail.RunId;
 
         var producerInvoiceNetTonnages = ImmutableList.CreateBuilder<ProducerInvoicedMaterialNetTonnage>();
 

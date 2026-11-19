@@ -1,5 +1,5 @@
 using System.Globalization;
-using EPR.Calculator.API.BackgroundService.Features.RunImport;
+using EPR.Calculator.API.Services.RunImport;
 
 namespace EPR.Calculator.API.IntegrationTests;
 

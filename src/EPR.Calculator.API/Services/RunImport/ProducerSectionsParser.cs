@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
+namespace EPR.Calculator.API.Services.RunImport;
 
 /// <summary>
 ///     Reads the cancelled, scaled-up and partial obligation producer sections, finding columns by their headers since the wording has changed between layouts.
@@ -86,6 +86,38 @@ public static class ProducerSectionsParser
         return producers;
     }
 
+    /// <summary>An Error Table row; a blank holding company row, which the export adds, has no error code.</summary>
+    public record ErrorReportRow(int ProducerId, string? SubsidiaryId, string? ProducerName, string? TradingName, string? LeaverCode, string? ErrorCode);
+
+    /// <summary>
+    ///     The results file's Error Table; empty for files from before it was added. The file shows a missing value as "-".
+    /// </summary>
+    public static IReadOnlyList<ErrorReportRow> ReadErrorReport(BillingCsv csv)
+    {
+        if (csv.TryFindRow("Error Table") is not { } section)
+            return [];
+
+        var header = csv.FindRow("Producer ID", section);
+        var columns = Columns(csv, header);
+        string? Value(int row, string column) => csv.Cell(row, columns[column]) is "" or "-" ? null : csv.Cell(row, columns[column]);
+        // The export shows a missing leaver code as "-", and writes an empty one as it is.
+        string? LeaverCode(int row) => csv.Cell(row, columns["leaver code"]) is "-" ? null : csv.Cell(row, columns["leaver code"]);
+
+        var errors = new List<ErrorReportRow>();
+        for (var row = header + 1; row < csv.Rows.Count && csv.Cell(row, 0).Length > 0; row++)
+        {
+            errors.Add(new ErrorReportRow(
+                csv.Cell(row, 0) == "-" ? 0 : (int)csv.Number(row, 0),
+                Value(row, "subsidiary id"),
+                Value(row, "producer / subsidiary name"),
+                Value(row, "trading name"),
+                LeaverCode(row),
+                Value(row, "error code text")));
+        }
+
+        return errors;
+    }
+
     /// <summary>Returns null when the file has no scaled-up producers section.</summary>
     public static CalcResultScaledupProducers? ReadScaledupProducers(BillingCsv csv, IReadOnlyDictionary<string, string> materialCodes)
     {
@@ -97,7 +129,8 @@ public static class ProducerSectionsParser
         var blocks = MaterialBlocks(csv, header - 1, materialCodes);
         var producers = new List<CalcResultScaledupProducer>();
 
-        for (var row = header + 1; IsProducerRow(csv, row); row++)
+        var row = header + 1;
+        for (; IsProducerRow(csv, row); row++)
         {
             producers.Add(new CalcResultScaledupProducer
             {
@@ -114,7 +147,21 @@ public static class ProducerSectionsParser
             });
         }
 
-        return new CalcResultScaledupProducers { ScaledupProducers = [.. producers] };
+        // The results file follows the producers with a Totals row; the billing file doesn't.
+        var total = csv.Cell(row, columns["scale-up factor"]) == "Totals"
+            ? new CalcResultScaledupProducer
+            {
+                ProducerId                        = 0,
+                Level                             = string.Empty,
+                SubmissionPeriodCode              = string.Empty,
+                DaysInSubmissionPeriod            = -1,
+                DaysInWholePeriod                 = -1,
+                ScaleupFactor                     = -1,
+                ScaledupProducerTonnageByMaterial = blocks.ToDictionary(b => b.Code, b => ScaledTonnage(csv, row, b.Columns))
+            }
+            : null;
+
+        return new CalcResultScaledupProducers { ScaledupProducers = [.. producers], Total = total };
     }
 
     /// <summary>Returns null when the file has no partial obligations section (runs before partial obligations).</summary>
@@ -239,7 +286,7 @@ public static class ProducerSectionsParser
         return columns;
     }
 
-    internal static string Normalise(string header) =>
+    public static string Normalise(string header) =>
         header.ToLowerInvariant()
             .Replace("household packaging tonnage", "household tonnage")
             .Replace("self managed", "self-managed")

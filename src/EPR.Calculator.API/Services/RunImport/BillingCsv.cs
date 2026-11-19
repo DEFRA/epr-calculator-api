@@ -1,6 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
+namespace EPR.Calculator.API.Services.RunImport;
 
 /// <summary>
 ///     The rows of a results or billing CSV, with the lookups and value parsing the layouts share.
@@ -64,6 +65,7 @@ public sealed class BillingCsv(IReadOnlyList<string[]> rows, IReadOnlySet<(int R
     // CsvSanitiser adds a left-to-right mark to stop spreadsheets reading a field as a formula.
     private static string Clean(string value) => value.Replace("‎", "").Trim();
 
+    [SuppressMessage("Critical Code Smell", "S3776:Cognitive Complexity of methods should not be too high", Justification = "A CSV reader's branches are the format's rules; splitting them up would hide them.")]
     private static string[]? ReadRecord(TextReader reader, int row, HashSet<(int, int)> quotedEmptyCells)
     {
         if (reader.Peek() < 0)

@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
+namespace EPR.Calculator.API.Services.RunImport;
 
 /// <summary>
 ///     Reads the H1 and H2 projected producers sections, which list each material's columns in the order their exporters write them.

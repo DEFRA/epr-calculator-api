@@ -11,6 +11,7 @@ using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Filters;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.RunImport;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -196,6 +197,8 @@ public static class ServiceConfiguration
             services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
 
             services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
+            services.AddTransient<IRunImporter, RunImporter>();
+            services.AddTransient<IRunImportService, RunImportService>();
             services.AddScoped<IBillingFileService, BillingFileService>();
             services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
             services.AddScoped<IFileExportService, FileExportService>();

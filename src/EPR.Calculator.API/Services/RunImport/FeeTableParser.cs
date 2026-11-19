@@ -1,7 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.Features.RunImport;
+namespace EPR.Calculator.API.Services.RunImport;
 
 /// <summary>
 ///     Reads the producer fee table (the "Calculation Result" section) into fee details, finding each column by its
@@ -22,7 +23,22 @@ public static class FeeTableParser
         for (; row < csv.Rows.Count && int.TryParse(csv.Cell(row, 0), out _); row++)
             producers.Add(ReadRow(csv, row, columns, materialCodes, warnings));
 
-        return new FeeTable(producers, ReadTotals(csv, header - 1, columns), warnings);
+        // The results file's Totals row shows every column's total; the billing file's only has its label, so its totals
+        // come from the section totals above the headers instead.
+        var total = IsFilledTotalsRow(csv, row)
+            ? ReadRow(csv, row, columns, materialCodes, warnings)
+            : ReadTotals(csv, header - 1, columns);
+
+        return new FeeTable(producers, total, warnings);
+    }
+
+    private static bool IsFilledTotalsRow(BillingCsv csv, int row)
+    {
+        if (row >= csv.Rows.Count)
+            return false;
+
+        var label = Array.FindIndex(csv.Rows[row], cell => cell.Trim() == "Totals");
+        return label >= 0 && csv.Rows[row].Skip(label + 1).Any(cell => cell.Trim().Length > 0);
     }
 
     /// <summary>
@@ -57,12 +73,15 @@ public static class FeeTableParser
         };
     }
 
+    [SuppressMessage("Critical Code Smell", "S3776:Cognitive Complexity of methods should not be too high", Justification = "Each branch is a column of the fee table, read the way the file lays it out.")]
     private static FeeDetail ReadRow(BillingCsv csv, int row, Columns columns, IReadOnlyDictionary<string, string> materialCodes, List<string> warnings)
     {
         decimal? Value(int? column) => column is { } c ? csv.NullableNumber(row, c) : null;
         decimal Number(int? column) => Value(column) ?? 0;
         string? Text(int? column) => column is { } c ? csv.Text(row, c) : null;
-        string? Raw(int? column) => column is { } c ? csv.Cell(row, c) : null;
+        // A producer's empty cell stays empty, since the export shows a null as "-"; the Totals row's is a null.
+        var isTotalsRow = csv.Cell(row, columns.Require(null, null, "producer id")).Length == 0;
+        string? Raw(int? column) => column is { } c ? (isTotalsRow ? csv.Text(row, c) : csv.Cell(row, c)) : null;
 
         // A section's bad debt column has its own group heading ("Bad Debt Provision"), so it's found by its header alone.
         FeeWithBadDebt Section(string group, string withoutBadDebt, string badDebt, string withBadDebt) => new()
@@ -176,7 +195,7 @@ public static class FeeTableParser
 
         var fee = new FeeDetail
         {
-            ProducerId               = (int)csv.Number(row, columns.Require(null, null, "producer id")),
+            ProducerId               = (int)(csv.NullableNumber(row, columns.Require(null, null, "producer id")) ?? 0),
             SubsidiaryId             = Text(columns.Find(null, null, "subsidiary id")) ?? string.Empty,
             ProducerName             = Text(columns.Find(null, null, "producer / subsidiary name")) ?? string.Empty,
             TradingName              = Text(columns.Find(null, null, "trading name")),
@@ -212,7 +231,7 @@ public static class FeeTableParser
     {
         const string group = "calculation of suggested billing instructions";
         decimal? Value(string header) => columns.Find(group, null, header) is { } c ? csv.NullableNumber(row, c) : null;
-        string? Text(string header) => columns.Find(group, null, header) is { } c ? csv.Cell(row, c) : null;
+        string? Text(string header) => columns.Find(group, null, header) is { } c ? csv.Text(row, c) : null;
 
         LiabilityDirection? Direction(string header) => Text(header) switch
         {
@@ -224,7 +243,7 @@ public static class FeeTableParser
         return new BillingInstruction
         {
             CurrentYearInvoiceTotalToDate             = Value("current year invoiced total to date"),
-            TonnageChangeSinceLastInvoice             = Text("tonnage change since last invoice") is { Length: > 0 } t ? t : null,
+            TonnageChangeSinceLastInvoice             = Text("tonnage change since last invoice"),
             LiabilityDifference                       = Value("liability difference (calc vs prev)"),
             MaterialityLiabilityDirection             = Direction("material £ threshold breached"),
             TonnageAmountLiabilityDirection           = Direction("tonnage £ threshold breached (if tonnage changed)"),
