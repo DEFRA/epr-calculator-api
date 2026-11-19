@@ -89,6 +89,20 @@ public class RunImportPackageTests
     }
 
     [TestMethod]
+    public void Read_TakesEachRunsOrganisations_InTheirOrder()
+    {
+        var runs = RunImportPackage.Read(Zip(
+            (Results51, ""),
+            (Billing51, ""),
+            (RunImportPackage.OrganisationsFile, "run_id,organisation_id,subsidiary_id,obligation_status,organisation_name\n51,200,,E,\n51,100,7,N,\"Not, In The Files\"\n")));
+
+        runs.Single().Details.Organisations.ShouldBe([
+            new RunOrganisation(200, null, null, null, null, null, null, null, "E"),
+            new RunOrganisation(100, "7", "Not, In The Files", null, null, null, null, null, "N")
+        ]);
+    }
+
+    [TestMethod]
     public void Read_Fails_WhenAnOptionalFileIsMissingAColumn() =>
         Should.Throw<RunImportPackageException>(() => RunImportPackage.Read(Zip((Results51, ""), (Billing51, ""), (RunImportPackage.ProducerNamesFile, "run_id,producer_id\n"))))
             .Message.ShouldBe("producer-names.csv has no 'subsidiary_id' column: it needs run_id, producer_id, subsidiary_id, producer_name, trading_name");

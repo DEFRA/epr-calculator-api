@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.IntegrationTests;
 
 /// <summary>
 ///     Imports real runs from their results and billing files, which aren't in the repo, with any producer-names.csv,
-///     run-details.csv and billing-instructions.csv beside them. Set PAYCAL_IMPORT_FILES to the folder holding them to run
+///     run-details.csv, billing-instructions.csv and organisations.csv beside them. Set PAYCAL_IMPORT_FILES to the folder holding them to run
 ///     this. It writes run-{id}.results-comparison.txt and run-{id}.billing-comparison.txt there.
 /// </summary>
 [TestCategory("LocalFiles")]
@@ -52,7 +52,7 @@ public class RunImportIntegrationTests : BaseIntegrationTest
     {
         var files = Directory.GetFiles(folder, "*_Results File_*.csv")
             .Concat(Directory.GetFiles(folder, "*_Billing File_*_AUTHORISED.csv"))
-            .Concat(new[] { RunImportPackage.ProducerNamesFile, RunImportPackage.RunDetailsFile, RunImportPackage.BillingInstructionsFile }
+            .Concat(new[] { RunImportPackage.ProducerNamesFile, RunImportPackage.RunDetailsFile, RunImportPackage.BillingInstructionsFile, RunImportPackage.OrganisationsFile }
                 .Select(name => Path.Combine(folder, name))
                 .Where(File.Exists));
 
@@ -98,6 +98,18 @@ public class RunImportIntegrationTests : BaseIntegrationTest
         var run = await db.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId);
         run.Name.ShouldBe(header.RunName);
         run.IsBillingFileShared.ShouldBeTrue();
+
+        // Every organisation organisations.csv marks as having errors is stored as one, and no other.
+        var organisationsFile = Path.Combine(folder, RunImportPackage.OrganisationsFile);
+        if (File.Exists(organisationsFile))
+        {
+            var withErrors = BillingCsv.Read(new StreamReader(organisationsFile)).Rows
+                .Where(r => r.Length > 3 && r[0] == runId.ToString(CultureInfo.InvariantCulture) && r[3] == "E")
+                .Select(r => (int.Parse(r[1], CultureInfo.InvariantCulture), string.IsNullOrEmpty(r[2]) ? null : r[2]))
+                .Distinct();
+            (await db.CalculatorRunOrganisations.AsNoTracking().Where(o => o.CalculatorRunId == runId && o.IsError).ToListAsync())
+                .Select(o => (o.OrganisationId, o.SubsidiaryId)).Distinct().Order().ShouldBe(withErrors.Order());
+        }
     }
 
     // One entry per producer, material and field, so a mismatch can be reported by field name without printing producer data.

@@ -29,6 +29,11 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
         // The other tests' runs share the database, so the imported run gets an ID of its own.
         var runId = 900_000 + year;
         string WithRunId(string csv) => Regex.Replace(csv, @"^Run Id,""\d+"",", $"Run Id,\"{runId}\",", RegexOptions.Multiline);
+        var results = await File.ReadAllTextAsync($"ExpectedData/{year}-results.csv");
+
+        // One organisation from the Error Table marked as having errors, and one the files don't show.
+        var withErrors = ProducerSectionsParser.ReadErrorReport(BillingCsv.Read(new StringReader(results))).First(e => e.ErrorCode is not null);
+        const int notInTheFiles = 999_999;
 
         using var zip = new MemoryStream();
         using (var archive = new ZipArchive(zip, ZipArchiveMode.Create, leaveOpen: true))
@@ -39,9 +44,10 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
                 writer.Write(text);
             }
 
-            Add($"{runId}-test{year}_Results File_20260923.csv", WithRunId(await File.ReadAllTextAsync($"ExpectedData/{year}-results.csv")));
+            Add($"{runId}-test{year}_Results File_20260923.csv", WithRunId(results));
             Add($"{runId}-test{year}_Billing File_202609231710_AUTHORISED.csv", WithRunId(await File.ReadAllTextAsync($"ExpectedData/{year}-billing.csv")));
             Add(RunImportPackage.RunDetailsFile, $"line\nrun_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at\n{runId},2026-09-23T17:09:42.1234567,7,\"INITIAL RUN COMPLETED\",\"some-user\",2026-09-24T09:15:00\n");
+            Add(RunImportPackage.OrganisationsFile, $"run_id,organisation_id,subsidiary_id,obligation_status,organisation_name\n{runId},{withErrors.ProducerId},{withErrors.SubsidiaryId},E,\n{runId},{notInTheFiles},,N,\"Not, In The Files\"\n");
         }
 
         await using var scope = Provider.CreateAsyncScope();
@@ -76,9 +82,13 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
 
+        var db = services.GetRequiredService<ApplicationDBContext>();
+        var organisations = await db.CalculatorRunOrganisations.AsNoTracking().Where(o => o.CalculatorRunId == runId).ToListAsync();
+        organisations.Where(o => o.IsError).Select(o => (o.OrganisationId, o.SubsidiaryId)).ShouldBe([(withErrors.ProducerId, withErrors.SubsidiaryId)]);
+        organisations.Single(o => o.OrganisationId == notInTheFiles).OrganisationName.ShouldBe("Not, In The Files");
+
         // What was invoiced, which later runs read: a net tonnage per material for each producer, and an invoice
         // instruction for each billing instruction.
-        var db = services.GetRequiredService<ApplicationDBContext>();
         var instructions = await db.ProducerResultFileSuggestedBillingInstruction.AsNoTracking().Where(i => i.CalculatorRunId == runId).ToListAsync();
         var invoiced = await db.ProducerDesignatedRunInvoiceInstruction.AsNoTracking().Where(i => i.CalculatorRunId == runId).ToListAsync();
         var tonnages = await db.ProducerInvoicedMaterialNetTonnage.AsNoTracking().Where(t => t.CalculatorRunId == runId).ToListAsync();

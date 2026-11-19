@@ -25,6 +25,7 @@ public static partial class RunImportPackage
     public const string ProducerNamesFile = "producer-names.csv";
     public const string RunDetailsFile = "run-details.csv";
     public const string BillingInstructionsFile = "billing-instructions.csv";
+    public const string OrganisationsFile = "organisations.csv";
 
     /// <returns>The zip's runs, in run ID order.</returns>
     /// <exception cref="RunImportPackageException">The zip is missing a file, or has one it doesn't recognise or can't read.</exception>
@@ -54,6 +55,7 @@ public static partial class RunImportPackage
             var names = optional.TryGetValue(ProducerNamesFile, out var namesText) ? ReadProducerNames(namesText) : [];
             var runDetails = optional.TryGetValue(RunDetailsFile, out var detailsText) ? ReadRunDetails(detailsText) : [];
             var decisions = optional.TryGetValue(BillingInstructionsFile, out var decisionsText) ? ReadBillingDecisions(decisionsText) : [];
+            var organisations = optional.TryGetValue(OrganisationsFile, out var organisationsText) ? ReadOrganisations(organisationsText) : [];
 
             return [.. results.Keys.Order().Select(runId =>
             {
@@ -61,7 +63,8 @@ public static partial class RunImportPackage
                 return new RunImportPackageRun(runId, results[runId].Name, results[runId].Text, billing[runId].Name, billing[runId].Text, details with
                 {
                     ProducerNames = names.GetValueOrDefault(runId) ?? details.ProducerNames,
-                    BillingDecisions = decisions.GetValueOrDefault(runId) ?? details.BillingDecisions
+                    BillingDecisions = decisions.GetValueOrDefault(runId) ?? details.BillingDecisions,
+                    Organisations = organisations.GetValueOrDefault(runId) ?? details.Organisations
                 });
             })];
         }
@@ -92,12 +95,13 @@ public static partial class RunImportPackage
                 }
                 else if (name.Equals(ProducerNamesFile, StringComparison.OrdinalIgnoreCase)
                          || name.Equals(RunDetailsFile, StringComparison.OrdinalIgnoreCase)
-                         || name.Equals(BillingInstructionsFile, StringComparison.OrdinalIgnoreCase))
+                         || name.Equals(BillingInstructionsFile, StringComparison.OrdinalIgnoreCase)
+                         || name.Equals(OrganisationsFile, StringComparison.OrdinalIgnoreCase))
                     optional[name] = text;
                 else
                     throw new RunImportPackageException(
                         $"The zip has a file the import doesn't recognise: '{entry.FullName}'. It takes results files ('{{run id}}-…_Results File_{{yyyyMMdd}}.csv'), " +
-                        $"authorised billing files ('{{run id}}-…_Billing File_{{yyyyMMddHHmm}}_AUTHORISED.csv'), {ProducerNamesFile}, {RunDetailsFile} and {BillingInstructionsFile}.");
+                        $"authorised billing files ('{{run id}}-…_Billing File_{{yyyyMMddHHmm}}_AUTHORISED.csv'), {ProducerNamesFile}, {RunDetailsFile}, {BillingInstructionsFile} and {OrganisationsFile}.");
             }
         }
 
@@ -150,6 +154,8 @@ public static partial class RunImportPackage
 
     private static string? Text(Dictionary<string, string> row, string column) => row[column].Length == 0 ? null : row[column];
 
+    private static string? Optional(Dictionary<string, string> row, string column) => row.TryGetValue(column, out var value) && value.Length > 0 ? value : null;
+
     // Names are kept exactly as written, spaces at either end included: those are what the files lost.
     private static Dictionary<int, IReadOnlyDictionary<(int ProducerId, string? SubsidiaryId), ProducerNames>> ReadProducerNames(string text) =>
         ReadRows(text, ProducerNamesFile, "run_id", "producer_id", "subsidiary_id", "producer_name", "trading_name")
@@ -173,6 +179,22 @@ public static partial class RunImportPackage
                 });
 
     /// <summary>Today's classification for production's, which said whether the billing file had been sent ("… RUN COMPLETED").</summary>
+    private static Dictionary<int, IReadOnlyList<RunOrganisation>> ReadOrganisations(string text) =>
+        ReadRows(text, OrganisationsFile, "run_id", "organisation_id", "subsidiary_id", "obligation_status")
+            .GroupBy(row => Int(row, "run_id", OrganisationsFile))
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyList<RunOrganisation>)[.. g.Select(row => new RunOrganisation(
+                    Int(row, "organisation_id", OrganisationsFile),
+                    Text(row, "subsidiary_id"),
+                    Optional(row, "organisation_name"),
+                    Optional(row, "trading_name"),
+                    Optional(row, "status_code"),
+                    Optional(row, "joiner_date"),
+                    Optional(row, "leaver_date"),
+                    Optional(row, "num_days_obligated") is null ? null : Int(row, "num_days_obligated", OrganisationsFile),
+                    row["obligation_status"].Trim()))]);
+
     private static RunClassification Classification(string status) => status.Trim().ToUpperInvariant() switch
     {
         "INITIAL RUN" or "INITIAL RUN COMPLETED" or "INITIAL"                   => RunClassification.Initial,

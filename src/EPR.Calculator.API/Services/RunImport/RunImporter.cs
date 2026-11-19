@@ -93,7 +93,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             await calcResultWriter.StoreModulationResult(header.RunId, modulation, cancellationToken);
 
         await calcResultWriter.StoreProducerFees(header.RunId, fees.Total, fees.Producers, cancellationToken);
-        await StoreProducersAsync(header.RunId, fees.Producers, errors, details.ProducerNames, cancellationToken);
+        await StoreProducersAsync(header.RunId, fees.Producers, errors, details.ProducerNames, details.Organisations, cancellationToken);
         await StoreErrorReportAsync(header, details, errors, cancellationToken);
         await StoreBillingInstructionsAsync(header, file, details, fees.Producers, cancelled, new BillingFileContents(billed.Producers, rejected), cancellationToken);
         await StoreInvoicedAsync(header.RunId, fees.Producers, cancellationToken);
@@ -259,46 +259,67 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         IReadOnlyList<FeeDetail> producers,
         IReadOnlyList<ProducerSectionsParser.ErrorReportRow> errors,
         IReadOnlyDictionary<(int ProducerId, string? SubsidiaryId), ProducerNames> names,
+        IReadOnlyList<RunOrganisation> runOrganisations,
         CancellationToken cancellationToken)
     {
-        var stored = new HashSet<(int, string?)>();
         var organisations = new Dictionary<(int, string?), CalculatorRunOrganisation>();
+        var producerDetails = AddProducers(runId, producers, organisations);
+        AddErrorTableOrganisations(runId, errors, names, organisations);
+        ApplyProductionOrganisations(runId, runOrganisations, organisations, producerDetails);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 
+    private Dictionary<(int, string?), ProducerDetail> AddProducers(
+        int runId,
+        IReadOnlyList<FeeDetail> producers,
+        Dictionary<(int, string?), CalculatorRunOrganisation> organisations)
+    {
+        var producerDetails = new Dictionary<(int, string?), ProducerDetail>();
         foreach (var producer in producers.OrderBy(p => p.Level))
         {
-            var subsidiaryId = NullIfEmpty(producer.SubsidiaryId);
-            if (!stored.Add((producer.ProducerId, subsidiaryId)))
+            var key = (producer.ProducerId, NullIfEmpty(producer.SubsidiaryId));
+            if (producerDetails.ContainsKey(key))
                 continue;
 
-            dbContext.ProducerDetail.Add(new ProducerDetail
+            var detail = new ProducerDetail
             {
                 CalculatorRunId = runId,
-                ProducerId      = producer.ProducerId,
-                SubsidiaryId    = subsidiaryId,
+                ProducerId      = key.ProducerId,
+                SubsidiaryId    = key.Item2,
                 ProducerName    = producer.ProducerName,
                 TradingName     = producer.TradingName,
                 StatusCode      = producer.StatusCode,
                 JoinerDate      = producer.JoinerDate,
                 LeaverDate      = producer.LeaverDate
-            });
+            };
+            producerDetails[key] = detail;
+            dbContext.ProducerDetail.Add(detail);
 
             var organisation = new CalculatorRunOrganisation
             {
                 CalculatorRunId  = runId,
-                OrganisationId   = producer.ProducerId,
-                SubsidiaryId     = subsidiaryId,
+                OrganisationId   = key.ProducerId,
+                SubsidiaryId     = key.Item2,
                 OrganisationName = producer.ProducerName,
                 TradingName      = producer.TradingName,
                 StatusCode       = producer.StatusCode,
                 JoinerDate       = producer.JoinerDate,
                 LeaverDate       = producer.LeaverDate
             };
-            organisations[(producer.ProducerId, subsidiaryId)] = organisation;
+            organisations[key] = organisation;
             dbContext.CalculatorRunOrganisations.Add(organisation);
         }
+        return producerDetails;
+    }
 
-        // The Error Table shows the organisations' own names, which can differ from the fee table's. Producers with errors
-        // are often not in the fee table at all.
+    // The Error Table shows the organisations' own names, which can differ from the fee table's. Producers with errors
+    // are often not in the fee table at all.
+    private void AddErrorTableOrganisations(
+        int runId,
+        IReadOnlyList<ProducerSectionsParser.ErrorReportRow> errors,
+        IReadOnlyDictionary<(int ProducerId, string? SubsidiaryId), ProducerNames> names,
+        Dictionary<(int, string?), CalculatorRunOrganisation> organisations)
+    {
         foreach (var error in errors.Where(e => e.ProducerName is not null))
         {
             if (organisations.TryGetValue((error.ProducerId, error.SubsidiaryId), out var existing))
@@ -308,21 +329,65 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
                 continue;
             }
 
-            if (!stored.Add((error.ProducerId, error.SubsidiaryId)))
-                continue;
-
             var name = names.GetValueOrDefault((error.ProducerId, error.SubsidiaryId));
-            dbContext.CalculatorRunOrganisations.Add(new CalculatorRunOrganisation
+            var organisation = new CalculatorRunOrganisation
             {
                 CalculatorRunId  = runId,
                 OrganisationId   = error.ProducerId,
                 SubsidiaryId     = error.SubsidiaryId,
                 OrganisationName = string.IsNullOrEmpty(name?.ProducerName) ? error.ProducerName! : name.ProducerName,
                 TradingName      = string.IsNullOrEmpty(name?.TradingName) ? error.TradingName : name.TradingName
-            });
+            };
+            organisations[(error.ProducerId, error.SubsidiaryId)] = organisation;
+            dbContext.CalculatorRunOrganisations.Add(organisation);
         }
+    }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+    /// <summary>
+    ///     What production holds that the files don't: which organisations had errors, and organisations the files don't
+    ///     show at all. A value the row leaves empty keeps what the files gave. An organisation listed again is another of
+    ///     its rows, as production can hold several.
+    /// </summary>
+    private void ApplyProductionOrganisations(
+        int runId,
+        IReadOnlyList<RunOrganisation> runOrganisations,
+        Dictionary<(int, string?), CalculatorRunOrganisation> organisations,
+        Dictionary<(int, string?), ProducerDetail> producerDetails)
+    {
+        var applied = new HashSet<(int, string?)>();
+        foreach (var source in runOrganisations)
+        {
+            var key = (source.OrganisationId, NullIfEmpty(source.SubsidiaryId));
+            if (!applied.Add(key) || !organisations.TryGetValue(key, out var organisation))
+            {
+                organisation = new CalculatorRunOrganisation
+                {
+                    CalculatorRunId  = runId,
+                    OrganisationId   = source.OrganisationId,
+                    SubsidiaryId     = key.Item2,
+                    OrganisationName = source.OrganisationName
+                        ?? throw new FormatException($"Organisation {source.OrganisationId} {source.SubsidiaryId} isn't in the files, so {RunImportPackage.OrganisationsFile} needs its name")
+                };
+                organisations.TryAdd(key, organisation);
+                dbContext.CalculatorRunOrganisations.Add(organisation);
+            }
+
+            organisation.IsError          = source.ObligationStatus == "E";
+            organisation.OrganisationName = source.OrganisationName ?? organisation.OrganisationName;
+            organisation.TradingName      = source.TradingName ?? organisation.TradingName;
+            organisation.StatusCode       = source.StatusCode ?? organisation.StatusCode;
+            organisation.JoinerDate       = source.JoinerDate ?? organisation.JoinerDate;
+            organisation.LeaverDate       = source.LeaverDate ?? organisation.LeaverDate;
+            organisation.DaysObligated    = source.DaysObligated ?? organisation.DaysObligated;
+
+            if (source.ObligationStatus == "O" && producerDetails.TryGetValue(key, out var detail))
+            {
+                detail.StatusCode    = source.StatusCode ?? detail.StatusCode;
+                detail.JoinerDate    = source.JoinerDate ?? detail.JoinerDate;
+                detail.LeaverDate    = source.LeaverDate ?? detail.LeaverDate;
+                detail.DaysObligated = source.DaysObligated ?? detail.DaysObligated;
+            }
+        }
     }
 
     // The CSV writer removes commas, tabs and line breaks and trims, so a corrected name shows like this in the files.

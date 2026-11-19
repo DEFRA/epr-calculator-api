@@ -34,6 +34,12 @@ public record RunImportDetails
     public IReadOnlyDictionary<int, BillingDecision> BillingDecisions { get; init; } = new Dictionary<int, BillingDecision>();
 
     /// <summary>
+    ///     What production holds about the run's organisations that the files don't: which had errors, and any the files
+    ///     don't show. The rest are worked out from the producers and the Error Table.
+    /// </summary>
+    public IReadOnlyList<RunOrganisation> Organisations { get; init; } = [];
+
+    /// <summary>
     ///     Default parameters the file doesn't show, by their parameter reference (for example "LRET-AL-R").
     /// </summary>
     public IReadOnlyDictionary<string, string> DefaultParameters { get; init; } = new Dictionary<string, string>();
@@ -42,3 +48,15 @@ public record RunImportDetails
 public sealed record ProducerNames(string? ProducerName, string? TradingName);
 
 public sealed record BillingDecision(string AcceptReject, string? DecidedBy, DateTime? DecidedAt);
+
+/// <summary>An organisation in a run's data. An obligation status of "E" is an organisation with errors; "O" is obligated.</summary>
+public sealed record RunOrganisation(
+    int OrganisationId,
+    string? SubsidiaryId,
+    string? OrganisationName,
+    string? TradingName,
+    string? StatusCode,
+    string? JoinerDate,
+    string? LeaverDate,
+    int? DaysObligated,
+    string ObligationStatus);
