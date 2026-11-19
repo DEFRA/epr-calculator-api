@@ -26,7 +26,7 @@ public static class FeeTableParser
         // The results file's Totals row shows every column's total; the billing file's only has its label, so its totals
         // come from the section totals above the headers instead.
         var total = IsFilledTotalsRow(csv, row)
-            ? ReadRow(csv, row, columns, materialCodes, warnings)
+            ? ReadRow(csv, row, columns, materialCodes, warnings) with { LeaverDate = "Totals" }
             : ReadTotals(csv, header - 1, columns);
 
         return new FeeTable(producers, total, warnings);
