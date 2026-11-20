@@ -52,7 +52,7 @@ public class RunImportIntegrationTests : BaseIntegrationTest
     {
         var files = Directory.GetFiles(folder, "*_Results File_*.csv")
             .Concat(Directory.GetFiles(folder, "*_Billing File_*_AUTHORISED.csv"))
-            .Concat(new[] { RunImportPackage.ProducerNamesFile, RunImportPackage.RunDetailsFile, RunImportPackage.BillingInstructionsFile, RunImportPackage.OrganisationsFile }
+            .Concat(new[] { RunImportPackage.ProducerNamesFile, RunImportPackage.RunDetailsFile, RunImportPackage.BillingInstructionsFile, RunImportPackage.OrganisationsFile, RunImportPackage.LapcapFile }
                 .Select(name => Path.Combine(folder, name))
                 .Where(File.Exists));
 

@@ -50,6 +50,11 @@ public record RunImportDetails
     public IReadOnlyList<RunOrganisation> Organisations { get; init; } = [];
 
     /// <summary>
+    ///     LAPCAP costs as uploaded, by reference (for example "WLS-AL"), for those the results file rounds to 2 decimal places.
+    /// </summary>
+    public IReadOnlyDictionary<string, decimal> LapcapCosts { get; init; } = new Dictionary<string, decimal>();
+
+    /// <summary>
     ///     Default parameters the file doesn't show, by their parameter reference (for example "LRET-AL-R").
     /// </summary>
     public IReadOnlyDictionary<string, string> DefaultParameters { get; init; } = new Dictionary<string, string>();

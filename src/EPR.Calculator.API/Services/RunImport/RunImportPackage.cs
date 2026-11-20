@@ -17,7 +17,7 @@ public sealed record RunImportPackageRun(int RunId, string ResultsFileName, stri
 
 /// <summary>
 ///     Reads a zip of runs to import: each run's results CSV and authorised billing CSV, by their usual names, and
-///     optionally producer-names.csv, run-details.csv and billing-instructions.csv, each covering every run with a
+///     optionally producer-names.csv, run-details.csv, billing-instructions.csv, organisations.csv and lapcap.csv, each covering every run with a
 ///     run_id column.
 /// </summary>
 public static partial class RunImportPackage
@@ -26,6 +26,7 @@ public static partial class RunImportPackage
     public const string RunDetailsFile = "run-details.csv";
     public const string BillingInstructionsFile = "billing-instructions.csv";
     public const string OrganisationsFile = "organisations.csv";
+    public const string LapcapFile = "lapcap.csv";
 
     /// <returns>The zip's runs, in run ID order.</returns>
     /// <exception cref="RunImportPackageException">The zip is missing a file, or has one it doesn't recognise or can't read.</exception>
@@ -56,6 +57,7 @@ public static partial class RunImportPackage
             var runDetails = optional.TryGetValue(RunDetailsFile, out var detailsText) ? ReadRunDetails(detailsText) : [];
             var decisions = optional.TryGetValue(BillingInstructionsFile, out var decisionsText) ? ReadBillingDecisions(decisionsText) : [];
             var organisations = optional.TryGetValue(OrganisationsFile, out var organisationsText) ? ReadOrganisations(organisationsText) : [];
+            var lapcapCosts = optional.TryGetValue(LapcapFile, out var lapcapText) ? ReadLapcapCosts(lapcapText) : [];
 
             return [.. results.Keys.Order().Select(runId =>
             {
@@ -64,7 +66,8 @@ public static partial class RunImportPackage
                 {
                     ProducerNames = names.GetValueOrDefault(runId) ?? details.ProducerNames,
                     BillingDecisions = decisions.GetValueOrDefault(runId) ?? details.BillingDecisions,
-                    Organisations = organisations.GetValueOrDefault(runId) ?? details.Organisations
+                    Organisations = organisations.GetValueOrDefault(runId) ?? details.Organisations,
+                    LapcapCosts = lapcapCosts.GetValueOrDefault(runId) ?? details.LapcapCosts
                 });
             })];
         }
@@ -96,12 +99,13 @@ public static partial class RunImportPackage
                 else if (name.Equals(ProducerNamesFile, StringComparison.OrdinalIgnoreCase)
                          || name.Equals(RunDetailsFile, StringComparison.OrdinalIgnoreCase)
                          || name.Equals(BillingInstructionsFile, StringComparison.OrdinalIgnoreCase)
-                         || name.Equals(OrganisationsFile, StringComparison.OrdinalIgnoreCase))
+                         || name.Equals(OrganisationsFile, StringComparison.OrdinalIgnoreCase)
+                         || name.Equals(LapcapFile, StringComparison.OrdinalIgnoreCase))
                     optional[name] = text;
                 else
                     throw new RunImportPackageException(
                         $"The zip has a file the import doesn't recognise: '{entry.FullName}'. It takes results files ('{{run id}}-…_Results File_{{yyyyMMdd}}.csv'), " +
-                        $"authorised billing files ('{{run id}}-…_Billing File_{{yyyyMMddHHmm}}_AUTHORISED.csv'), {ProducerNamesFile}, {RunDetailsFile}, {BillingInstructionsFile} and {OrganisationsFile}.");
+                        $"authorised billing files ('{{run id}}-…_Billing File_{{yyyyMMddHHmm}}_AUTHORISED.csv'), {ProducerNamesFile}, {RunDetailsFile}, {BillingInstructionsFile}, {OrganisationsFile} and {LapcapFile}.");
             }
         }
 
@@ -184,6 +188,17 @@ public static partial class RunImportPackage
                     BillingFileCreatedBy = Optional(row, "billing_file_created_by"),
                     BillingFileCreatedAt = OptionalDate(row, "billing_file_created_at", RunDetailsFile)
                 });
+
+    private static Dictionary<int, IReadOnlyDictionary<string, decimal>> ReadLapcapCosts(string text) =>
+        ReadRows(text, LapcapFile, "run_id", "unique_reference", "total_cost")
+            .GroupBy(row => Int(row, "run_id", LapcapFile))
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyDictionary<string, decimal>)g.ToDictionary(
+                    row => row["unique_reference"].Trim(),
+                    row => decimal.TryParse(row["total_cost"].Trim(), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var cost)
+                        ? cost
+                        : throw new RunImportPackageException($"{LapcapFile} has '{row["total_cost"]}' for total_cost, which isn't a number")));
 
     /// <summary>Today's classification for production's, which said whether the billing file had been sent ("… RUN COMPLETED").</summary>
     private static Dictionary<int, IReadOnlyList<RunOrganisation>> ReadOrganisations(string text) =>

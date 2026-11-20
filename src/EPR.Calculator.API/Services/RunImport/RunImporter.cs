@@ -146,7 +146,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
 
     private async Task StoreRunAsync(RunSectionsParser.RunHeader header, BillingFileName file, RunImportDetails details, CalcResultLapcapData lapcap, IReadOnlyDictionary<string, string> defaultParameters, CancellationToken cancellationToken)
     {
-        var lapcapMaster = await LapcapMasterAsync(header, lapcap, cancellationToken);
+        var lapcapMaster = await LapcapMasterAsync(header, lapcap, details.LapcapCosts, cancellationToken);
         var parameterMaster = await ParameterMasterAsync(header, defaultParameters, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -189,7 +189,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
 
     // Only one LAPCAP and one parameter file is active per year, so a new upload closes the previous one, as the app does.
     // Runs in a year that used the same file share it.
-    private async Task<LapcapDataMaster> LapcapMasterAsync(RunSectionsParser.RunHeader header, CalcResultLapcapData lapcap, CancellationToken cancellationToken)
+    private async Task<LapcapDataMaster> LapcapMasterAsync(RunSectionsParser.RunHeader header, CalcResultLapcapData lapcap, IReadOnlyDictionary<string, decimal> exactCosts, CancellationToken cancellationToken)
     {
         var file = header.LapcapFile;
         var existing = await dbContext.LapcapDataMaster.SingleOrDefaultAsync(m =>
@@ -210,15 +210,22 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             LapcapFileName = file.FileName
         };
 
-        // The LAPCAP section shows the uploaded cost for each country and material.
+        // The LAPCAP section shows the uploaded cost for each country and material, to 2 decimal places.
         foreach (var (material, cost) in lapcap.ByMaterial)
             foreach (var (country, value) in new[] { ("ENG", cost.England), ("WLS", cost.Wales), ("SCT", cost.Scotland), ("NI", cost.NorthernIreland) })
-                master.Details.Add(new LapcapDataDetail { UniqueReference = $"{country}-{material}", TotalCost = value });
+                master.Details.Add(new LapcapDataDetail { UniqueReference = $"{country}-{material}", TotalCost = ExactCost($"{country}-{material}", value, exactCosts) });
 
+        if (exactCosts.Keys.Except(master.Details.Select(d => d.UniqueReference)).FirstOrDefault() is { } unknown)
+            throw new FormatException($"{RunImportPackage.LapcapFile} has a cost for '{unknown}', which run {header.RunId}'s LAPCAP section doesn't show");
 
         dbContext.Add(master);
         return master;
     }
+
+    private static decimal ExactCost(string reference, decimal shown, IReadOnlyDictionary<string, decimal> exactCosts) =>
+        !exactCosts.TryGetValue(reference, out var exact) ? shown
+        : Math.Abs(exact - shown) <= 0.005m ? exact
+        : throw new FormatException($"{RunImportPackage.LapcapFile} has {exact} for '{reference}', which doesn't round to the {shown} the results file shows");
 
     private async Task<DefaultParameterSettingMaster> ParameterMasterAsync(RunSectionsParser.RunHeader header, IReadOnlyDictionary<string, string> defaultParameters, CancellationToken cancellationToken)
     {

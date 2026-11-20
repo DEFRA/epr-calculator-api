@@ -47,6 +47,7 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
             Add($"{runId}-test{year}_Results File_20260923.csv", WithRunId(results));
             Add($"{runId}-test{year}_Billing File_202609231710_AUTHORISED.csv", WithRunId(await File.ReadAllTextAsync($"ExpectedData/{year}-billing.csv")));
             Add(RunImportPackage.RunDetailsFile, $"line\nrun_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at,updated_by,updated_at,billing_run_started_at,billing_file_created_by,billing_file_created_at\n{runId},2026-09-23T17:09:42.1234567,7,\"INITIAL RUN COMPLETED\",\"some-user\",2026-09-24T09:15:00,\"designer\",2026-09-23T17:12:00,2026-09-23T17:13:00,\"creator\",2026-09-23T17:10:30.5\n");
+            Add(RunImportPackage.LapcapFile, $"run_id,unique_reference,total_cost\n{runId},ENG-AL,5000.004\n");
             Add(RunImportPackage.OrganisationsFile, $"run_id,organisation_id,subsidiary_id,obligation_status,organisation_name\n{runId},{withErrors.ProducerId},{withErrors.SubsidiaryId},E,\n{runId},{notInTheFiles},,N,\"Not, In The Files\"\n");
         }
 
@@ -112,7 +113,7 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
         var lapcapMaster = await db.LapcapDataMaster.AsNoTracking().Include(m => m.Details).SingleAsync(m => m.Id == run.LapcapDataMasterId);
         var templates = (await db.LapcapDataTemplateMaster.AsNoTracking().ToListAsync()).ToImmutableList();
         lapcapMaster.Details.Select(d => (d.UniqueReference, d.TotalCost)).OrderBy(d => d.UniqueReference)
-            .ShouldBe(LapcapDataDetails("TestData/lapcap.csv", lapcapMaster, templates).Select(d => (d.UniqueReference, d.TotalCost)).OrderBy(d => d.UniqueReference));
+            .ShouldBe(LapcapDataDetails("TestData/lapcap.csv", lapcapMaster, templates).Select(d => (d.UniqueReference, d.UniqueReference == "ENG-AL" ? 5000.004m : d.TotalCost)).OrderBy(d => d.UniqueReference));
 
         var parameters = await db.DefaultParameterSettingDetail.AsNoTracking().Where(d => d.DefaultParameterSettingMasterId == run.DefaultParameterSettingMasterId).ToListAsync();
         var imported = parameters.ToDictionary(d => d.ParameterUniqueReferenceId, d => Normalise(d.ParameterValue));
