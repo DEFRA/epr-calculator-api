@@ -160,10 +160,13 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             CalculationRunStatus            = CalculationRunStatus.Completed,
             BillingRunStatus                = BillingRunStatus.Completed,
             IsBillingFileShared             = file.IsAuthorised,
-            BillingFileSharedAt             = file.IsAuthorised ? details.BillingFileSharedAt ?? file.CreatedAt : null,
+            BillingFileSharedAt             = file.IsAuthorised ? details.BillingFileSharedAt ?? details.BillingFileCreatedAt ?? file.CreatedAt : null,
             BillingFileSharedBy             = file.IsAuthorised ? details.BillingFileSharedBy ?? details.BillingFileCreatedBy ?? header.RunBy : null,
             CreatedBy                       = header.RunBy,
             CreatedAt                       = details.RunDate ?? header.RunDate,
+            UpdatedBy                       = details.UpdatedBy,
+            UpdatedAt                       = details.UpdatedAt,
+            BillingRunStartedAt             = details.BillingRunStartedAt is { } startedAt ? DateTime.SpecifyKind(startedAt, DateTimeKind.Utc) : null,
             OrgPomDataLoadedAt              = header.OrgPomDataLoadedAt,
             LapcapDataMasterId              = lapcapMaster.Id,
             DefaultParameterSettingMasterId = parameterMaster.Id
@@ -173,7 +176,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         {
             BillingCsvFileName     = file.CsvFileName,
             BillingJsonFileName    = file.JsonFileName,
-            BillingFileCreatedDate = file.CreatedAt,
+            BillingFileCreatedDate = details.BillingFileCreatedAt ?? file.CreatedAt,
             BillingFileCreatedBy   = details.BillingFileCreatedBy ?? header.RunBy
         });
 
@@ -211,6 +214,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         foreach (var (material, cost) in lapcap.ByMaterial)
             foreach (var (country, value) in new[] { ("ENG", cost.England), ("WLS", cost.Wales), ("SCT", cost.Scotland), ("NI", cost.NorthernIreland) })
                 master.Details.Add(new LapcapDataDetail { UniqueReference = $"{country}-{material}", TotalCost = value });
+
 
         dbContext.Add(master);
         return master;
@@ -436,7 +440,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             details.BillingDecisions.Count > 0
                 ? details.BillingDecisions.GetValueOrDefault(producerId)
                 : billedIds.Contains(producerId)
-                    ? new BillingDecision(BillingConstants.Action.Accepted, acceptedBy, file.CreatedAt)
+                    ? new BillingDecision(BillingConstants.Action.Accepted, acceptedBy, details.BillingFileCreatedAt ?? file.CreatedAt)
                     : rejectedById.TryGetValue(producerId, out var r)
                         ? new BillingDecision(BillingConstants.Action.Rejected, r.ConfirmedBy, r.ConfirmedAt)
                         : null;

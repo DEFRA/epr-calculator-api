@@ -46,7 +46,7 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
 
             Add($"{runId}-test{year}_Results File_20260923.csv", WithRunId(results));
             Add($"{runId}-test{year}_Billing File_202609231710_AUTHORISED.csv", WithRunId(await File.ReadAllTextAsync($"ExpectedData/{year}-billing.csv")));
-            Add(RunImportPackage.RunDetailsFile, $"line\nrun_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at\n{runId},2026-09-23T17:09:42.1234567,7,\"INITIAL RUN COMPLETED\",\"some-user\",2026-09-24T09:15:00\n");
+            Add(RunImportPackage.RunDetailsFile, $"line\nrun_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at,updated_by,updated_at,billing_run_started_at,billing_file_created_by,billing_file_created_at\n{runId},2026-09-23T17:09:42.1234567,7,\"INITIAL RUN COMPLETED\",\"some-user\",2026-09-24T09:15:00,\"designer\",2026-09-23T17:12:00,2026-09-23T17:13:00,\"creator\",2026-09-23T17:10:30.5\n");
             Add(RunImportPackage.OrganisationsFile, $"run_id,organisation_id,subsidiary_id,obligation_status,organisation_name\n{runId},{withErrors.ProducerId},{withErrors.SubsidiaryId},E,\n{runId},{notInTheFiles},,N,\"Not, In The Files\"\n");
         }
 
@@ -101,7 +101,14 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
             invoiced.Single(i => i.ProducerId == instruction.ProducerId).InvoiceAmount.ShouldBe(instruction.TotalProducerBillWithBadDebt);
 
         // The LAPCAP and parameter uploads the run used, worked out from the file, are the ones the calculator run uploaded.
-        var run = await db.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId);
+        var run = await db.CalculatorRuns.AsNoTracking().Include(r => r.CalculatorRunBillingFileMetadata).SingleAsync(r => r.Id == runId);
+        run.ShouldSatisfyAllConditions(
+            r => r.UpdatedBy.ShouldBe("designer"),
+            r => r.UpdatedAt.ShouldBe(new DateTime(2026, 9, 23, 17, 12, 0)),
+            r => r.BillingRunStartedAt.ShouldBe(new DateTime(2026, 9, 23, 17, 13, 0, DateTimeKind.Utc)),
+            r => r.CalculatorRunBillingFileMetadata.Single().BillingFileCreatedBy.ShouldBe("creator"),
+            r => r.CalculatorRunBillingFileMetadata.Single().BillingFileCreatedDate.ShouldBe(new DateTime(2026, 9, 23, 17, 10, 30, 500)));
+
         var lapcapMaster = await db.LapcapDataMaster.AsNoTracking().Include(m => m.Details).SingleAsync(m => m.Id == run.LapcapDataMasterId);
         var templates = (await db.LapcapDataTemplateMaster.AsNoTracking().ToListAsync()).ToImmutableList();
         lapcapMaster.Details.Select(d => (d.UniqueReference, d.TotalCost)).OrderBy(d => d.UniqueReference)

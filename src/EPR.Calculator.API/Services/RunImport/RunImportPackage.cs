@@ -156,6 +156,8 @@ public static partial class RunImportPackage
 
     private static string? Optional(Dictionary<string, string> row, string column) => row.TryGetValue(column, out var value) && value.Length > 0 ? value : null;
 
+    private static DateTime? OptionalDate(Dictionary<string, string> row, string column, string fileName) => row.ContainsKey(column) ? Date(row, column, fileName) : null;
+
     // Names are kept exactly as written, spaces at either end included: those are what the files lost.
     private static Dictionary<int, IReadOnlyDictionary<(int ProducerId, string? SubsidiaryId), ProducerNames>> ReadProducerNames(string text) =>
         ReadRows(text, ProducerNamesFile, "run_id", "producer_id", "subsidiary_id", "producer_name", "trading_name")
@@ -174,8 +176,13 @@ public static partial class RunImportPackage
                 {
                     RunDate             = Date(row, "created_at", RunDetailsFile),
                     Classification      = Classification(row["classification"]),
-                    BillingFileSharedBy = Text(row, "billing_file_shared_by"),
-                    BillingFileSharedAt = Date(row, "billing_file_shared_at", RunDetailsFile)
+                    BillingFileSharedBy  = Text(row, "billing_file_shared_by"),
+                    BillingFileSharedAt  = Date(row, "billing_file_shared_at", RunDetailsFile),
+                    UpdatedBy            = Optional(row, "updated_by"),
+                    UpdatedAt            = OptionalDate(row, "updated_at", RunDetailsFile),
+                    BillingRunStartedAt  = OptionalDate(row, "billing_run_started_at", RunDetailsFile),
+                    BillingFileCreatedBy = Optional(row, "billing_file_created_by"),
+                    BillingFileCreatedAt = OptionalDate(row, "billing_file_created_at", RunDetailsFile)
                 });
 
     /// <summary>Today's classification for production's, which said whether the billing file had been sent ("… RUN COMPLETED").</summary>

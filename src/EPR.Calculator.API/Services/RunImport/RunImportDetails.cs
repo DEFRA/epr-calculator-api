@@ -13,8 +13,18 @@ public record RunImportDetails
     /// <summary>When the run was made, to the second; the files only show the minute.</summary>
     public DateTime? RunDate { get; init; }
 
+    /// <summary>Who designated the run, and when.</summary>
+    public string? UpdatedBy { get; init; }
+
+    public DateTime? UpdatedAt { get; init; }
+
+    public DateTime? BillingRunStartedAt { get; init; }
+
     /// <summary>Who created the billing file; defaults to who ran the calculation (the file's "Run by").</summary>
     public string? BillingFileCreatedBy { get; init; }
+
+    /// <summary>When the billing file was created, to the second; the file name only shows the minute.</summary>
+    public DateTime? BillingFileCreatedAt { get; init; }
 
     /// <summary>When the billing file was sent to FSS; defaults to when it was created.</summary>
     public DateTime? BillingFileSharedAt { get; init; }
