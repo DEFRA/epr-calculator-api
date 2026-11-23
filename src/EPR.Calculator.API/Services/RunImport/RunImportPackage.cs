@@ -37,7 +37,8 @@ public static partial class RunImportPackage
         {
             zip = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: true);
         }
-        catch (InvalidDataException)
+        // An upload shorter than a zip's end record makes some streams, such as an uploaded file's, throw on seeking before the start.
+        catch (Exception ex) when (ex is InvalidDataException or ArgumentOutOfRangeException)
         {
             throw new RunImportPackageException("The upload isn't a zip file");
         }

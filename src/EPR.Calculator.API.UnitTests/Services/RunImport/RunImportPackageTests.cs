@@ -52,6 +52,11 @@ public class RunImportPackageTests
             .Message.ShouldBe("The upload isn't a zip file");
 
     [TestMethod]
+    public void Read_Fails_WhenAnUploadedFileIsTooShortToBeAZip() =>
+        Should.Throw<RunImportPackageException>(() => RunImportPackage.Read(new NoSeekingBeforeTheStart("short"u8.ToArray())))
+            .Message.ShouldBe("The upload isn't a zip file");
+
+    [TestMethod]
     public void Read_IgnoresMacFolderFiles() =>
         RunImportPackage.Read(Zip((Results51, ""), (Billing51, ""), ("__MACOSX/._x.csv", ""), (".DS_Store", ""))).Count.ShouldBe(1);
 
@@ -123,6 +128,15 @@ public class RunImportPackageTests
     public void Read_Fails_WhenAnOptionalFileIsMissingAColumn() =>
         Should.Throw<RunImportPackageException>(() => RunImportPackage.Read(Zip((Results51, ""), (Billing51, ""), (RunImportPackage.ProducerNamesFile, "run_id,producer_id\n"))))
             .Message.ShouldBe("producer-names.csv has no 'subsidiary_id' column: it needs run_id, producer_id, subsidiary_id, producer_name, trading_name");
+
+    // Like an uploaded file's stream, which throws ArgumentOutOfRangeException rather than IOException.
+    private sealed class NoSeekingBeforeTheStart(byte[] bytes) : MemoryStream(bytes)
+    {
+        public override long Seek(long offset, SeekOrigin loc) =>
+            (loc == SeekOrigin.End ? Length : loc == SeekOrigin.Current ? Position : 0) + offset < 0
+                ? throw new ArgumentOutOfRangeException(nameof(offset))
+                : base.Seek(offset, loc);
+    }
 
     private static MemoryStream Zip(params (string Name, string Text)[] files)
     {
