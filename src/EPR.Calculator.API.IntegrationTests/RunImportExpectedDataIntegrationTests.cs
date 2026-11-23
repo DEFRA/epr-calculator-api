@@ -88,6 +88,19 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
         organisations.Where(o => o.IsError).Select(o => (o.OrganisationId, o.SubsidiaryId)).ShouldBe([(withErrors.ProducerId, withErrors.SubsidiaryId)]);
         organisations.Single(o => o.OrganisationId == notInTheFiles).OrganisationName.ShouldBe("Not, In The Files");
 
+        // Each partially obligated producer's obligated days, from the results file's Partial Obligation section.
+        var partialDays = (ProducerSectionsParser.ReadPartialObligations(BillingCsv.Read(new StringReader(results)), RunSectionsParser.MaterialCodes) ?? [])
+            .Where(p => p.DaysObligated is not null)
+            .GroupBy(p => (p.ProducerId, SubsidiaryId: string.IsNullOrEmpty(p.SubsidiaryId) ? null : p.SubsidiaryId))
+            .Select(g => (g.Key.ProducerId, g.Key.SubsidiaryId, g.First().DaysObligated))
+            .OrderBy(d => d)
+            .ToList();
+        if (year == 2026)
+            partialDays.ShouldNotBeEmpty();
+        var producerDays = await db.ProducerDetail.AsNoTracking().Where(p => p.CalculatorRunId == runId && p.DaysObligated != null).ToListAsync();
+        producerDays.Select(p => (p.ProducerId, p.SubsidiaryId, p.DaysObligated)).OrderBy(d => d).ShouldBe(partialDays);
+        organisations.Where(o => o.DaysObligated != null).Select(o => (o.OrganisationId, o.SubsidiaryId, o.DaysObligated)).OrderBy(d => d).ShouldBe(partialDays);
+
         // What was invoiced, which later runs read: a net tonnage per material for each producer, and an invoice
         // instruction for each billing instruction.
         var instructions = await db.ProducerResultFileSuggestedBillingInstruction.AsNoTracking().Where(i => i.CalculatorRunId == runId).ToListAsync();

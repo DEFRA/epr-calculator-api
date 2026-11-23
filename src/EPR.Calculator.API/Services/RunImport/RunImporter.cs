@@ -93,7 +93,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             await calcResultWriter.StoreModulationResult(header.RunId, modulation, cancellationToken);
 
         await calcResultWriter.StoreProducerFees(header.RunId, fees.Total, fees.Producers, cancellationToken);
-        await StoreProducersAsync(header.RunId, fees.Producers, errors, details.ProducerNames, details.Organisations, cancellationToken);
+        await StoreProducersAsync(header.RunId, fees.Producers, partial, errors, details.ProducerNames, details.Organisations, cancellationToken);
         await StoreErrorReportAsync(header, details, errors, cancellationToken);
         await StoreBillingInstructionsAsync(header, file, details, fees.Producers, cancelled, new BillingFileContents(billed.Producers, rejected), cancellationToken);
         await StoreInvoicedAsync(header.RunId, details, fees.Producers, cancellationToken);
@@ -271,13 +271,14 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
     private async Task StoreProducersAsync(
         int runId,
         IReadOnlyList<FeeDetail> producers,
+        IReadOnlyList<CalcResultPartialObligation>? partial,
         IReadOnlyList<ProducerSectionsParser.ErrorReportRow> errors,
         IReadOnlyDictionary<(int ProducerId, string? SubsidiaryId), ProducerNames> names,
         IReadOnlyList<RunOrganisation> runOrganisations,
         CancellationToken cancellationToken)
     {
         var organisations = new Dictionary<(int, string?), CalculatorRunOrganisation>();
-        var producerDetails = AddProducers(runId, producers, organisations);
+        var producerDetails = AddProducers(runId, producers, partial, organisations);
         AddErrorTableOrganisations(runId, errors, names, organisations);
         ApplyProductionOrganisations(runId, runOrganisations, organisations, producerDetails);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -286,8 +287,13 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
     private Dictionary<(int, string?), ProducerDetail> AddProducers(
         int runId,
         IReadOnlyList<FeeDetail> producers,
+        IReadOnlyList<CalcResultPartialObligation>? partial,
         Dictionary<(int, string?), CalculatorRunOrganisation> organisations)
     {
+        var daysObligated = (partial ?? [])
+            .Where(p => p.DaysObligated is not null)
+            .GroupBy(p => (p.ProducerId, NullIfEmpty(p.SubsidiaryId)))
+            .ToDictionary(g => g.Key, g => g.First().DaysObligated);
         var producerDetails = new Dictionary<(int, string?), ProducerDetail>();
         foreach (var producer in producers.OrderBy(p => p.Level))
         {
@@ -304,7 +310,8 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
                 TradingName     = producer.TradingName,
                 StatusCode      = producer.StatusCode,
                 JoinerDate      = producer.JoinerDate,
-                LeaverDate      = producer.LeaverDate
+                LeaverDate      = producer.LeaverDate,
+                DaysObligated   = daysObligated.GetValueOrDefault(key)
             };
             producerDetails[key] = detail;
             dbContext.ProducerDetail.Add(detail);
@@ -318,7 +325,8 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
                 TradingName      = producer.TradingName,
                 StatusCode       = producer.StatusCode,
                 JoinerDate       = producer.JoinerDate,
-                LeaverDate       = producer.LeaverDate
+                LeaverDate       = producer.LeaverDate,
+                DaysObligated    = daysObligated.GetValueOrDefault(key)
             };
             organisations[key] = organisation;
             dbContext.CalculatorRunOrganisations.Add(organisation);
