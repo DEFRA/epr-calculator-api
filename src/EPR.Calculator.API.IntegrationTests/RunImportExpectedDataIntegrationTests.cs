@@ -100,6 +100,7 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
         tonnages.Count.ShouldBe(instructions.Count(i => i.SuggestedBillingInstruction != "CANCEL") * materials);
         foreach (var instruction in instructions.Where(i => i is { BillingInstructionAcceptReject: "Accepted", SuggestedBillingInstruction: "INITIAL" }))
             invoiced.Single(i => i.ProducerId == instruction.ProducerId).InvoiceAmount.ShouldBe(instruction.TotalProducerBillWithBadDebt);
+        invoiced.Select(i => i.InstructionConfirmedDate).Distinct().ShouldBe([new DateTime(2026, 9, 24, 9, 15, 0)]);
 
         // The LAPCAP and parameter uploads the run used, worked out from the file, are the ones the calculator run uploaded.
         var run = await db.CalculatorRuns.AsNoTracking().Include(r => r.CalculatorRunBillingFileMetadata).SingleAsync(r => r.Id == runId);
@@ -107,6 +108,7 @@ public class RunImportExpectedDataIntegrationTests : BaseIntegrationTest
             r => r.UpdatedBy.ShouldBe("designer"),
             r => r.UpdatedAt.ShouldBe(new DateTime(2026, 9, 23, 17, 12, 0)),
             r => r.BillingRunStartedAt.ShouldBe(new DateTime(2026, 9, 23, 17, 13, 0, DateTimeKind.Utc)),
+            r => r.BillingFileSharedAt.ShouldBe(new DateTime(2026, 9, 24, 9, 15, 0, DateTimeKind.Utc)),
             r => r.CalculatorRunBillingFileMetadata.Single().BillingFileCreatedBy.ShouldBe("creator"),
             r => r.CalculatorRunBillingFileMetadata.Single().BillingFileCreatedDate.ShouldBe(new DateTime(2026, 9, 23, 17, 10, 30, 500)));
 

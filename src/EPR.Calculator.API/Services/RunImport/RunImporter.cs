@@ -96,7 +96,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         await StoreProducersAsync(header.RunId, fees.Producers, errors, details.ProducerNames, details.Organisations, cancellationToken);
         await StoreErrorReportAsync(header, details, errors, cancellationToken);
         await StoreBillingInstructionsAsync(header, file, details, fees.Producers, cancelled, new BillingFileContents(billed.Producers, rejected), cancellationToken);
-        await StoreInvoicedAsync(header.RunId, fees.Producers, cancellationToken);
+        await StoreInvoicedAsync(header.RunId, details, fees.Producers, cancellationToken);
 
         if (transaction is not null)
             await transaction.CommitAsync(cancellationToken);
@@ -160,13 +160,13 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
             CalculationRunStatus            = CalculationRunStatus.Completed,
             BillingRunStatus                = BillingRunStatus.Completed,
             IsBillingFileShared             = file.IsAuthorised,
-            BillingFileSharedAt             = file.IsAuthorised ? details.BillingFileSharedAt ?? details.BillingFileCreatedAt ?? file.CreatedAt : null,
+            BillingFileSharedAt             = file.IsAuthorised ? Utc(details.BillingFileSharedAt ?? details.BillingFileCreatedAt ?? file.CreatedAt) : null,
             BillingFileSharedBy             = file.IsAuthorised ? details.BillingFileSharedBy ?? details.BillingFileCreatedBy ?? header.RunBy : null,
             CreatedBy                       = header.RunBy,
             CreatedAt                       = details.RunDate ?? header.RunDate,
             UpdatedBy                       = details.UpdatedBy,
             UpdatedAt                       = details.UpdatedAt,
-            BillingRunStartedAt             = details.BillingRunStartedAt is { } startedAt ? DateTime.SpecifyKind(startedAt, DateTimeKind.Utc) : null,
+            BillingRunStartedAt             = details.BillingRunStartedAt is { } startedAt ? Utc(startedAt) : null,
             OrgPomDataLoadedAt              = header.OrgPomDataLoadedAt,
             LapcapDataMasterId              = lapcapMaster.Id,
             DefaultParameterSettingMasterId = parameterMaster.Id
@@ -221,6 +221,9 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         dbContext.Add(master);
         return master;
     }
+
+    // These columns are converted to UTC when saved: production's values already are, so mark them as UTC to keep them as they are.
+    private static DateTime Utc(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc);
 
     private static decimal ExactCost(string reference, decimal shown, IReadOnlyDictionary<string, decimal> exactCosts) =>
         !exactCosts.TryGetValue(reference, out var exact) ? shown
@@ -509,7 +512,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
     ///     What was invoiced, as a run stores it: the net tonnages when the run finishes, and the invoice instructions when
     ///     its billing file is sent. Later runs read these for what's already been invoiced.
     /// </summary>
-    private async Task StoreInvoicedAsync(int runId, IReadOnlyList<FeeDetail> producers, CancellationToken cancellationToken)
+    private async Task StoreInvoicedAsync(int runId, RunImportDetails details, IReadOnlyList<FeeDetail> producers, CancellationToken cancellationToken)
     {
         var materials = await materialService.GetMaterials();
         dbContext.ProducerInvoicedMaterialNetTonnage.AddRange(ProducerInvoiceNetTonnageService.GetInvoicedMaterialNetTonnage(runId, producers, materials));
@@ -517,7 +520,7 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
 
         var run = await dbContext.CalculatorRuns.AsNoTracking().SingleAsync(r => r.Id == runId, cancellationToken);
         if (run.IsBillingFileShared)
-            await invoiceDetailsService.InsertInvoiceDetailsAtProducerLevel(runId, run.BillingFileSharedAt!.Value, run.BillingFileSharedBy!, cancellationToken);
+            await invoiceDetailsService.InsertInvoiceDetailsAtProducerLevel(runId, details.InstructionConfirmedAt ?? run.BillingFileSharedAt!.Value, run.BillingFileSharedBy!, cancellationToken);
     }
 
     /// <summary>

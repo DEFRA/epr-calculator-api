@@ -31,6 +31,9 @@ public record RunImportDetails
 
     public string? BillingFileSharedBy { get; init; }
 
+    /// <summary>When the billing instructions were confirmed; defaults to when the billing file was sent to FSS.</summary>
+    public DateTime? InstructionConfirmedAt { get; init; }
+
     /// <summary>
     ///     Names as stored, by producer and subsidiary ID, for the names the files lost commas or spaces from.
     /// </summary>

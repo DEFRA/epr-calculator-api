@@ -76,7 +76,7 @@ public class RunImportPackageTests
         var runs = RunImportPackage.Read(Zip(
             (Results51, ""),
             (Billing51, ""),
-            (RunImportPackage.RunDetailsFile, "run_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at,updated_by,updated_at,billing_run_started_at,billing_file_created_by,billing_file_created_at\n51,2026-03-11T11:33:14.0190108,12,\"RECALCULATION RUN COMPLETED\",\"Someone\",2026-03-20T16:47:59,\"Designer\",2026-03-19T10:20:54,2026-03-20T11:33:15,\"Creator\",2026-03-20T11:48:15\n"),
+            (RunImportPackage.RunDetailsFile, "run_id,created_at,classification_id,classification,billing_file_shared_by,billing_file_shared_at,updated_by,updated_at,billing_run_started_at,billing_file_created_by,billing_file_created_at,instruction_confirmed_at\n51,2026-03-11T11:33:14.0190108,12,\"RECALCULATION RUN COMPLETED\",\"Someone\",2026-03-20T16:47:59,\"Designer\",2026-03-19T10:20:54,2026-03-20T11:33:15,\"Creator\",2026-03-20T11:48:15,2026-03-20T15:47:59\n"),
             (RunImportPackage.BillingInstructionsFile, "run_id,producer_id,accept_reject,accept_reject_by,accept_reject_at\n51,100,Rejected,\"Someone Else\",2026-03-19T10:00:00\n")));
 
         var details = runs.Single().Details;
@@ -90,6 +90,7 @@ public class RunImportPackageTests
             d => d.BillingRunStartedAt.ShouldBe(new DateTime(2026, 3, 20, 11, 33, 15)),
             d => d.BillingFileCreatedBy.ShouldBe("Creator"),
             d => d.BillingFileCreatedAt.ShouldBe(new DateTime(2026, 3, 20, 11, 48, 15)),
+            d => d.InstructionConfirmedAt.ShouldBe(new DateTime(2026, 3, 20, 15, 47, 59)),
             d => d.BillingDecisions[100].ShouldBe(new BillingDecision("Rejected", "Someone Else", new DateTime(2026, 3, 19, 10, 0, 0))));
     }
 

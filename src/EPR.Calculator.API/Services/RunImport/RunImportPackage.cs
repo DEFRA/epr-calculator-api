@@ -186,7 +186,8 @@ public static partial class RunImportPackage
                     UpdatedAt            = OptionalDate(row, "updated_at", RunDetailsFile),
                     BillingRunStartedAt  = OptionalDate(row, "billing_run_started_at", RunDetailsFile),
                     BillingFileCreatedBy = Optional(row, "billing_file_created_by"),
-                    BillingFileCreatedAt = OptionalDate(row, "billing_file_created_at", RunDetailsFile)
+                    BillingFileCreatedAt = OptionalDate(row, "billing_file_created_at", RunDetailsFile),
+                    InstructionConfirmedAt = OptionalDate(row, "instruction_confirmed_at", RunDetailsFile)
                 });
 
     private static Dictionary<int, IReadOnlyDictionary<string, decimal>> ReadLapcapCosts(string text) =>
