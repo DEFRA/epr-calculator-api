@@ -569,11 +569,11 @@ public partial class RunImporter(ApplicationDBContext dbContext, ICalcResultWrit
         values["TONT-PD"]  = otherCost.TonnageChangeDecrease.Percentage;
         values["BADEBT-P"] = otherCost.BadDebtValue;
 
-        var parameters = values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString(CultureInfo.InvariantCulture));
+        var parameters = values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString("F3", CultureInfo.InvariantCulture));
         parameters["COFF-DT"] = header.CutOffDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "NA";
 
         // Files without modulation don't show the red modulation factor; uploads from before it were given 1.000.
-        parameters["REDM-RF"] = (modulation?.RedFactor ?? 1.000m).ToString(CultureInfo.InvariantCulture);
+        parameters["REDM-RF"] = (modulation?.RedFactor ?? 1.000m).ToString("F3", CultureInfo.InvariantCulture);
 
         foreach (var (reference, value) in details.DefaultParameters)
             parameters[reference] = value;
