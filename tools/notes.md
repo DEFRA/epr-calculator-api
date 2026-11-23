@@ -68,3 +68,33 @@ Not changed:
 The previous version, which built the aligned file from the export's layout instead, is in a stash: `git stash list` shows it as "align_billing.py: version that builds the aligned file from the downloaded export's layout".
 
 Billing CSVs from production hold producer data: keep them, and the files this writes, outside the repo.
+
+## align_billing_json.py
+
+Changes a copy of an imported run's billing JSON export to production's formatting, so its fingerprints can be compared with those taken from production's billing JSON. It works the opposite way to `align_billing.py`: production's JSON can't be copied off the machine it's on, so it changes ours to look like production's, rather than production's to look like ours. It changes how values are written and the order of producers, never a value.
+
+```bash
+python3 -I align_billing_json.py <folder with our {run id}billing.json files> <folder with production's billing CSVs>
+```
+
+It writes `aligned/{run id}billing.json` in the first folder. Production's billing CSVs are only read for run 102's order. The rules are for the five production runs imported with `POST /v1/runs/import`, and are listed at the top of the script:
+
+- a zero tonnage change written as `0` where the previous invoiced tonnage is zero, as production wrote it, rather than the stored `0.000`
+- for the year's first run (10): zero previous invoiced tonnages as `0`, production's placeholder cancelled producer instead of an empty list, and late reporting in the usual material order
+- for the 2025 layout (10, 51, 68): a zero share of all producers' tonnage as `0%`, no `cutOffDate`, and the SA set-up cost totals under their old misspelt names with their values swapped
+- for run 84: `modulationResults` written as null
+- for run 102: producers in the order of production's billing CSV fee table
+
+It leaves every value as it is, including the 1p on two producers' "without bad debt" disposal fees in runs 10 and 51.
+
+## billing_json_fingerprints
+
+Scripts that print short hashes of a billing JSON file, and never names or figures, so production's JSON can be compared with ours without copying it off the machine it's on. Run each on production's files there and on ours, then compare the outputs here:
+
+- `allfp.py`: a hash of each section, each results section and each producer field, and counts of names with commas, spaces at either end, or nothing
+- `deep.py`: a hash of every value in the summary, the cancelled producers, the other parameters and four producer fee sections, by path
+- `avd.py`: value shapes (each digit shown as 9) and counts for the tonnage fields, a hash per 10 cancelled producers, and hashes of the names with commas or spaces at either end, by producer ID
+- `blocks.py`: a hash of the "without bad debt" disposal fees per block of producers, to find a producer whose fees differ
+- `compare.py`: compares two outputs of `allfp.py` or `deep.py` and prints only what differs; `avd.py`'s outputs compare with `diff`
+
+The outputs taken from production are hashes of producer data: keep them outside the repo.
