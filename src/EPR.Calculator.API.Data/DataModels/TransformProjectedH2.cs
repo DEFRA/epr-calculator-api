@@ -54,4 +54,5 @@ public class TransformProjectedH2
     public decimal? ProjectedHDCTonnageRedMedical { get; set; }
     public decimal? ProjectedHDCTonnageAmberMedical { get; set; }
     public decimal? ProjectedHDCTonnageGreenMedical { get; set; }
+    public decimal TotalTonnage { get; set; }
 }

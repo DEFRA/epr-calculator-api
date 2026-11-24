@@ -35,6 +35,8 @@ public class ModulationResultConfiguration : IEntityTypeConfiguration<Modulation
             mods.OwnsOne(x => x.ModulationDetail);
         });
 
+        builder.OwnsOne(p => p.Total, total => total.ToJson("total"));
+
         builder.Ignore(p => p.ModulationByMaterial);
     }
 }

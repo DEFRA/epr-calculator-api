@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using EPR.Calculator.API.Data.Utils;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public record ByCountryCost
     {
@@ -10,7 +12,21 @@
 
         public required decimal NorthernIreland { get; init; }
 
-        public decimal Total => England + Wales + Scotland + NorthernIreland;
+        // Read back from storage so the files show the run's own total; until it's stored, it's the sum.
+        public decimal Total
+        {
+            get => storedTotal ?? England + Wales + Scotland + NorthernIreland;
+            init => storedTotal = value;
+        }
+
+        private readonly decimal? storedTotal;
+
+        public virtual bool Equals(ByCountryCost? other) =>
+            other is not null && EqualityContract == other.EqualityContract
+            && England == other.England && Wales == other.Wales && Scotland == other.Scotland && NorthernIreland == other.NorthernIreland
+            && Total == other.Total;
+
+        public override int GetHashCode() => HashCode.Combine(England, Wales, Scotland, NorthernIreland, Total);
 
         public static ByCountryCost Empty =>
             new(){ England = 0, Wales = 0, Scotland = 0, NorthernIreland = 0 };
@@ -66,7 +82,21 @@
 
         public required decimal NorthernIreland { get; init; }
 
-        public decimal Total => England + Wales + Scotland + NorthernIreland;
+        // Only shown, so it's the sum to the 8 dp the files show, or that total read back from storage.
+        public decimal Total
+        {
+            get => storedTotal ?? MathUtils.RoundAwayFromZero(England + Wales + Scotland + NorthernIreland, 8);
+            init => storedTotal = value;
+        }
+
+        private readonly decimal? storedTotal;
+
+        public virtual bool Equals(ByCountryApportionment? other) =>
+            other is not null && EqualityContract == other.EqualityContract
+            && England == other.England && Wales == other.Wales && Scotland == other.Scotland && NorthernIreland == other.NorthernIreland
+            && Total == other.Total;
+
+        public override int GetHashCode() => HashCode.Combine(England, Wales, Scotland, NorthernIreland, Total);
 
         public static ByCountryApportionment Empty =>
             new(){ England = 0, Wales = 0, Scotland = 0, NorthernIreland = 0 };

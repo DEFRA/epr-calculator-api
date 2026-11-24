@@ -632,4 +632,81 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
         Assert.AreEqual(0.13m, glassTonnage.ScaledupTotalReportedTonnage);
         Assert.AreEqual(0.13m, glassTonnage.ScaledupNetReportedTonnage);
     }
+
+    [TestMethod]
+    public void GetOverallTotalRowTest()
+    {
+        var runProducerMaterialDetails = new List<CalcResultScaledupProducer>();
+        var dictionary = new Dictionary<string, CalcResultScaledupProducerTonnage>();
+        dictionary.Add("AL", new CalcResultScaledupProducerTonnage
+        {
+            ReportedHouseholdPackagingWasteTonnage = 10,
+            ReportedPublicBinTonnage = 10,
+            TotalReportedTonnage = 10,
+            ReportedSelfManagedConsumerWasteTonnage = 10,
+            NetReportedTonnage = 10,
+            ScaledupReportedHouseholdPackagingWasteTonnage = 10,
+            ScaledupReportedPublicBinTonnage = 10,
+            ScaledupTotalReportedTonnage = 10,
+            ScaledupReportedSelfManagedConsumerWasteTonnage = 10,
+            ScaledupNetReportedTonnage = 10,
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 1,
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "1",
+            SubmissionPeriodCode = "2025-P2"
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 1,
+            SubsidiaryId = "Sub1",
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "2",
+            SubmissionPeriodCode = "2025-P2"
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 1,
+            SubsidiaryId = "Sub2",
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "2",
+            SubmissionPeriodCode = "2025-P2"
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 2,
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "1",
+            SubmissionPeriodCode = "2025-P2"
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 2,
+            SubsidiaryId = "Sub3",
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "2",
+            SubmissionPeriodCode = "2025-P2"
+        });
+        runProducerMaterialDetails.Add(new CalcResultScaledupProducer
+        {
+            ProducerId = 2,
+            SubsidiaryId = "Sub4",
+            ScaledupProducerTonnageByMaterial = dictionary,
+            Level = "2",
+            SubmissionPeriodCode = "2025-P2"
+        });
+
+        List<MaterialDetail> materialDetails = [new() { Id = 1, Code = "AL", Name = "Aluminium" }];
+        var totalRow = CalcResultScaledupProducersBuilder.GetOverallTotalRow(runProducerMaterialDetails, materialDetails);
+        Assert.IsNotNull(totalRow);
+        var aluminium = totalRow.ScaledupProducerTonnageByMaterial["AL"];
+        Assert.IsNotNull(aluminium);
+        Assert.AreEqual(60, aluminium.NetReportedTonnage);
+        Assert.AreEqual(60, aluminium.ScaledupTotalReportedTonnage);
+        Assert.AreEqual(60, aluminium.ScaledupNetReportedTonnage);
+        Assert.AreEqual(60, aluminium.ScaledupReportedPublicBinTonnage);
+        Assert.AreEqual(60, aluminium.ScaledupReportedPublicBinTonnage);
+    }
 }

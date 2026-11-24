@@ -69,12 +69,59 @@ public class CalcResultCommsCostBuilder(ApplicationDBContext context)
             NorthernIreland = uk * apportionmentDetail.NorthernIreland / 100
         };
 
-        return new CalcResultCommsCost()
+        return Create(
+            onePlusFourApportionment: apportionmentDetail,
+            byMaterial:               commsCostByMaterial,
+            commsCostUkWide:          ukCost,
+            commsCostByCountry:       runContext.DefaultParameters.CommunicationCosts.ByCountry);
+    }
+
+    public static CalcResultCommsCost Create(
+        ByCountryApportionment onePlusFourApportionment,
+        IReadOnlyDictionary<string, CalcResultCommsCostCommsCostByMaterial> byMaterial,
+        ByCountryCost commsCostUkWide,
+        ByCountryCost commsCostByCountry
+    ) =>
+        new()
         {
-            OnePlusFourApportionment = apportionmentDetail,
-            ByMaterial               = commsCostByMaterial,
-            CommsCostUkWide          = ukCost,
-            CommsCostByCountry       = runContext.DefaultParameters.CommunicationCosts.ByCountry
+            OnePlusFourApportionment = onePlusFourApportionment,
+            ByMaterial               = byMaterial.ToDictionary(kvp => kvp.Key, kvp => WithTotalTonnageAndPricePerTonne(kvp.Value) with { Cost = ToShownPrecision(kvp.Value.Cost) }),
+            Total                    = WithTotalTonnageAndPricePerTonne(new CalcResultCommsCostCommsCostByMaterial
+            {
+                Cost                             = ToShownPrecision(ByCountryCost.Sum([.. byMaterial.Values.Select(v => v.Cost)])),
+                TotalCost                        = byMaterial.Values.Sum(v => v.TotalCost),
+                HouseholdPackagingWasteTonnage   = byMaterial.Values.Sum(v => v.HouseholdPackagingWasteTonnage),
+                PublicBinTonnage                 = byMaterial.Values.Sum(v => v.PublicBinTonnage),
+                HouseholdDrinksContainersTonnage = byMaterial.Values.Sum(v => v.HouseholdDrinksContainersTonnage),
+                LateReportingTonnage             = byMaterial.Values.Sum(v => v.LateReportingTonnage)
+            }),
+            CommsCostUkWide          = commsCostUkWide,
+            CommsCostByCountry       = commsCostByCountry
+        };
+
+    // Only shown, so stored at the 2 dp the files show; the total is rounded from the unrounded costs.
+    private static ByCountryCost ToShownPrecision(ByCountryCost cost) =>
+        new()
+        {
+            England         = MathUtils.RoundAwayFromZero(cost.England, 2),
+            Wales           = MathUtils.RoundAwayFromZero(cost.Wales, 2),
+            Scotland        = MathUtils.RoundAwayFromZero(cost.Scotland, 2),
+            NorthernIreland = MathUtils.RoundAwayFromZero(cost.NorthernIreland, 2),
+            Total           = MathUtils.RoundAwayFromZero(cost.Total, 2)
+        };
+
+    private static CalcResultCommsCostCommsCostByMaterial WithTotalTonnageAndPricePerTonne(CalcResultCommsCostCommsCostByMaterial commsCost)
+    {
+        var totalTonnage =
+            commsCost.HouseholdPackagingWasteTonnage
+            + commsCost.LateReportingTonnage
+            + commsCost.PublicBinTonnage
+            + commsCost.HouseholdDrinksContainersTonnage;
+
+        return commsCost with
+        {
+            TotalTonnage  = totalTonnage,
+            PricePerTonne = totalTonnage != 0 ? MathUtils.RoundAwayFromZero(commsCost.TotalCost / totalTonnage, 4) : 0
         };
     }
 

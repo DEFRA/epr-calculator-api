@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using EPR.Calculator.API.BackgroundService.Builder.Modulation;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.Data.DataModels;
 
@@ -10,13 +11,11 @@ public class CalcResultModulationResultsJsonTests
     [TestMethod]
     public void From_WithValidData_MapsAndSerializesCorrectly()
     {
-        var result = CalcResultModulationResults.From(new ModulationResult
-        {
-            CalculatorRunId = 1,
-            RedFactor = 1.25m,
-            GreenFactor = 0.75m,
-            ModulationByMaterial = new Dictionary<MaterialDetail, ModulationDetail>()
-        });
+        var result = CalcResultModulationResults.From(CalcResultModulationBuilder.Create(
+            calculatorRunId: 1,
+            redFactor: 1.25m,
+            greenFactor: 0.75m,
+            byMaterial: new Dictionary<MaterialDetail, ModulationDetail>()));
 
         var actualJson = JsonSerializer.Serialize(result);
 

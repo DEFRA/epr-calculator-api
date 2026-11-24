@@ -21,7 +21,9 @@ public class CalcResult2ACommsDataByMaterialTests
                 HouseholdPackagingWasteTonnage = 2.34m,
                 PublicBinTonnage = 4.56m,
                 HouseholdDrinksContainersTonnage = 0m,
-                LateReportingTonnage = 3.45m
+                LateReportingTonnage = 3.45m,
+                TotalTonnage = 10.35m,
+                PricePerTonne = 1.23m
             },
             ["GL"] = new()
             {
@@ -30,7 +32,9 @@ public class CalcResult2ACommsDataByMaterialTests
                 HouseholdPackagingWasteTonnage = 3.45m,
                 PublicBinTonnage = 5.67m,
                 HouseholdDrinksContainersTonnage = 0m,
-                LateReportingTonnage = 4.56m
+                LateReportingTonnage = 4.56m,
+                TotalTonnage = 13.68m,
+                PricePerTonne = 2.34m
             }
         };
         var total = new CalcResultCommsCostCommsCostByMaterial
@@ -40,7 +44,8 @@ public class CalcResult2ACommsDataByMaterialTests
             HouseholdPackagingWasteTonnage = 5.79m,
             PublicBinTonnage = 10.23m,
             HouseholdDrinksContainersTonnage = 0m,
-            LateReportingTonnage = 8.01m
+            LateReportingTonnage = 8.01m,
+            TotalTonnage = 24.03m
         };
         var materials = TestDataHelper.GetMaterialDetails();
 

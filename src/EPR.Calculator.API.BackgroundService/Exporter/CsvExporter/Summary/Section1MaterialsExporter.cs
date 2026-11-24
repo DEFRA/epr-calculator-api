@@ -169,7 +169,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
         }
 
         if (applyModulation) {
-            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.TotalRamTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.TotalRamTonnage, DecimalPlaces.Three, DecimalFormats.F3));
 
             var totalRed = disposalFee.TotalTonnage.Red;
             var totalAmber = disposalFee.TotalTonnage.Amber;
@@ -184,9 +184,9 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
             csvContent.Append(CsvSanitiser.SanitiseData(totalAmberMedical, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(totalGreenMedical, DecimalPlaces.Three, DecimalFormats.F3));
 
-            csvContent.Append(CsvSanitiser.SanitiseData(totalRed + totalRedMedical, DecimalPlaces.Three, DecimalFormats.F3));
-            csvContent.Append(CsvSanitiser.SanitiseData(totalAmber + totalAmberMedical, DecimalPlaces.Three, DecimalFormats.F3));
-            csvContent.Append(CsvSanitiser.SanitiseData(totalGreen + totalGreenMedical, DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.RedAndRedMedical, DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.AmberAndAmberMedical, DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.GreenAndGreenMedical, DecimalPlaces.Three, DecimalFormats.F3));
 
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.SmcwTonnage              , DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.ActionedSmcwTonnage.Total, DecimalPlaces.Three, DecimalFormats.F3, canBeEmpty: true));
@@ -199,7 +199,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.NetTonnage.Green                     , DecimalPlaces.Three, DecimalFormats.F3, canBeEmpty: true));
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.ResidualSmcwTonnage      , DecimalPlaces.Three, DecimalFormats.F3, canBeEmpty: true));
         } else {
-            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.TotalRamTonnage(), DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.TotalTonnage.TotalRamTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.SmcwTonnage, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(disposalFee.NetTonnage.Total, DecimalPlaces.Three, DecimalFormats.F3));
         }
@@ -228,7 +228,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
 
     private static IEnumerable<decimal> MaterialTonnagePackages(string materialCode, DisposalFee mb, bool applyModulation)
     {
-        yield return mb.HhTonnage.TotalRamTonnage();
+        yield return mb.HhTonnage.TotalRamTonnage;
 
         if (applyModulation)
         {
@@ -240,7 +240,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
             yield return mb.HhTonnage.GreenMedical;
         }
 
-        yield return mb.PbTonnage.TotalRamTonnage();
+        yield return mb.PbTonnage.TotalRamTonnage;
 
         if (applyModulation)
         {
@@ -254,7 +254,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
 
         if (materialCode == MaterialCodes.Glass)
         {
-            yield return mb.HdcTonnage.TotalRamTonnage();
+            yield return mb.HdcTonnage.TotalRamTonnage;
 
             if (applyModulation)
             {

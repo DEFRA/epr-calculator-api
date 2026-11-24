@@ -224,7 +224,7 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
 
         mockCalcResultScaledupProducersBuilder.Verify(m => m.ConstructAsync(runContext,It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<List<L1Producer>>()), Times.Once);
         mockCalcResultProjectedProducersBuilder.Verify(m => m.Construct(runContext,It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<List<L1Producer>>()), Times.Never);
-        mockCalcResultWriter.Verify(m => m.StoreScaledData(runContext.RunId, It.IsAny<IReadOnlyList<CalcResultScaledupProducer>>(), CancellationToken.None), Times.Once);
+        mockCalcResultWriter.Verify(m => m.StoreScaledData(runContext.RunId, It.IsAny<CalcResultScaledupProducers>(), CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StorePartialData(runContext.RunId, It.IsAny<IReadOnlyList<CalcResultPartialObligation>>(), CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StoreProducerMaterialPackaging(It.IsAny<List<L1Producer>>(), CancellationToken.None), Times.Once);
     }
@@ -238,7 +238,6 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         Assert.IsNotNull(result);
 
         mockCalcResultWriter.Verify(m => m.StoreProducerFees(runContext.RunId, result.ProducerFeesTotal, producerFeeDetails, CancellationToken.None), Times.Once);
-        mockCalcResultWriter.Verify(m => m.StoreSmcw(runContext.RunId, It.IsAny<SelfManagedConsumerWaste>(), CancellationToken.None), Times.Once);
         mockCalcResultWriter.Verify(m => m.StoreModulationResult(runContext.RunId, result.CalcResultModulation!, CancellationToken.None), Times.Once);
     }
 }

@@ -2016,59 +2016,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("producer_resultfile_suggested_billing_instruction", (string)null);
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerSelfManagedConsumerWaste", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Level")
-                        .HasMaxLength(10)
-                        .HasColumnType("int")
-                        .HasColumnName("level");
-
-                    b.Property<int>("ProducerId")
-                        .HasMaxLength(400)
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<int>("SmcwId")
-                        .HasColumnType("int")
-                        .HasColumnName("smcw_id");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SmcwId");
-
-                    b.ToTable("calc_result_smcw_producer", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWaste", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("calc_result_smcw", (string)null);
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SubmissionPeriodLookup", b =>
                 {
                     b.Property<string>("SubmissionPeriod")
@@ -2221,6 +2168,121 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("decimal(16,12)")
                         .HasColumnName("obligated_factor");
 
+                    b.Property<decimal?>("PartialHDCTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage");
+
+                    b.Property<decimal?>("PartialHDCTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_amber");
+
+                    b.Property<decimal?>("PartialHDCTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialHDCTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_green");
+
+                    b.Property<decimal?>("PartialHDCTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialHDCTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_red");
+
+                    b.Property<decimal?>("PartialHDCTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_hdc_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialHouseholdTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_amber");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_green");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_red");
+
+                    b.Property<decimal?>("PartialHouseholdTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_household_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_amber");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_green");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_green_medical");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_red");
+
+                    b.Property<decimal?>("PartialPublicBinTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_public_bin_tonnage_red_medical");
+
+                    b.Property<decimal>("PartialSMCWTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_smcw_tonnage");
+
+                    b.Property<decimal>("PartialTotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("partial_total_tonnage");
+
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
                         .HasColumnName("producer_id");
@@ -2278,6 +2340,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
+
+                    b.Property<decimal>("TotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("total_tonnage");
 
                     b.Property<string>("TradingName")
                         .HasMaxLength(400)
@@ -2858,6 +2925,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
 
+                    b.Property<decimal>("TotalTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("total_tonnage");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CalculatorRunId");
@@ -2886,9 +2958,18 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("days_in_whole_period");
 
+                    b.Property<decimal>("HouseholdDrinksContainersTonnageGlass")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("hdc_tonnage");
+
                     b.Property<bool>("IsSubTotal")
                         .HasColumnType("bit")
                         .HasColumnName("is_subtotal");
+
+                    b.Property<bool>("IsTotal")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_total");
 
                     b.Property<string>("Level")
                         .IsRequired()
@@ -2896,15 +2977,16 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(5)")
                         .HasColumnName("level");
 
-                    b.Property<int>("MaterialId")
-                        .HasColumnType("int")
-                        .HasColumnName("material_id");
-
-                    b.Property<string>("PackagingType")
+                    b.Property<string>("MaterialCode")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("packaging_type");
+                        .HasColumnName("material_code");
+
+                    b.Property<decimal>("NetReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("net_reported_tonnage");
 
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
@@ -2915,10 +2997,50 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("producer_name");
 
-                    b.Property<decimal>("ScaledTonnage")
+                    b.Property<decimal>("ReportedHouseholdPackagingWasteTonnage")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
-                        .HasColumnName("scaled_tonnage");
+                        .HasColumnName("household_tonnage");
+
+                    b.Property<decimal>("ReportedPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("public_bin_tonnage");
+
+                    b.Property<decimal>("ReportedSelfManagedConsumerWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("smcw_tonnage");
+
+                    b.Property<decimal>("ScaledupHouseholdDrinksContainersTonnageGlass")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_hdc_tonnage");
+
+                    b.Property<decimal>("ScaledupNetReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_net_reported_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedHouseholdPackagingWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_household_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedPublicBinTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_public_bin_tonnage");
+
+                    b.Property<decimal>("ScaledupReportedSelfManagedConsumerWasteTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_smcw_tonnage");
+
+                    b.Property<decimal>("ScaledupTotalReportedTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("scaled_total_reported_tonnage");
 
                     b.Property<decimal>("ScaleupFactor")
                         .HasPrecision(16, 12)
@@ -2936,10 +3058,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("subsidiary_id");
 
-                    b.Property<decimal>("Tonnage")
+                    b.Property<decimal>("TotalReportedTonnage")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
-                        .HasColumnName("tonnage");
+                        .HasColumnName("total_reported_tonnage");
 
                     b.Property<string>("TradingName")
                         .HasMaxLength(400)
@@ -3074,6 +3196,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3096,6 +3221,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3122,6 +3250,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3131,6 +3262,69 @@ namespace EPR.Calculator.API.Data.Migrations
 
                                     b2.WithOwner()
                                         .HasForeignKey("CalcResultCommsCostEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultCommsCostCommsCostByMaterial", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultCommsCostEntryId");
+
+                                    b2.Property<decimal>("HouseholdDrinksContainersTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdPackagingWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("LateReportingTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PricePerTonne")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PublicBinTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalCost")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultCommsCostEntryId");
+
+                                    b2.ToTable("calc_result_comms_cost");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultCommsCostEntryId");
+
+                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b3 =>
+                                        {
+                                            b3.Property<int>("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+
+                                            b3.Property<decimal>("England")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("NorthernIreland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Wales")
+                                                .HasPrecision(18, 6);
+
+                                            b3.HasKey("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+
+                                            b3.ToTable("calc_result_comms_cost");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CalcResultCommsCostCommsCostByMaterialCalcResultCommsCostEntryId");
+                                        });
+
+                                    b2.Navigation("Cost")
+                                        .IsRequired();
                                 });
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialCommsCostData", "MaterialCosts", b2 =>
@@ -3165,10 +3359,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("LateReportingTonnage")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("PricePerTonne")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("PublicBinTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("TotalCost")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("TotalTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.HasKey("MaterialCommsCostDataCalcResultCommsCostEntryId", "MaterialCommsCostData__synthesizedOrdinal");
@@ -3191,6 +3391,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Scotland")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("Total")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Wales")
@@ -3222,6 +3425,9 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.Navigation("OnePlusFourApportionment")
                                 .IsRequired();
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("CommsCost")
@@ -3244,6 +3450,69 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLaDisposalCostDataEntryId");
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLaDisposalCostDataDetail", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.Property<decimal?>("ActionedSelfManagedConsumerWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal?>("DisposalCostPricePerTonne")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdDrinkContainersTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("HouseholdPackagingWasteTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("LateReportingTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("PublicBinTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("TotalTonnage")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.ToTable("calc_result_la_disposal_cost");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLaDisposalCostDataEntryId");
+
+                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Cost", b3 =>
+                                        {
+                                            b3.Property<int>("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+
+                                            b3.Property<decimal>("England")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("NorthernIreland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Wales")
+                                                .HasPrecision(18, 6);
+
+                                            b3.HasKey("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+
+                                            b3.ToTable("calc_result_la_disposal_cost");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CalcResultLaDisposalCostDataDetailCalcResultLaDisposalCostDataEntryId");
+                                        });
+
+                                    b2.Navigation("Cost")
+                                        .IsRequired();
+                                });
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLaDisposalCostData", "MaterialCosts", b2 =>
                                 {
@@ -3271,6 +3540,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal?>("ActionedSelfManagedConsumerWasteTonnage")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal?>("DisposalCostPricePerTonne")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("HouseholdDrinkContainersTonnage")
                                                 .HasPrecision(18, 6);
 
@@ -3281,6 +3553,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("PublicBinTonnage")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("TotalTonnage")
                                                 .HasPrecision(18, 6);
 
                                             b3.HasKey("MaterialLaDisposalCostDataCalcResultLaDisposalCostDataEntryId", "MaterialLaDisposalCostData__synthesizedOrdinal");
@@ -3305,6 +3580,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -3325,6 +3603,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                 });
 
                             b1.Navigation("MaterialCosts");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LaDisposalCost")
@@ -3347,6 +3628,60 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLapcapDataEntryId");
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "CountryApportionment", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLapcapDataEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLapcapDataEntryId");
+
+                                    b2.ToTable("calc_result_lapcap_data");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLapcapDataEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLapcapDataEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLapcapDataEntryId");
+
+                                    b2.ToTable("calc_result_lapcap_data");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLapcapDataEntryId");
+                                });
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLapcapData", "MaterialCosts", b2 =>
                                 {
@@ -3380,6 +3715,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -3395,7 +3733,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .IsRequired();
                                 });
 
+                            b1.Navigation("CountryApportionment")
+                                .IsRequired();
+
                             b1.Navigation("MaterialCosts");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LapcapData")
@@ -3418,6 +3762,30 @@ namespace EPR.Calculator.API.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("CalcResultLateReportingTonnageEntryId");
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.CalcResultLateReportingTonnageDetail", "Total", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultLateReportingTonnageEntryId");
+
+                                    b2.Property<decimal>("Amber")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Green")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Red")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultLateReportingTonnageEntryId");
+
+                                    b2.ToTable("calc_result_late_reporting_tonnage");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultLateReportingTonnageEntryId");
+                                });
 
                             b1.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialLateReportingTonnageData", "MaterialTonnages", b2 =>
                                 {
@@ -3467,6 +3835,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                 });
 
                             b1.Navigation("MaterialTonnages");
+
+                            b1.Navigation("Total")
+                                .IsRequired();
                         });
 
                     b.Navigation("LateReportingTonnage")
@@ -3503,6 +3874,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3527,6 +3901,63 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.ToTable("calc_result_one_plus_four_apportionment");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryApportionment", "OnePlusFourApportionment", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Wales")
+                                        .HasPrecision(18, 6);
+
+                                    b2.HasKey("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.ToTable("calc_result_one_plus_four_apportionment");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CalcResultOnePlusFourApportionmentEntryId");
+                                });
+
+                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.ByCountryCost", "TotalOnePlusFour", b2 =>
+                                {
+                                    b2.Property<int>("CalcResultOnePlusFourApportionmentEntryId");
+
+                                    b2.Property<decimal>("England")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("NorthernIreland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3542,6 +3973,12 @@ namespace EPR.Calculator.API.Data.Migrations
                                 .IsRequired();
 
                             b1.Navigation("LaDisposalCost")
+                                .IsRequired();
+
+                            b1.Navigation("OnePlusFourApportionment")
+                                .IsRequired();
+
+                            b1.Navigation("TotalOnePlusFour")
                                 .IsRequired();
                         });
 
@@ -3584,6 +4021,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3606,6 +4046,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3668,6 +4111,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("Scotland")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("Total")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("Wales")
                                         .HasPrecision(18, 6);
 
@@ -3690,6 +4136,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Scotland")
+                                        .HasPrecision(18, 6);
+
+                                    b2.Property<decimal>("Total")
                                         .HasPrecision(18, 6);
 
                                     b2.Property<decimal>("Wales")
@@ -3770,7 +4219,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
-
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
                         .WithMany("RunDetails")
                         .HasForeignKey("DefaultParameterSettingMasterId");
@@ -3986,6 +4434,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                     b2.Property<decimal>("TotalGreenMaterialAtAmberDisposalCost")
                                         .HasPrecision(18, 6);
 
+                                    b2.Property<decimal>("TotalMaterialTonnages")
+                                        .HasPrecision(18, 6);
+
                                     b2.Property<decimal>("TotalRedMaterialAtAmberDisposalCost")
                                         .HasPrecision(18, 6);
 
@@ -4004,7 +4455,44 @@ namespace EPR.Calculator.API.Data.Migrations
                                 .IsRequired();
                         });
 
+                    b.OwnsOne("EPR.Calculator.API.Data.DataModels.ModulationTotal", "Total", b1 =>
+                        {
+                            b1.Property<int>("ModulationResultId");
+
+                            b1.Property<decimal>("AmberMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("GreenMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("RedMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalGreenMaterialAtAmberDisposalCost")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalMaterialTonnages")
+                                .HasPrecision(18, 6);
+
+                            b1.Property<decimal>("TotalRedMaterialAtAmberDisposalCost")
+                                .HasPrecision(18, 6);
+
+                            b1.HasKey("ModulationResultId");
+
+                            b1.ToTable("calc_result_modulation");
+
+                            b1
+                                .ToJson("total")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ModulationResultId");
+                        });
+
                     b.Navigation("MaterialModulations");
+
+                    b.Navigation("Total")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>
@@ -4063,6 +4551,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Property<string>("TonnageChangeAdvice");
 
                             b1.Property<string>("TonnageChangeCount");
+
+                            b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebt")
+                                .HasPrecision(18, 6);
 
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
                                 .HasPrecision(18, 6);
@@ -4147,6 +4638,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4190,6 +4684,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -4237,6 +4734,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4282,6 +4782,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4325,6 +4828,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -4421,6 +4927,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
+                                                                .HasPrecision(18, 6);
+
+                                                            b5.Property<decimal>("Total")
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
@@ -4537,6 +5046,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -4572,6 +5084,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
@@ -4602,6 +5117,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -4662,6 +5180,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fee_detail");
@@ -4705,10 +5226,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Amber")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("AmberAndAmberMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("AmberMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("GreenAndGreenMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
@@ -4717,7 +5244,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Red")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("RedAndRedMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeeDetailId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -4793,6 +5326,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4838,6 +5374,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -4881,6 +5420,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -4959,6 +5501,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Property<string>("TonnageChangeAdvice");
 
                             b1.Property<string>("TonnageChangeCount");
+
+                            b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebt")
+                                .HasPrecision(18, 6);
 
                             b1.Property<decimal>("TotalOnePlus2A2B2CWithBadDebtPercentage")
                                 .HasPrecision(18, 6);
@@ -5043,6 +5588,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5086,6 +5634,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5133,6 +5684,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5178,6 +5732,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5221,6 +5778,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5317,6 +5877,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Scotland")
+                                                                .HasPrecision(18, 6);
+
+                                                            b5.Property<decimal>("Total")
                                                                 .HasPrecision(18, 6);
 
                                                             b5.Property<decimal>("Wales")
@@ -5433,6 +5996,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Scotland")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("Total")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("Wales")
                                                         .HasPrecision(18, 6);
 
@@ -5468,6 +6034,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
@@ -5498,6 +6067,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -5558,6 +6130,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("RedMedical")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("TotalRamTonnage")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
 
                                                     b4.ToTable("calc_result_producer_fees");
@@ -5601,10 +6176,16 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Amber")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("AmberAndAmberMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("AmberMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("Green")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("GreenAndGreenMedical")
                                                         .HasPrecision(18, 6);
 
                                                     b4.Property<decimal>("GreenMedical")
@@ -5613,7 +6194,13 @@ namespace EPR.Calculator.API.Data.Migrations
                                                     b4.Property<decimal>("Red")
                                                         .HasPrecision(18, 6);
 
+                                                    b4.Property<decimal>("RedAndRedMedical")
+                                                        .HasPrecision(18, 6);
+
                                                     b4.Property<decimal>("RedMedical")
+                                                        .HasPrecision(18, 6);
+
+                                                    b4.Property<decimal>("TotalRamTonnage")
                                                         .HasPrecision(18, 6);
 
                                                     b4.HasKey("DisposalFeeMaterialFeeFeeDetailProducerFeesId", "DisposalFeeMaterialFee__synthesizedOrdinal");
@@ -5689,6 +6276,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5734,6 +6324,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                             b3.Property<decimal>("Scotland")
                                                 .HasPrecision(18, 6);
 
+                                            b3.Property<decimal>("Total")
+                                                .HasPrecision(18, 6);
+
                                             b3.Property<decimal>("Wales")
                                                 .HasPrecision(18, 6);
 
@@ -5777,6 +6370,9 @@ namespace EPR.Calculator.API.Data.Migrations
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Scotland")
+                                                .HasPrecision(18, 6);
+
+                                            b3.Property<decimal>("Total")
                                                 .HasPrecision(18, 6);
 
                                             b3.Property<decimal>("Wales")
@@ -5895,228 +6491,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("CalculatorRun");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerSelfManagedConsumerWaste", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWaste", null)
-                        .WithMany("ProducerTotals")
-                        .HasForeignKey("SmcwId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialSelfManagedConsumerWasteData", "SmcwMaterialData", b1 =>
-                        {
-                            b1.Property<int>("ProducerSelfManagedConsumerWasteId");
-
-                            b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAddOrUpdate();
-
-                            b1.Property<string>("MaterialCode")
-                                .IsRequired();
-
-                            b1.HasKey("ProducerSelfManagedConsumerWasteId", "__synthesizedOrdinal");
-
-                            b1.ToTable("calc_result_smcw_producer");
-
-                            b1
-                                .ToJson("material_totals")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProducerSelfManagedConsumerWasteId");
-
-                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWasteData", "Smcw", b2 =>
-                                {
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
-
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.Property<decimal?>("ResidualSmcwTonnage")
-                                        .HasPrecision(18, 6);
-
-                                    b2.Property<decimal>("SmcwTonnage")
-                                        .HasPrecision(18, 6);
-
-                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.ToTable("calc_result_smcw_producer");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b3 =>
-                                        {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
-
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6);
-
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.ToTable("calc_result_smcw_producer");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-                                        });
-
-                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b3 =>
-                                        {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId");
-
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6);
-
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.ToTable("calc_result_smcw_producer");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataProducerSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-                                        });
-
-                                    b2.Navigation("ActionedSmcwTonnage")
-                                        .IsRequired();
-
-                                    b2.Navigation("NetTonnage")
-                                        .IsRequired();
-                                });
-
-                            b1.Navigation("Smcw")
-                                .IsRequired();
-                        });
-
-                    b.Navigation("SmcwMaterialData");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWaste", b =>
-                {
-                    b.OwnsMany("EPR.Calculator.API.Data.DataModels.MaterialSelfManagedConsumerWasteData", "MaterialTotals", b1 =>
-                        {
-                            b1.Property<int>("SelfManagedConsumerWasteId");
-
-                            b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAddOrUpdate();
-
-                            b1.Property<string>("MaterialCode")
-                                .IsRequired();
-
-                            b1.HasKey("SelfManagedConsumerWasteId", "__synthesizedOrdinal");
-
-                            b1.ToTable("calc_result_smcw");
-
-                            b1
-                                .ToJson("material_totals")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SelfManagedConsumerWasteId");
-
-                            b1.OwnsOne("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWasteData", "Smcw", b2 =>
-                                {
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
-
-                                    b2.Property<int>("MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.Property<decimal?>("ResidualSmcwTonnage")
-                                        .HasPrecision(18, 6);
-
-                                    b2.Property<decimal>("SmcwTonnage")
-                                        .HasPrecision(18, 6);
-
-                                    b2.HasKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.ToTable("calc_result_smcw");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "MaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "ActionedSmcwTonnage", b3 =>
-                                        {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
-
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6);
-
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.ToTable("calc_result_smcw");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-                                        });
-
-                                    b2.OwnsOne("EPR.Calculator.API.Data.DataModels.RamTonnageGroup", "NetTonnage", b3 =>
-                                        {
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId");
-
-                                            b3.Property<int>("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.Property<decimal?>("Amber")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Green")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Red")
-                                                .HasPrecision(18, 6);
-
-                                            b3.Property<decimal?>("Total")
-                                                .HasPrecision(18, 6);
-
-                                            b3.HasKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-
-                                            b3.ToTable("calc_result_smcw");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteDataSelfManagedConsumerWasteId", "SelfManagedConsumerWasteDataMaterialSelfManagedConsumerWasteData__synthesizedOrdinal");
-                                        });
-
-                                    b2.Navigation("ActionedSmcwTonnage")
-                                        .IsRequired();
-
-                                    b2.Navigation("NetTonnage")
-                                        .IsRequired();
-                                });
-
-                            b1.Navigation("Smcw")
-                                .IsRequired();
-                        });
-
-                    b.Navigation("MaterialTotals");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.Navigation("CalculatorRunBillingFileMetadata");
@@ -6186,11 +6560,6 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerFees", b =>
                 {
                     b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SelfManagedConsumerWaste", b =>
-                {
-                    b.Navigation("ProducerTotals");
                 });
 #pragma warning restore 612, 618
         }

@@ -50,7 +50,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
             var pbTonnageWithoutRAM = CalcResultProjectedProducersBuilder.TonnageWithoutRAM(pbTonnage, pbRAMTonnage);
             decimal? hdcTonnageWithoutRAM = (hdcTonnage != null && hdcRAMTonnage != null) ? CalcResultProjectedProducersBuilder.TonnageWithoutRAM(hdcTonnage.Value, hdcRAMTonnage) : null;
 
-            var h2ProjectedTotalTonnage = h2ProjectedProducer?.H2ProjectedTonnageByMaterial[material.Code].TotalTonnage() ?? 0;
+            var h2ProjectedTotalTonnage = h2ProjectedProducer?.H2ProjectedTonnageByMaterial[material.Code].TotalTonnage ?? 0;
             var h2RamProportions = ComputeProportionsFromH2(h2ProjectedProducer, material.Code);
 
             var h1ProportionateRAMTonnage = (decimal tonnage, RamTonnage ramTonnage, decimal tonnageWithoutRAM, decimal h2TotalTonnage)
@@ -80,7 +80,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
         private static RAMProportions ComputeProportionsFromH2(CalcResultH2ProjectedProducer? h2Producer, string materialCode)
         {
             var t = h2Producer != null ? h2Producer.H2ProjectedTonnageByMaterial[materialCode] : GetEmptyH2MaterialTonnage(materialCode);
-            var total = t.TotalTonnage();
+            var total = t.TotalTonnage;
             return new RAMProportions
             {
                 Red          = GetH2RAMProportion(t.GetTotalProjectedRedTonnage()         , total),
@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
 
         public static RamTonnage ReconcileRoundingDifference(decimal tonnage, RamTonnage projectedTonnage)
         {
-            var diffTonnage = tonnage - projectedTonnage.TotalRamTonnage();
+            var diffTonnage = tonnage - projectedTonnage.TotalRamTonnage;
             if (diffTonnage != 0)
             {
                 var dominantRamTonnage = new[]
@@ -144,6 +144,27 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
             }
 
             return projectedTonnage;
+        }
+
+        public static List<CalcResultH1ProjectedProducer> WithLevelOneProportions(IReadOnlyCollection<CalcResultH1ProjectedProducer> producers)
+        {
+            var levelOne = CommonConstants.LevelOne.ToString();
+            var l1ProportionsByProducer = producers
+                .Where(p => p.Level == levelOne)
+                .ToDictionary(
+                    p => p.ProducerId,
+                    p => p.H1ProjectedTonnageByMaterial.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.H2RamProportions));
+
+            return producers
+                .Select(p => p.Level != levelOne && l1ProportionsByProducer.TryGetValue(p.ProducerId, out var l1Proportions)
+                    ? p with
+                    {
+                        H1ProjectedTonnageByMaterial = p.H1ProjectedTonnageByMaterial.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => l1Proportions.TryGetValue(kvp.Key, out var proportions) ? kvp.Value with { H2RamProportions = proportions } : kvp.Value)
+                    }
+                    : p)
+                .ToList();
         }
 
         public static CalcResultH1ProjectedProducer CreateParentProducer(CalcResultH1ProjectedProducer p, List<CalcResultH2ProjectedProducer> h2Producers)

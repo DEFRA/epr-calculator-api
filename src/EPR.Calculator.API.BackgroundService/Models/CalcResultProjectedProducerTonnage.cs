@@ -36,9 +36,13 @@ namespace EPR.Calculator.API.BackgroundService.Models
         public required RamTonnage ProjectedPublicBinRAMTonnage { get; init; }
         public decimal? ProjectedHouseholdDrinksContainerTonnage { get; init; }
         public RamTonnage? ProjectedHouseholdDrinksContainerRAMTonnage { get; init; }
-        public decimal TotalTonnage() {
-            return HouseholdTonnage + PublicBinTonnage + (HouseholdDrinksContainerTonnage ?? 0);
+        public decimal TotalTonnage
+        {
+            get => storedTotalTonnage ?? HouseholdTonnage + PublicBinTonnage + (HouseholdDrinksContainerTonnage ?? 0);
+            init => storedTotalTonnage = value;
         }
+
+        private readonly decimal? storedTotalTonnage;
 
         private decimal GetTotalProjectedRamTonnage(Func<RamTonnage, decimal> getTonnage)
         {

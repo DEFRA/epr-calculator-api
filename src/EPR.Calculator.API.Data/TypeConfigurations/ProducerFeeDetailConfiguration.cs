@@ -57,11 +57,11 @@ public class ProducerFeeDetailConfiguration : IEntityTypeConfiguration<ProducerF
             pfm.HasJsonPropertyName("MaterialFees");
             pfm.OwnsOne(x => x.DisposalFee, disposal =>
             {
-                disposal.OwnsOne(x => x.HhTonnage);
-                disposal.OwnsOne(x => x.PbTonnage);
-                disposal.OwnsOne(x => x.HdcTonnage);
+                disposal.OwnsOne(x => x.HhTonnage, IgnoreRamPairs);
+                disposal.OwnsOne(x => x.PbTonnage, IgnoreRamPairs);
+                disposal.OwnsOne(x => x.HdcTonnage, IgnoreRamPairs);
                 disposal.OwnsOne(x => x.TotalTonnage);
-                disposal.OwnsOne(x => x.FeeWithBadDebtByCountry, c => c.Ignore(x => x.Total));
+                disposal.OwnsOne(x => x.FeeWithBadDebtByCountry);
                 disposal.OwnsOne(x => x.ActionedSmcwTonnage);
                 disposal.OwnsOne(x => x.NetTonnage);
                 disposal.OwnsOne(x => x.PricePerTonne);
@@ -75,7 +75,15 @@ public class ProducerFeeDetailConfiguration : IEntityTypeConfiguration<ProducerF
         });
     }
 
+    // The files only show the red, amber and green + medical totals for the total tonnage.
+    private static void IgnoreRamPairs(OwnedNavigationBuilder<DisposalFee, RamTonnage> tonnage)
+    {
+        tonnage.Ignore(x => x.RedAndRedMedical);
+        tonnage.Ignore(x => x.AmberAndAmberMedical);
+        tonnage.Ignore(x => x.GreenAndGreenMedical);
+    }
+
     private static void ConfigureBadDebt<T>(
         OwnedNavigationBuilder<T, FeeWithBadDebt> section) where T : class =>
-        section.OwnsOne(x => x.ByCountry, c => c.Ignore(x => x.Total));
+        section.OwnsOne(x => x.ByCountry);
 }

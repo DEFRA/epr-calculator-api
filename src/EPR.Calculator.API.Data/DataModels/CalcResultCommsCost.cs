@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using EPR.Calculator.API.Data.Utils;
 
 namespace EPR.Calculator.API.Data.DataModels;
 
@@ -24,26 +23,14 @@ public class CalcResultCommsCost
             new MaterialCommsCostData { MaterialCode = kvp.Key, CommsCost = kvp.Value })];
     }
 
-    private CalcResultCommsCostCommsCostByMaterial? total;
-    public CalcResultCommsCostCommsCostByMaterial Total =>
-        total ??=
-            new CalcResultCommsCostCommsCostByMaterial
-            {
-                Cost                             = ByCountryCost.Sum(ByMaterial.Values.Select(v => v.Cost).ToImmutableList()),
-                TotalCost                        = ByMaterial.Values.Sum(v => v.TotalCost),
-                // TODO why do we sum up tonnage for different materials?
-                HouseholdPackagingWasteTonnage   = ByMaterial.Values.Sum(v => v.HouseholdPackagingWasteTonnage),
-                PublicBinTonnage                 = ByMaterial.Values.Sum(v => v.PublicBinTonnage),
-                HouseholdDrinksContainersTonnage = ByMaterial.Values.Sum(v => v.HouseholdDrinksContainersTonnage),
-                LateReportingTonnage             = ByMaterial.Values.Sum(v => v.LateReportingTonnage)
-            };
+    public required CalcResultCommsCostCommsCostByMaterial Total { get; init; }
 
     public required ByCountryCost CommsCostUkWide { get; set; }
 
     public required ByCountryCost CommsCostByCountry { get; set; }
 }
 
-public class CalcResultCommsCostCommsCostByMaterial
+public record CalcResultCommsCostCommsCostByMaterial
 {
     public required ByCountryCost Cost {get; set;}
 
@@ -58,18 +45,9 @@ public class CalcResultCommsCostCommsCostByMaterial
     public required decimal HouseholdDrinksContainersTonnage { get; set; }
     public required decimal LateReportingTonnage { get; set; }
 
-    private decimal? totalTonnage;
-    public decimal TotalTonnage =>
-        totalTonnage ??=
-            HouseholdPackagingWasteTonnage
-            + LateReportingTonnage
-            + PublicBinTonnage
-            + HouseholdDrinksContainersTonnage;
+    public decimal TotalTonnage { get; init; }
 
-    private decimal? pricePerTonne;
-    public decimal PricePerTonne =>
-        pricePerTonne ??=
-            TotalTonnage != 0 ? MathUtils.RoundAwayFromZero(TotalCost / TotalTonnage, 4) : 0;
+    public decimal PricePerTonne { get; init; }
 }
 
 internal record MaterialCommsCostData

@@ -55,7 +55,7 @@ public class CalculationResultsJson
             BadDebtProvision2c                                  = FormatUtils.FormatCurrency(total.CommsCostsSection2c.BadDebt),
             FeeForCommsCostsByCountryWideWithBadDebtprovision2c = FormatUtils.FormatCurrency(total.CommsCostsSection2c.ByCountry.Total),
 
-            Total12a2b2cWithBadDebt = FormatUtils.FormatCurrency(total.TotalOnePlus2A2B2CWithBadDebt()),
+            Total12a2b2cWithBadDebt = FormatUtils.FormatCurrency(total.TotalOnePlus2A2B2CWithBadDebt),
 
             SaOperatingCostsWithoutBadDebtProvision3 = FormatUtils.FormatCurrency(total.SaOperatingCostsSection3.FeeWithoutBadDebt),
             BadDebtProvision3                        = FormatUtils.FormatCurrency(total.SaOperatingCostsSection3.BadDebt),

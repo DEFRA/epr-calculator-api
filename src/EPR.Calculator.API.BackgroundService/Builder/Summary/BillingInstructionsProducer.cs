@@ -51,6 +51,7 @@ public static class BillingInstructionsProducer
             var tonnagePercentageLiabilityDirection  = GetTonnagePercentageLiabilityDirection(fee, currentYearInvoiceTotalToDate, tonnageChangeSinceLastInvoice, percentageLiabilityDifference, param_TONT_PI, param_TONT_PD);
             var suggestedBillingInstruction          = GetSuggestedBillingInstruction(fee, currentYearInvoiceTotalToDate, liabilityDifference, materialLiabilityDirection, tonnageLiabilityDirection, materialPercentageLiabilityDirection, tonnagePercentageLiabilityDirection);
             var suggestedInvoiceAmount               = GetSuggestedInvoiceAmount(fee, suggestedBillingInstruction, liabilityDifference);
+            // The total is summed before each amount is rounded to the 2 dp it's shown and invoiced at.
             if (suggestedInvoiceAmount.HasValue)
                 SuggestedInvoiceAmountTotal         += suggestedInvoiceAmount.Value;
 
@@ -65,7 +66,7 @@ public static class BillingInstructionsProducer
                 MaterialityPercentageLiabilityDirection    = materialPercentageLiabilityDirection,
                 TonnageAmountPercentageLiabilityDirection  = tonnagePercentageLiabilityDirection,
                 SuggestedBillingInstruction                = suggestedBillingInstruction,
-                SuggestedInvoiceAmount                     = suggestedInvoiceAmount
+                SuggestedInvoiceAmount                     = suggestedInvoiceAmount is { } amount ? MathUtils.RoundAwayFromZero(amount, 2) : null
             };
         }
 
@@ -80,7 +81,7 @@ public static class BillingInstructionsProducer
             MaterialityPercentageLiabilityDirection     = null,
             TonnageAmountPercentageLiabilityDirection   = null,
             SuggestedBillingInstruction                 = string.Empty,
-            SuggestedInvoiceAmount                      = SuggestedInvoiceAmountTotal
+            SuggestedInvoiceAmount                      = MathUtils.RoundAwayFromZero(SuggestedInvoiceAmountTotal, 2)
         };
     }
 

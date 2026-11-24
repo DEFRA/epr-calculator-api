@@ -82,7 +82,7 @@ public class ResultBuilder(
         if (runContext.RequiresScaling)
         {
             (producers, result.CalcResultScaledupProducers) = await scaledUpProducersBuilder.ConstructAsync(runContext, materials, producers);
-            await calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers.ScaledupProducers, cancellationToken);
+            await calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers, cancellationToken);
         }
 
         (producers, result.CalcResultPartialObligations) = await partialObligationsBuilder.ConstructAsync(runContext, materials, producers);
@@ -90,8 +90,6 @@ public class ResultBuilder(
         await calcResultWriter.StoreProducerMaterialPackaging(producers, cancellationToken);
 
         var smcw = await selfManagedConsumerWasteService.Calculate(runContext, materials);
-        result.SmcwByMaterial = smcw.TotalByMaterial;
-        await calcResultWriter.StoreSmcw(runContext.RunId, smcw, cancellationToken);
 
         result.CalcResultLaDisposalCostData = await laDisposalCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultLapcapData, result.CalcResultLateReportingTonnageData, smcw);
         await calcResultWriter.StoreLaDisposalCostData(runContext.RunId, result.CalcResultLaDisposalCostData, cancellationToken);

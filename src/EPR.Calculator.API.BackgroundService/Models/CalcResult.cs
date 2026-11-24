@@ -1,4 +1,9 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
+using EPR.Calculator.API.BackgroundService.Builder.LaDisposalCost;
+using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+using EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages;
+using EPR.Calculator.API.BackgroundService.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.Models
@@ -8,18 +13,17 @@ namespace EPR.Calculator.API.BackgroundService.Models
         public required CalcResultDetail CalcResultDetail { get; set; }
 
         public required CalcResultLapcapData CalcResultLapcapData { get; set; } =
-            new() { ByMaterial = new Dictionary<string, ByCountryCost>() };
+            CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>());
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; } =
-            new() {
-                OnePlusFourApportionment = ByCountryApportionment.Empty,
-                ByMaterial               = new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>(),
-                CommsCostUkWide          = ByCountryCost.Empty,
-                CommsCostByCountry       = ByCountryCost.Empty
-            };
+            CalcResultCommsCostBuilder.Create(
+                onePlusFourApportionment: ByCountryApportionment.Empty,
+                byMaterial:               new Dictionary<string, CalcResultCommsCostCommsCostByMaterial>(),
+                commsCostUkWide:          ByCountryCost.Empty,
+                commsCostByCountry:       ByCountryCost.Empty);
 
         public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; } =
-            new() { ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>() };
+            CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>());
 
 
         public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; } =
@@ -29,14 +33,10 @@ namespace EPR.Calculator.API.BackgroundService.Models
             };
 
         public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment { get; set; }
-            = new()
-            {
-                LADataPrepCharge = ByCountryCost.Empty,
-                LaDisposalCost   = ByCountryCost.Empty
-            };
+            = CalcResultOnePlusFourApportionmentBuilder.Create(ByCountryCost.Empty, ByCountryCost.Empty);
 
         public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
-            = new() { ByMaterial = new Dictionary<string, CalcResultLaDisposalCostDataDetail>() };
+            = CalcRunLaDisposalCostBuilder.Create(new Dictionary<string, CalcResultLaDisposalCostDataDetail>());
 
         public required CalcResultPartialObligations CalcResultPartialObligations { get; set; }
 
@@ -52,22 +52,14 @@ namespace EPR.Calculator.API.BackgroundService.Models
 
         public IEnumerable<CalcResultErrorReport> CalcResultErrorReports { get; set; } = [];
 
-        public IReadOnlyDictionary<string, SelfManagedConsumerWasteData>? SmcwByMaterial { get; set; }
-
         public ModulationResult? CalcResultModulation { get; set; }
 
         public static CalcResult Empty =>
             new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail { RunId = 0, RelativeYear = new RelativeYear() } ,
-                CalcResultLapcapData = new CalcResultLapcapData
-                {
-                    ByMaterial = new Dictionary<string, ByCountryCost>()
-                },
-                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
-                {
-                    ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()
-                },
+                CalcResultLapcapData = CalcResultLapcapDataBuilder.Create(new Dictionary<string, ByCountryCost>()),
+                CalcResultLateReportingTonnageData = CalcResultLateReportingBuilder.Create(new Dictionary<string, CalcResultLateReportingTonnageDetail>()),
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost(),
                 CalcResultPartialObligations = new CalcResultPartialObligations(){
                     PartialObligations = ImmutableList<CalcResultPartialObligation>.Empty,
