@@ -114,6 +114,17 @@ public class RunImportPackageTests
     }
 
     [TestMethod]
+    public void Read_LeavesOutASubmissionPeriodInTheStatusCode()
+    {
+        var runs = RunImportPackage.Read(Zip(
+            (Results51, ""),
+            (Billing51, ""),
+            (RunImportPackage.OrganisationsFile, "run_id,organisation_id,subsidiary_id,obligation_status,status_code,joiner_date\n51,100,,O,January to December 2025,01/03/2025\n51,200,,O,12,\n")));
+
+        runs.Single().Details.Organisations.Select(o => (o.OrganisationId, o.StatusCode, o.JoinerDate)).ShouldBe([(100, null, "01/03/2025"), (200, "12", null)]);
+    }
+
+    [TestMethod]
     public void Read_TakesEachRunsExactLapcapCosts()
     {
         var runs = RunImportPackage.Read(Zip(

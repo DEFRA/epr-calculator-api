@@ -161,6 +161,9 @@ public static partial class RunImportPackage
 
     private static string? Optional(Dictionary<string, string> row, string column) => row.TryGetValue(column, out var value) && value.Length > 0 ? value : null;
 
+    // Runs made before status_code replaced submission_period_desc kept the period in it, such as "January to December 2025".
+    private static string? StatusCode(string? value) => value is not null && value.Contains(" to ", StringComparison.Ordinal) ? null : value;
+
     private static DateTime? OptionalDate(Dictionary<string, string> row, string column, string fileName) => row.ContainsKey(column) ? Date(row, column, fileName) : null;
 
     // Names are kept exactly as written, spaces at either end included: those are what the files lost.
@@ -213,7 +216,7 @@ public static partial class RunImportPackage
                     Text(row, "subsidiary_id"),
                     Optional(row, "organisation_name"),
                     Optional(row, "trading_name"),
-                    Optional(row, "status_code"),
+                    StatusCode(Optional(row, "status_code")),
                     Optional(row, "joiner_date"),
                     Optional(row, "leaver_date"),
                     Optional(row, "num_days_obligated") is null ? null : Int(row, "num_days_obligated", OrganisationsFile),
